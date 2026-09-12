@@ -86,10 +86,8 @@ def main():
         return
     session = payload.get("session_id") or "unknown"
     transcript = payload.get("transcript_path") or ""
-    if not os.path.exists(transcript):
-        return
 
-    turns = read_turns(transcript)
+    turns = read_turns(transcript) if os.path.exists(transcript) else []
     pending = (payload.get("prompt") or "").strip()
     if pending and (not turns or pending not in turns[-1]["prompt"]):
         turns.append({"prompt": pending,

@@ -197,7 +197,7 @@ export function Workflow() {
             variants={fadeUp}
             className="text-[2.125rem] leading-[1.04] font-semibold tracking-[-0.035em] text-balance text-ink sm:text-[2.75rem] lg:text-[calc(50*var(--u))]"
           >
-            Run creator campaigns from one place<span className="text-[#92CBE5]">.</span>
+            Run creator campaigns from one place.
           </motion.h2>
 
           <motion.p

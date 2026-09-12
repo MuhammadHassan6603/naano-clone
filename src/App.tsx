@@ -4,6 +4,8 @@ import { Testimonial } from './sections/Testimonial'
 import { Marketplace } from './sections/Marketplace'
 import { Workflow } from './sections/Workflow'
 import { Proof } from './sections/Proof'
+import { Results } from './sections/Results'
+import { Pricing } from './sections/Pricing'
 
 export default function App() {
   return (
@@ -15,8 +17,10 @@ export default function App() {
           <Testimonial />
           <Marketplace />
           <Workflow />
-          <Proof />
         </div>
+        <Proof />
+        <Results />
+        <Pricing />
       </main>
     </>
   )

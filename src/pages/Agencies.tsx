@@ -55,14 +55,14 @@ export default function Agencies() {
           aria-hidden
           fetchPriority="high"
           decoding="async"
-          className="pointer-events-none absolute inset-0 -z-10 size-full object-cover object-bottom"
+          className="pointer-events-none absolute inset-0 z-0 size-full object-cover object-bottom"
         />
 
         <motion.div
           variants={stagger(0.09, 0.1)}
           initial="hidden"
           animate="show"
-          className="flex flex-col items-center"
+          className="relative z-10 flex flex-col items-center"
         >
           <motion.span
             variants={fadeUp}

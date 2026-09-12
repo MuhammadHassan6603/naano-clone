@@ -57,6 +57,12 @@
   color: var(--color-faint);
 }
 
+@layer base {
+  .canvas {
+    --u: min(calc(100vw / 1672), 1px);
+  }
+}
+
 @keyframes marquee {
   from {
     transform: translate3d(0, 0, 0);

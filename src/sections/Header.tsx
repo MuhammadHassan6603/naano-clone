@@ -58,12 +58,12 @@ export function Header() {
           />
         </a>
 
-        <ul className="ml-auto hidden items-center gap-8 lg:flex">
+        <ul className="ml-auto hidden items-center gap-5 lg:flex xl:gap-8">
           {primaryLinks.map((link) => (
             <li key={link.label}>
               <a
                 href={link.href}
-                className="text-[0.875rem] font-medium text-[#17181c] transition-colors hover:text-ink/70"
+                className="text-[0.875rem] font-medium whitespace-nowrap text-[#17181c] transition-colors hover:text-ink/70"
               >
                 {link.label}
               </a>
@@ -72,7 +72,7 @@ export function Header() {
           <li className="group relative">
             <button
               type="button"
-              className="flex items-center gap-1 text-[0.875rem] font-medium text-[#17181c] transition-colors hover:text-ink/70"
+              className="flex items-center gap-1 text-[0.875rem] font-medium whitespace-nowrap text-[#17181c] transition-colors hover:text-ink/70"
             >
               Resources
               <ChevronDown className="transition-transform duration-300 group-hover:rotate-180" />
@@ -93,7 +93,7 @@ export function Header() {
           </li>
         </ul>
 
-        <div className="ml-auto flex items-center gap-2 lg:ml-10">
+        <div className="ml-auto flex items-center gap-2 lg:ml-6 xl:ml-10">
           <motion.button
             type="button"
             whileTap={press}

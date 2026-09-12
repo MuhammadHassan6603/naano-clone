@@ -30,6 +30,7 @@ export function Header() {
   const { pathname } = useLocation()
   const cta = ctaByPath[pathname] ?? { label: 'Sign up', href: '/#cta' }
   const [open, setOpen] = useState(false)
+  const [resourcesOpen, setResourcesOpen] = useState(false)
 
   useEffect(() => {
     if (!open) return
@@ -37,6 +38,11 @@ export function Header() {
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [open])
+
+  useEffect(() => {
+    setOpen(false)
+    setResourcesOpen(false)
+  }, [pathname])
 
   const close = () => setOpen(false)
 
@@ -73,20 +79,31 @@ export function Header() {
               </SmartLink>
             </li>
           ))}
-          <li className="group relative">
+          <li
+            className="relative"
+            onMouseEnter={() => setResourcesOpen(true)}
+            onMouseLeave={() => setResourcesOpen(false)}
+          >
             <button
               type="button"
+              onClick={() => setResourcesOpen((value) => !value)}
+              aria-expanded={resourcesOpen}
               className="flex items-center gap-1 text-[12.9px] font-medium whitespace-nowrap text-[#17181c] transition-colors hover:text-ink/70"
             >
               Resources
-              <ChevronDown className="transition-transform duration-300 group-hover:rotate-180" />
+              <ChevronDown className={`transition-transform duration-300 ${resourcesOpen ? 'rotate-180' : ''}`} />
             </button>
-            <div className="invisible absolute top-full left-1/2 w-56 -translate-x-1/2 pt-3 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+            <div
+              className={`absolute top-full left-1/2 w-56 -translate-x-1/2 pt-3 transition-all duration-200 ${
+                resourcesOpen ? 'visible translate-y-0 opacity-100' : 'invisible translate-y-1 opacity-0'
+              }`}
+            >
               <div className="rounded-2xl border border-line bg-white p-2 shadow-card">
                 {resourceLinks.map((link) => (
                   <SmartLink
                     key={link.label}
                     href={link.href}
+                    onClick={() => setResourcesOpen(false)}
                     className="block rounded-xl px-3 py-2 text-sm text-ink-soft transition-colors hover:bg-page hover:text-ink"
                   >
                     {link.label}

@@ -8,6 +8,9 @@ export const assetSrcSet = (file: string, max = 1920) =>
     .map((w) => `${asset(file, w)} ${w}w`)
     .join(', ')
 
+export const rootAsset = (file: string, width = 384) =>
+  `https://naano.com/_next/image?url=%2F${file}&w=${width}&q=75`
+
 export const CASE_STUDY_VIDEO =
   'https://api.naano.xyz/storage/v1/object/public/marketing-assets/case-studies/blogseo-vincent-josse.mp4'
 

@@ -21,9 +21,9 @@ const variants: Record<Variant, string> = {
 }
 
 const sizes: Record<Size, string> = {
-  sm: 'h-9 px-4 text-sm',
+  sm: 'h-9 px-3.5 text-[0.875rem]',
   md: 'h-11 px-5 text-[0.9375rem]',
-  lg: 'h-[52px] px-7 text-base',
+  lg: 'h-11 px-6 text-base',
 }
 
 export function Button({
@@ -39,7 +39,7 @@ export function Button({
       whileHover={variant === 'link' ? { x: 3 } : { y: -2 }}
       whileTap={press}
       transition={spring}
-      className={`group inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-medium whitespace-nowrap ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`group inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap ${variants[variant]} ${sizes[size]} ${className}`}
       {...props}
     >
       {children}

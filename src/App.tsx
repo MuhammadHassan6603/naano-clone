@@ -8,6 +8,7 @@ import { Results } from './sections/Results'
 import { Pricing } from './sections/Pricing'
 import { Faq } from './sections/Faq'
 import { Cta } from './sections/Cta'
+import { Footer } from './sections/Footer'
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Faq />
         <Cta />
       </main>
+      <Footer />
     </>
   )
 }

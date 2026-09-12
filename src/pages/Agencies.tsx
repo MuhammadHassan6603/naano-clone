@@ -57,6 +57,11 @@ export default function Agencies() {
           decoding="async"
           className="pointer-events-none absolute inset-0 z-0 size-full object-cover object-bottom"
         />
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-1 bg-white/18" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 -bottom-px z-3 h-[120px] bg-[linear-gradient(180deg,rgba(252,252,251,0)_0%,rgba(252,252,251,0.74)_72%,#FCFCFB_100%)] lg:h-[calc(170*var(--u))]"
+        />
 
         <motion.div
           variants={stagger(0.09, 0.1)}

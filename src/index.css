@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 
 @theme {
+  --breakpoint-wide: 87.5rem;
+
   --font-sans: 'Inter', -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif;
 
   --color-page: #fcfcfb;
@@ -128,6 +130,45 @@
   isolation: isolate;
 }
 
+@keyframes route-flow {
+  to {
+    stroke-dashoffset: -170;
+  }
+}
+
+@keyframes journey-breath {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes play-pulse {
+  0%,
+  100% {
+    box-shadow: 0 10px 26px rgb(37 99 235 / 0.24);
+  }
+  50% {
+    box-shadow: 0 16px 42px rgb(37 99 235 / 0.5);
+  }
+}
+
+.route-flow {
+  animation: route-flow 5.5s linear infinite;
+}
+
+.journey-breath {
+  animation: journey-breath 4.8s ease-in-out infinite;
+  will-change: transform;
+}
+
+.play-pulse {
+  animation: play-pulse 2.6s ease-in-out infinite;
+}
+
 @keyframes marquee {
   from {
     transform: translate3d(0, 0, 0);
@@ -152,6 +193,9 @@
   }
 
   .marquee-track,
+  .route-flow,
+  .journey-breath,
+  .play-pulse,
   .float-avatar,
   .float-flag,
   .dash-flow,

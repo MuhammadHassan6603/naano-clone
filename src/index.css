@@ -63,6 +63,71 @@
   }
 }
 
+@keyframes avatar-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--rot, 0deg));
+  }
+  50% {
+    transform: translate3d(0, -7px, 0) rotate(calc(var(--rot, 0deg) + 1deg));
+  }
+}
+
+@keyframes flag-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(var(--rot, 0deg));
+  }
+  45% {
+    transform: translate3d(3px, -6px, 0) rotate(calc(var(--rot, 0deg) + 2deg));
+  }
+  75% {
+    transform: translate3d(-2px, -2px, 0) rotate(calc(var(--rot, 0deg) - 1deg));
+  }
+}
+
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -54;
+  }
+}
+
+@keyframes score-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 12px 28px rgb(48 87 108 / 0.14);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 16px 34px rgb(48 87 108 / 0.2);
+  }
+}
+
+.float-avatar {
+  animation: avatar-float 5.2s ease-in-out infinite;
+  will-change: transform;
+}
+
+.float-flag {
+  animation: flag-float 4.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.dash-flow {
+  animation: dash-flow 5s linear infinite;
+}
+
+.score-pulse {
+  animation: score-pulse 3.6s ease-in-out infinite;
+  will-change: transform;
+}
+
+.anim-isolate {
+  contain: layout paint;
+  isolation: isolate;
+}
+
 @keyframes marquee {
   from {
     transform: translate3d(0, 0, 0);
@@ -86,7 +151,11 @@
     scroll-behavior: auto;
   }
 
-  .marquee-track {
+  .marquee-track,
+  .float-avatar,
+  .float-flag,
+  .dash-flow,
+  .score-pulse {
     animation: none;
   }
 }

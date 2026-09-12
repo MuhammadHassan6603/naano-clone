@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { motion } from 'motion/react'
 import { Reveal } from '../components/Reveal'
 import { asset, assetSrcSet } from '../lib/assets'
@@ -12,13 +13,13 @@ const avatars = [
 ]
 
 const flags = [
-  { name: 'France', rotate: -3.81, paths: [['#1a47b8', 'M0 0h10v20H0z'], ['#fff', 'M10 0h10v20H10z'], ['#f1333f', 'M20 0h10v20H20z']] },
-  { name: 'United States', rotate: 5.9, stripes: true },
-  { name: 'Germany', rotate: -2.97, paths: [['#111', 'M0 0h30v6.67H0z'], ['#d00', 'M0 6.67h30v6.67H0z'], ['#ffce00', 'M0 13.34h30V20H0z']] },
-  { name: 'United Kingdom', rotate: 4.25, union: true },
-  { name: 'Spain', rotate: -2.04, paths: [['#aa151b', 'M0 0h30v20H0z'], ['#f1bf00', 'M0 5h30v10H0z']] },
-  { name: 'Canada', rotate: 2.82, paths: [['#d80621', 'M0 0h7v20H0zm23 0h7v20h-7z'], ['#fff', 'M7 0h16v20H7z'], ['#d80621', 'm15 3 1.2 3 2.4-1.1-.8 3 2 .8-3.1 2.4.6 3.1-2.3-1.4-2.3 1.4.6-3.1-3.1-2.4 2-.8-.8-3 2.4 1.1z']] },
-  { name: 'Netherlands', rotate: 5, paths: [['#ae1c28', 'M0 0h30v6.67H0z'], ['#fff', 'M0 6.67h30v6.67H0z'], ['#21468b', 'M0 13.34h30V20H0z']] },
+  { name: 'France', rotate: -3.81, delay: -0.4, paths: [['#1a47b8', 'M0 0h10v20H0z'], ['#fff', 'M10 0h10v20H10z'], ['#f1333f', 'M20 0h10v20H20z']] },
+  { name: 'United States', delay: -1.5, rotate: 5.9, stripes: true },
+  { name: 'Germany', delay: -2.6, rotate: -2.97, paths: [['#111', 'M0 0h30v6.67H0z'], ['#d00', 'M0 6.67h30v6.67H0z'], ['#ffce00', 'M0 13.34h30V20H0z']] },
+  { name: 'United Kingdom', delay: -3.1, rotate: 4.25, union: true },
+  { name: 'Spain', delay: -1.1, rotate: -2.04, paths: [['#aa151b', 'M0 0h30v20H0z'], ['#f1bf00', 'M0 5h30v10H0z']] },
+  { name: 'Canada', delay: -2.2, rotate: 2.82, paths: [['#d80621', 'M0 0h7v20H0zm23 0h7v20h-7z'], ['#fff', 'M7 0h16v20H7z'], ['#d80621', 'm15 3 1.2 3 2.4-1.1-.8 3 2 .8-3.1 2.4.6 3.1-2.3-1.4-2.3 1.4.6-3.1-3.1-2.4 2-.8-.8-3 2.4 1.1z']] },
+  { name: 'Netherlands', delay: -3.8, rotate: 5, paths: [['#ae1c28', 'M0 0h30v6.67H0z'], ['#fff', 'M0 6.67h30v6.67H0z'], ['#21468b', 'M0 13.34h30V20H0z']] },
 ]
 
 const buyers = ['Founders', 'Sales leaders', 'GTM teams']
@@ -65,7 +66,7 @@ function SignalCard({ children, title, copy, delay }: {
       variants={scaleIn}
       transition={{ delay }}
       whileHover={{ y: -4 }}
-      className="relative flex min-h-[210px] flex-col overflow-hidden rounded-[22px] border border-[rgba(173,205,222,0.42)] bg-white/82 p-6 shadow-[0_26px_64px_-48px_rgba(43,84,106,0.42),inset_0_1px_0_#fff] lg:min-h-[calc(276*var(--u))] lg:rounded-[calc(26*var(--u))] lg:p-[calc(26*var(--u))_calc(28*var(--u))_calc(28*var(--u))]"
+      className="anim-isolate relative flex min-h-[210px] flex-col overflow-hidden rounded-[22px] border border-[rgba(173,205,222,0.42)] bg-white/82 p-6 shadow-[0_26px_64px_-48px_rgba(43,84,106,0.42),inset_0_1px_0_#fff] lg:min-h-[calc(276*var(--u))] lg:rounded-[calc(26*var(--u))] lg:p-[calc(26*var(--u))_calc(28*var(--u))_calc(28*var(--u))]"
     >
       <div
         aria-hidden
@@ -209,20 +210,21 @@ export function Marketplace() {
                   whileInView={{ opacity: 1, y: 0, scale: 1 }}
                   viewport={viewport}
                   transition={{ delay: 0.12 + index * 0.06, duration: 0.5, ease }}
-                  className="absolute grid size-[56px] place-items-center rounded-full bg-white/94 p-1 shadow-[0_12px_28px_rgba(53,89,108,0.16),0_0_0_1px_rgba(127,180,205,0.18)] lg:size-[calc(62*var(--u))]"
-                  style={{
-                    left: `${avatar.left / 3.55}%`,
-                    top: `${avatar.top / 1.36}%`,
-                    rotate: `${avatar.rotate}deg`,
-                  }}
+                  className="absolute"
+                  style={{ left: `${avatar.left / 3.55}%`, top: `${avatar.top / 1.36}%` }}
                 >
-                  <img
-                    src={asset(avatar.file, 96)}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className="size-full rounded-full object-cover"
-                  />
+                  <span
+                    className="float-avatar grid size-[56px] place-items-center rounded-full bg-white/94 p-1 shadow-[0_12px_28px_rgba(53,89,108,0.16),0_0_0_1px_rgba(127,180,205,0.18)] lg:size-[calc(62*var(--u))]"
+                    style={{ '--rot': `${avatar.rotate}deg`, animationDelay: `${index * -0.7}s` } as CSSProperties}
+                  >
+                    <img
+                      src={asset(avatar.file, 96)}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      className="size-full rounded-full object-cover"
+                    />
+                  </span>
                 </motion.span>
               ))}
             </div>
@@ -244,10 +246,14 @@ export function Marketplace() {
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={viewport}
                   transition={{ delay: 0.12 + index * 0.05, duration: 0.45, ease }}
-                  className="grid place-items-center overflow-hidden rounded-[7px] border border-[rgba(150,190,211,0.48)] bg-white/96 p-[3px] shadow-[0_8px_22px_rgba(52,91,111,0.1)] lg:rounded-[calc(8*var(--u))]"
-                  style={{ rotate: `${flag.rotate}deg` }}
+                  className="grid place-items-center"
                 >
-                  <Flag flag={flag} />
+                  <span
+                    className="float-flag grid place-items-center overflow-hidden rounded-[7px] border border-[rgba(150,190,211,0.48)] bg-white/96 p-[3px] shadow-[0_8px_22px_rgba(52,91,111,0.1)] lg:rounded-[calc(8*var(--u))]"
+                    style={{ '--rot': `${flag.rotate}deg`, animationDelay: `${flag.delay}s` } as CSSProperties}
+                  >
+                    <Flag flag={flag} />
+                  </span>
                 </motion.span>
               ))}
             </div>
@@ -276,16 +282,13 @@ export function Marketplace() {
               </div>
 
               <svg viewBox="0 0 96 52" className="w-full" fill="none" aria-hidden>
-                <motion.path
+                <path
+                  className="dash-flow"
                   d="M3 37 C27 4 68 4 93 36"
                   stroke="#9CCBDD"
                   strokeWidth="2"
-                  strokeDasharray="5 6"
+                  strokeDasharray="4 5"
                   strokeLinecap="round"
-                  initial={{ pathLength: 0 }}
-                  whileInView={{ pathLength: 1 }}
-                  viewport={viewport}
-                  transition={{ duration: 0.9, ease, delay: 0.2 }}
                 />
                 <circle cx="48" cy="13" r="5" fill="#70B7D7" />
               </svg>
@@ -306,9 +309,11 @@ export function Marketplace() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={viewport}
                 transition={{ delay: 0.7, duration: 0.45, ease }}
-                className="absolute top-[9.4%] left-[41.7%] grid size-[48px] place-items-center rounded-full border-2 border-white bg-[#E9F7FD] text-[13px] font-extrabold text-[#315B7C] shadow-[0_14px_31px_rgba(48,87,108,0.17)] lg:size-[calc(54*var(--u))] lg:text-[calc(15*var(--u))]"
+                className="absolute top-[9.4%] left-[41.7%]"
               >
-                96%
+                <span className="score-pulse grid size-[48px] place-items-center rounded-full border-2 border-white bg-[#E9F7FD] text-[13px] font-extrabold text-[#315B7C] lg:size-[calc(54*var(--u))] lg:text-[calc(15*var(--u))]">
+                  96%
+                </span>
               </motion.span>
             </div>
           </SignalCard>

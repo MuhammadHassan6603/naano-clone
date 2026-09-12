@@ -45,7 +45,7 @@ export function Header() {
     >
       <nav
         aria-label="Primary"
-        className="mx-auto flex h-16 max-w-[1680px] items-center gap-8 px-5 sm:px-8 lg:px-12"
+        className="mx-auto flex h-16 max-w-[1680px] items-center gap-4 px-5 sm:px-8 lg:gap-0 lg:px-12"
       >
         <a href="#top" className="flex shrink-0 items-center" onClick={close}>
           <img
@@ -58,12 +58,12 @@ export function Header() {
           />
         </a>
 
-        <ul className="ml-auto hidden items-center gap-5 lg:flex xl:gap-8">
+        <ul className="ml-auto hidden items-center gap-[20px] lg:flex xl:gap-[27.6px]">
           {primaryLinks.map((link) => (
             <li key={link.label}>
               <a
                 href={link.href}
-                className="text-[0.875rem] font-medium whitespace-nowrap text-[#17181c] transition-colors hover:text-ink/70"
+                className="text-[12.9px] font-medium whitespace-nowrap text-[#17181c] transition-colors hover:text-ink/70"
               >
                 {link.label}
               </a>
@@ -72,7 +72,7 @@ export function Header() {
           <li className="group relative">
             <button
               type="button"
-              className="flex items-center gap-1 text-[0.875rem] font-medium whitespace-nowrap text-[#17181c] transition-colors hover:text-ink/70"
+              className="flex items-center gap-1 text-[12.9px] font-medium whitespace-nowrap text-[#17181c] transition-colors hover:text-ink/70"
             >
               Resources
               <ChevronDown className="transition-transform duration-300 group-hover:rotate-180" />
@@ -93,7 +93,7 @@ export function Header() {
           </li>
         </ul>
 
-        <div className="ml-auto flex items-center gap-2 lg:ml-6 xl:ml-10">
+        <div className="ml-auto flex items-center gap-2 lg:ml-[20px] xl:ml-[27.5px]">
           <motion.button
             type="button"
             whileTap={press}
@@ -108,7 +108,7 @@ export function Header() {
           </motion.button>
           <button
             type="button"
-            className="hidden items-center gap-1.5 px-2 text-[0.8125rem] font-medium text-ink-soft transition-colors hover:text-ink lg:flex"
+            className="hidden items-center gap-1.5 px-1 text-[11.5px] font-medium text-ink-soft transition-colors hover:text-ink lg:flex"
           >
             <Globe />
             EN

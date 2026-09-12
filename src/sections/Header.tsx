@@ -23,6 +23,7 @@ const resourceLinks = [
 
 const ctaByPath: Record<string, { label: string; href: string }> = {
   '/creators': { label: 'Start earning', href: '/creators#apply' },
+  '/agencies': { label: 'Choose your agency', href: '/agencies#choose' },
 }
 
 export function Header() {

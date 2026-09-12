@@ -6,6 +6,7 @@ import { Footer } from './sections/Footer'
 import Home from './pages/Home'
 
 const Creators = lazy(() => import('./pages/Creators'))
+const Agencies = lazy(() => import('./pages/Agencies'))
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/creators" element={<Creators />} />
+          <Route path="/agencies" element={<Agencies />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </Suspense>

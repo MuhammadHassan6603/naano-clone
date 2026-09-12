@@ -125,7 +125,7 @@ const taglines: Record<string, string> = {
   '/creators': 'Turn your LinkedIn audience into a paid channel.',
 }
 
-const zoomedRoutes = ['/creators']
+const zoomedRoutes = ['/creators', '/agencies']
 
 export function Footer() {
   const { pathname } = useLocation()

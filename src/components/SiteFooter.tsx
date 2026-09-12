@@ -7,6 +7,7 @@ const product = [
   { label: 'FAQs', href: '/#faq' },
   { label: 'Blog', href: '/blog' },
   { label: 'Free Tools', href: '/free-tools' },
+  { label: 'Benchmarks', href: 'https://naano.com/benchmarks/q2-2026' },
   { label: 'About', href: 'https://naano.com/about' },
 ]
 
@@ -53,14 +54,17 @@ const agents = [
   { label: 'Reports & data', href: 'https://naano.com/reports' },
 ]
 
-const linkClass = 'text-[13px] transition-colors duration-150 text-[#78878a] hover:text-white'
+const linkClass = 'text-[13px] transition-colors duration-150 text-[#787774] hover:text-white'
 
-export function BlogFooter() {
+export function SiteFooter() {
   return (
     <footer className="font-jakarta" style={{ backgroundColor: '#1c1b19' }}>
       <div
-        className="relative overflow-hidden px-6 py-16 text-center sm:py-20"
-        style={{ background: 'linear-gradient(135deg, #0A2A6B 0%, #1652F0 55%, #2563EB 100%)' }}
+        className="relative overflow-hidden text-center"
+        style={{
+          background: 'linear-gradient(135deg, #0A2A6B 0%, #1652F0 55%, #2563EB 100%)',
+          padding: 'clamp(48px, 8vw, 80px) 24px clamp(56px, 8vw, 96px)',
+        }}
       >
         <svg className="pointer-events-none absolute inset-0 size-full opacity-[0.04]" aria-hidden>
           <defs>
@@ -71,11 +75,14 @@ export function BlogFooter() {
           <rect width="100%" height="100%" fill="url(#ftGrid)" />
         </svg>
         <div className="relative z-10 mx-auto max-w-2xl">
-          <p className="mb-5 text-xs font-semibold tracking-[0.14em] text-white/75 uppercase">
+          <p
+            className="mb-5 text-xs font-semibold tracking-[0.14em] uppercase"
+            style={{ color: 'rgba(255,255,255,0.75)' }}
+          >
             Get started
           </p>
           <h2 className="mb-5 text-[clamp(28px,3.4vw,46px)] leading-[1.08] font-bold tracking-[-0.03em] text-white">
-            Ready to scale with naano?
+            Ready to scale with <span style={{ color: '#FFFFFF' }}>naano</span>?
           </h2>
           <p className="mx-auto mb-10 max-w-md text-base leading-relaxed text-white/75">
             Launch your first campaign in minutes. Top up your wallet and pay per post, with
@@ -84,7 +91,7 @@ export function BlogFooter() {
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
               to="/#pricing"
-              className="inline-flex h-[50px] items-center rounded-[10px] bg-white px-7 text-[15px] font-bold tracking-[-0.01em] text-[#111827] shadow-[0_8px_30px_rgba(4,18,60,0.28)]"
+              className="inline-flex h-[50px] items-center rounded-[10px] bg-white px-7 text-[15px] font-bold tracking-[-0.01em] text-[#37352f] shadow-[0_8px_30px_rgba(4,18,60,0.28)]"
             >
               Get started
             </Link>
@@ -128,7 +135,7 @@ export function BlogFooter() {
                 />
                 <span className="text-base font-bold text-white">naano</span>
               </Link>
-              <p className="max-w-[220px] text-[13px] leading-relaxed text-[#78878a]">
+              <p className="max-w-[220px] text-[13px] leading-relaxed text-[#787774]">
                 Turn LinkedIn creators into your best acquisition channel.
               </p>
               <a
@@ -147,7 +154,8 @@ export function BlogFooter() {
             </div>
 
             <div className="flex flex-col gap-3">
-              <p className="mb-1 text-[11px] font-semibold tracking-[0.1em] text-white/35 uppercase">
+              <p className="mb-1 text-[11px] font-semibold tracking-[0.1em] uppercase"
+                style={{ color: 'rgba(255,255,255,0.35)' }}>
                 Product
               </p>
               {product.map((link) => (
@@ -158,7 +166,8 @@ export function BlogFooter() {
             </div>
 
             <div className="flex flex-col gap-3">
-              <p className="mb-1 text-[11px] font-semibold tracking-[0.1em] text-white/35 uppercase">
+              <p className="mb-1 text-[11px] font-semibold tracking-[0.1em] uppercase"
+                style={{ color: 'rgba(255,255,255,0.35)' }}>
                 Company
               </p>
               {company.map((link) => (
@@ -169,7 +178,8 @@ export function BlogFooter() {
             </div>
 
             <div className="flex flex-col gap-3">
-              <p className="mb-1 text-[11px] font-semibold tracking-[0.1em] text-white/35 uppercase">
+              <p className="mb-1 text-[11px] font-semibold tracking-[0.1em] uppercase"
+                style={{ color: 'rgba(255,255,255,0.35)' }}>
                 Press
               </p>
               {press.map((link) => (
@@ -180,7 +190,8 @@ export function BlogFooter() {
             </div>
 
             <div className="flex flex-col gap-3">
-              <p className="mb-1 text-[11px] font-semibold tracking-[0.1em] text-white/35 uppercase">
+              <p className="mb-1 text-[11px] font-semibold tracking-[0.1em] uppercase"
+                style={{ color: 'rgba(255,255,255,0.35)' }}>
                 Resources
               </p>
               {resources.map((link) => (
@@ -188,7 +199,8 @@ export function BlogFooter() {
                   {link.label}
                 </SmartLink>
               ))}
-              <p className="mt-4 mb-1 text-[11px] font-semibold tracking-[0.1em] text-white/35 uppercase">
+              <p className="mt-4 mb-1 text-[11px] font-semibold tracking-[0.1em] uppercase"
+                style={{ color: 'rgba(255,255,255,0.35)' }}>
                 For AI agents
               </p>
               {agents.map((link) => (
@@ -203,12 +215,12 @@ export function BlogFooter() {
             className="flex flex-col items-center justify-between gap-3 pt-6 sm:flex-row"
             style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
           >
-            <p className="text-[12px] text-[#78878a]">© 2026 naano. All rights reserved.</p>
+            <p className="text-[12px] text-[#787774]">© 2026 naano. All rights reserved.</p>
             <a
               href="https://fr.trustpilot.com/review/www.naano.xyz"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-[12px] text-[#78878a] transition-colors hover:text-white"
+              className="flex items-center gap-1.5 text-[12px] text-[#787774] transition-colors hover:text-white"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="#00b67a" stroke="none" aria-hidden>
                 <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />
@@ -218,6 +230,8 @@ export function BlogFooter() {
           </div>
         </div>
       </div>
+
+      <div className="h-20" style={{ backgroundColor: '#1c1b19' }} />
     </footer>
   )
 }

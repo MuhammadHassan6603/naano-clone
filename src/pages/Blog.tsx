@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
-import { BlogFooter } from '../components/BlogFooter'
+import { SiteFooter } from '../components/SiteFooter'
 import { blogPosts } from '../lib/blogPosts'
 import { fadeUp, stagger, viewport } from '../lib/motion'
 
@@ -209,7 +209,7 @@ export default function Blog() {
         </div>
       </section>
 
-      <BlogFooter />
+      <SiteFooter />
     </main>
   )
 }

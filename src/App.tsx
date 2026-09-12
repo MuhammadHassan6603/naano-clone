@@ -11,10 +11,16 @@ const Blog = lazy(() => import('./pages/Blog'))
 const BlogPost = lazy(() => import('./pages/BlogPost'))
 const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
+const FreeTools = lazy(() => import('./pages/FreeTools'))
+const CaseStudy = lazy(() => import('./pages/CaseStudy'))
 
 export default function App() {
   const { pathname } = useLocation()
-  const bare = pathname === '/login' || pathname === '/register'
+  const bare =
+    pathname === '/login' ||
+    pathname === '/register' ||
+    pathname === '/free-tools' ||
+    pathname.startsWith('/case-studies')
   const hasOwnFooter = bare || pathname.startsWith('/blog')
 
   return (
@@ -30,6 +36,8 @@ export default function App() {
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/free-tools" element={<FreeTools />} />
+          <Route path="/case-studies/blogseo" element={<CaseStudy />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </Suspense>

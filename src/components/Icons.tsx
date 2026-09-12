@@ -111,3 +111,120 @@ export const GoogleG: Icon = (props) => (
     <path fill="#EA4335" d="M12 5.38c1.62 0 3.07.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.05l3.66 2.84C6.71 7.31 9.14 5.38 12 5.38Z" />
   </svg>
 )
+
+export const CaretDown: Icon = (props) => (
+  <svg viewBox="0 0 256 256" width="12" height="12" fill="currentColor" aria-hidden {...props}>
+    <path d="M216.49,104.49l-80,80a12,12,0,0,1-17,0l-80-80a12,12,0,0,1,17-17L128,159l71.51-71.52a12,12,0,0,1,17,17Z" />
+  </svg>
+)
+
+export const Burger: Icon = (props) => (
+  <svg viewBox="0 0 256 256" width="20" height="20" fill="currentColor" aria-hidden {...props}>
+    <path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z" />
+  </svg>
+)
+
+export const Sparkles: Icon = (props) => (
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden {...base} strokeWidth={2} {...props}>
+    <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
+    <path d="M20 2v4" />
+    <path d="M22 4h-4" />
+    <circle cx="4" cy="20" r="2" />
+  </svg>
+)
+
+export const UserSearch: Icon = (props) => (
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden {...base} strokeWidth={2} {...props}>
+    <circle cx="10" cy="7" r="4" />
+    <path d="M10.3 15H7a4 4 0 0 0-4 4v2" />
+    <circle cx="17" cy="17" r="3" />
+    <path d="m21 21-1.9-1.9" />
+  </svg>
+)
+
+export const Calculator: Icon = (props) => (
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden {...base} strokeWidth={2} {...props}>
+    <rect width="16" height="20" x="4" y="2" rx="2" />
+    <line x1="8" x2="16" y1="6" y2="6" />
+    <line x1="16" x2="16" y1="14" y2="18" />
+    <path d="M16 10h.01" />
+    <path d="M12 10h.01" />
+    <path d="M8 10h.01" />
+    <path d="M12 14h.01" />
+    <path d="M8 14h.01" />
+    <path d="M12 18h.01" />
+    <path d="M8 18h.01" />
+  </svg>
+)
+
+export const TrendingUp: Icon = (props) => (
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden {...base} strokeWidth={2} {...props}>
+    <path d="M16 7h6v6" />
+    <path d="m22 7-8.5 8.5-5-5L2 17" />
+  </svg>
+)
+
+export const Target: Icon = (props) => (
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden {...base} strokeWidth={2} {...props}>
+    <circle cx="12" cy="12" r="10" />
+    <circle cx="12" cy="12" r="6" />
+    <circle cx="12" cy="12" r="2" />
+  </svg>
+)
+
+export const ChartPie: Icon = (props) => (
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden {...base} strokeWidth={2} {...props}>
+    <path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z" />
+    <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+  </svg>
+)
+
+export const ArrowRightLine: Icon = (props) => (
+  <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden {...base} strokeWidth={2.2} {...props}>
+    <path d="M5 12h14" />
+    <path d="m12 5 7 7-7 7" />
+  </svg>
+)
+
+export const ArrowLeftLong: Icon = (props) => (
+  <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden {...base} strokeWidth={2.2} {...props}>
+    <line x1="19" y1="12" x2="5" y2="12" />
+    <polyline points="12 19 5 12 12 5" />
+  </svg>
+)
+
+export const ArrowRightLong: Icon = (props) => (
+  <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden {...base} strokeWidth={2.2} {...props}>
+    <line x1="4" y1="12" x2="20" y2="12" />
+    <polyline points="13 5 20 12 13 19" />
+  </svg>
+)
+
+export const ArrowRightMid: Icon = (props) => (
+  <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden {...base} strokeWidth={2.3} {...props}>
+    <line x1="5" y1="12" x2="19" y2="12" />
+    <polyline points="12 5 19 12 12 19" />
+  </svg>
+)
+
+export const Check: Icon = (props) => (
+  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden {...base} strokeWidth={3} {...props}>
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+)
+
+export const PlayTriangle: Icon = (props) => (
+  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden {...props}>
+    <path d="M8 5.5 L19 12 L8 18.5 Z" />
+  </svg>
+)
+
+export const LinkedInBadge: Icon = (props) => (
+  <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden {...props}>
+    <rect width="24" height="24" rx="4" fill="#0A66C2" />
+    <path
+      fill="#FFFFFF"
+      d="M7.2 9.6H4.8V19h2.4V9.6ZM6 5.2a1.4 1.4 0 100 2.8 1.4 1.4 0 000-2.8ZM19.2 19h-2.4v-4.9c0-1.2-.5-1.9-1.5-1.9-.8 0-1.3.5-1.5 1.1-.1.2-.1.5-.1.8V19H11.3s.03-8.6 0-9.4h2.4v1.3c.3-.5.9-1.2 2.2-1.2 1.6 0 2.9 1 2.9 3.3V19Z"
+    />
+  </svg>
+)

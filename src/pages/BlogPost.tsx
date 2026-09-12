@@ -1,5 +1,5 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
-import { BlogFooter } from '../components/BlogFooter'
+import { SiteFooter } from '../components/SiteFooter'
 import { LinkedIn } from '../components/Icons'
 import { rootAsset } from '../lib/assets'
 import { getBlogPost } from '../lib/blogPosts'
@@ -183,7 +183,7 @@ export default function BlogPost() {
         </div>
       </div>
 
-      <BlogFooter />
+      <SiteFooter />
     </main>
   )
 }

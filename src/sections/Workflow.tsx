@@ -245,6 +245,11 @@ export function Workflow() {
               key={step.title}
               variants={scaleIn}
               transition={{ delay: index * 0.06 }}
+              whileHover={{
+                y: -6,
+                boxShadow: '0 34px 66px -42px rgba(56,96,128,0.42)',
+                transition: { duration: 0.42, ease: [0.16, 1, 0.3, 1] },
+              }}
               className="relative z-2 flex flex-col rounded-[24px] lg:rounded-[calc(24*var(--u))] border border-[rgba(172,203,219,0.42)] bg-white/90 p-[18px] lg:p-[calc(18*var(--u))] pb-[22px] lg:pb-[calc(22*var(--u))] shadow-[0_22px_58px_-44px_rgba(56,96,128,0.38)] lg:shadow-[0_calc(22*var(--u))_calc(58*var(--u))_calc(-44*var(--u))_rgba(56,96,128,0.38)] backdrop-blur-[14px] lg:backdrop-blur-[calc(14*var(--u))]"
             >
               <span className="absolute -top-[14px] lg:-top-[calc(14*var(--u))] left-[18px] lg:left-[calc(18*var(--u))] grid h-[28px] lg:h-[calc(28*var(--u))] w-[36px] lg:w-[calc(36*var(--u))] place-items-center rounded-full border border-[rgba(143,187,209,0.4)] bg-[#F4FBFE] text-[10px] lg:text-[calc(10*var(--u))] font-extrabold tracking-[0.8px] lg:tracking-[calc(0.8*var(--u))] text-[#54778A]">

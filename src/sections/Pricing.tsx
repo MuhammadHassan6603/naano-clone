@@ -57,7 +57,7 @@ export function Pricing() {
         whileInView="show"
         viewport={viewport}
       >
-        <div className="mx-auto max-w-[640px] text-center">
+        <div className="mx-auto max-w-[710px] text-center">
           <motion.h2
             variants={fadeUp}
             className="text-[2.25rem] leading-none font-semibold tracking-[-0.035em] text-ink sm:text-[3rem] lg:text-[52px]"
@@ -78,12 +78,17 @@ export function Pricing() {
           </motion.p>
         </div>
 
-        <div className="mx-auto mt-10 grid max-w-[1180px] gap-6 lg:mt-[66px] lg:grid-cols-2 lg:gap-[42px]">
+        <div className="mx-auto mt-10 grid max-w-[1180px] gap-6 lg:mt-[46px] lg:grid-cols-2 lg:gap-[42px]">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.eyebrow}
               variants={scaleIn}
               transition={{ delay: index * 0.08 }}
+              whileHover={{
+                y: -5,
+                boxShadow: '0 40px 82px -48px rgba(45,87,110,0.5)',
+                transition: { duration: 0.42, ease: [0.16, 1, 0.3, 1] },
+              }}
               className="flex flex-col rounded-[28px] border border-[rgba(178,204,217,0.52)] bg-white/96 p-[26px] shadow-[0_30px_72px_-50px_rgba(45,87,110,0.42)] lg:p-[46px_48px_42px]"
             >
               <div className={`text-[12px] font-bold tracking-[0.14em] ${plan.eyebrowClass}`}>

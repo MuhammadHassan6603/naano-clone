@@ -84,7 +84,7 @@ export function Results() {
   return (
     <section
       id="results"
-      className="bg-[linear-gradient(180deg,rgba(243,248,255,0.72)_0%,#FCFCFB_48%,rgba(243,248,255,0.52)_100%)] px-5 py-16 sm:px-8 lg:px-[84px] lg:pt-[112px] lg:pb-[128px]"
+      className="bg-[linear-gradient(180deg,rgba(243,248,255,0.72)_0%,#FCFCFB_48%,rgba(243,248,255,0.52)_100%)] px-5 py-16 sm:px-8 lg:px-[84px] lg:pt-[118px] lg:pb-[72px]"
     >
       <motion.div
         variants={stagger(0.09)}
@@ -129,6 +129,13 @@ export function Results() {
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={viewport}
                 transition={{ delay: 0.1 + index * 0.08, duration: 0.55, ease }}
+                whileHover={{
+                  y: -5,
+                  backgroundColor: 'rgba(255,255,255,0.82)',
+                  boxShadow:
+                    '0 28px 58px -38px rgba(46,86,108,0.5), inset 0 1px 0 #fff',
+                  transition: { duration: 0.42, ease: [0.16, 1, 0.3, 1] },
+                }}
                 className="rounded-[22px] border border-white/90 bg-white/64 px-[14px] pt-[26px] pb-[24px] text-center shadow-[0_22px_48px_-38px_rgba(46,86,108,0.42),inset_0_1px_0_#fff]"
               >
                 <div className="text-[2rem] leading-none font-[660] tracking-[-0.05em] text-[#17181C] lg:text-[54px] lg:leading-[54px]">
@@ -150,8 +157,12 @@ export function Results() {
             <motion.article
               key={post.name}
               variants={scaleIn}
-              whileHover={{ y: -4 }}
-              className="flex flex-col rounded-[26px] border border-[rgba(170,204,221,0.5)] bg-[linear-gradient(rgba(237,248,253,0.92)_0,rgba(255,255,255,0.98)_160px,#fff_100%)] shadow-[0_28px_66px_-46px_rgba(44,83,106,0.42),inset_0_1px_0_#fff]"
+              whileHover={{
+                y: -6,
+                boxShadow: '0 40px 80px -44px rgba(44,83,106,0.5), inset 0 1px 0 #fff',
+                transition: { duration: 0.42, ease: [0.16, 1, 0.3, 1] },
+              }}
+              className="group flex flex-col rounded-[26px] border border-[rgba(170,204,221,0.5)] bg-[linear-gradient(rgba(237,248,253,0.92)_0,rgba(255,255,255,0.98)_160px,#fff_100%)] shadow-[0_28px_66px_-46px_rgba(44,83,106,0.42),inset_0_1px_0_#fff]"
             >
               <div className="flex items-center gap-[12px] px-[22px] pt-[20px]">
                 <span
@@ -192,7 +203,7 @@ export function Results() {
                   alt={post.alt}
                   loading="lazy"
                   decoding="async"
-                  className="block size-full object-cover object-top"
+                  className="block size-full object-cover object-top transition-[transform,filter] duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.025] group-hover:contrast-[1.02] group-hover:saturate-[0.92]"
                 />
               </div>
 

@@ -4,6 +4,7 @@
 Fires automatically on UserPromptSubmit and Stop (see .claude/settings.json).
 Captures only the verbatim prompt and the final assistant response of each turn.
 """
+import datetime
 import glob
 import json
 import os
@@ -89,6 +90,13 @@ def main():
         return
 
     turns = read_turns(transcript)
+    pending = (payload.get("prompt") or "").strip()
+    if pending and (not turns or pending not in turns[-1]["prompt"]):
+        turns.append({"prompt": pending,
+                      "prompt_time": datetime.datetime.now(datetime.timezone.utc)
+                      .strftime("%Y-%m-%dT%H:%M:%S.") + f"{datetime.datetime.now().microsecond // 1000:03d}Z",
+                      "model": turns[-1]["model"] if turns else "",
+                      "response": "", "response_time": ""})
     if not turns:
         return
 

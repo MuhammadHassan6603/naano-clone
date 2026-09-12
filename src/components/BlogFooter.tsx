@@ -37,6 +37,14 @@ const resources = [
   { label: 'B2B influencer marketing cost', href: 'https://naano.com/blog/b2b-influencer-marketing-cost' },
   { label: 'What is a B2B creator marketplace?', href: 'https://naano.com/blog/what-is-a-b2b-creator-marketplace' },
   { label: 'Launch a LinkedIn creator campaign', href: 'https://naano.com/blog/launch-b2b-linkedin-creator-campaign' },
+  { label: 'LinkedIn Creator Marketplace in Europe', href: 'https://naano.com/blog/linkedin-creator-marketplace-europe' },
+  { label: 'How to pay B2B creators', href: 'https://naano.com/blog/how-to-pay-b2b-creators' },
+  { label: 'Creator Marketplace explained', href: 'https://naano.com/blog/linkedin-creator-marketplace-explained' },
+  { label: 'LinkedIn Ads vs creator-led CPL', href: 'https://naano.com/blog/linkedin-ads-vs-creator-led-cpl' },
+  { label: 'Nano vs macro creators in B2B', href: 'https://naano.com/blog/nano-vs-macro-creators-b2b-ctr' },
+  { label: 'B2B influence on LinkedIn', href: 'https://naano.com/blog/b2b-influence-linkedin' },
+  { label: 'Founder-led distribution for SaaS', href: 'https://naano.com/blog/founder-led-distribution-b2b-saas' },
+  { label: 'Naano vs alternatives', href: 'https://naano.com/blog/naano-vs-alternatives' },
 ]
 
 const agents = [

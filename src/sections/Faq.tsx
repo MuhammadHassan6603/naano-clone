@@ -1,9 +1,11 @@
-import { useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
-import { ArrowRight, ChevronDown } from '../components/Icons'
-import { ease, fadeUp, stagger, viewport } from '../lib/motion'
+import { motion } from 'motion/react'
+import { Accordion } from '../components/Accordion'
+import { ArrowRight } from '../components/Icons'
+import { fadeUp, stagger, viewport } from '../lib/motion'
 
-const faqs = [
+import type { FaqItem } from '../components/Accordion'
+
+const faqs: FaqItem[] = [
   {
     q: 'What is Naano?',
     a: 'Naano is a B2B LinkedIn creator marketplace: companies discover and book vetted creators for sponsored LinkedIn campaigns, each at a fixed price per post set by the creator. The marketplace spans creators from niche voices with around 1,000 followers to established B2B creators with audiences of several hundred thousand.',
@@ -39,8 +41,6 @@ const faqs = [
 ]
 
 export function Faq() {
-  const [open, setOpen] = useState(0)
-
   return (
     <section
       id="faq"
@@ -56,7 +56,7 @@ export function Faq() {
         >
           <motion.h2
             variants={fadeUp}
-            className="text-[2.25rem] leading-[1.03] font-semibold tracking-[-0.045em] text-[#17181C] sm:text-[3rem] lg:text-[52px]"
+            className="text-[2.25rem] leading-[1.03] font-semibold tracking-[-0.045em] text-[#17181C] sm:text-[3rem] lg:text-[51.84px]"
           >
             Frequently asked questions.
           </motion.h2>
@@ -89,50 +89,7 @@ export function Faq() {
           viewport={viewport}
           className="w-full"
         >
-          {faqs.map((item, index) => {
-            const isOpen = open === index
-            return (
-              <div
-                key={item.q}
-                className={`border-t ${index === 0 ? 'border-[#DFE7EB]' : 'border-[#ECEAE6]'}`}
-              >
-                <button
-                  type="button"
-                  onClick={() => setOpen(isOpen ? -1 : index)}
-                  aria-expanded={isOpen}
-                  className="flex w-full cursor-pointer touch-manipulation items-center justify-between gap-[18px] rounded-[14px] py-[22px] text-left transition-[background-color,padding] duration-[240ms] hover:bg-[#F3F9FC] hover:px-[14px] lg:gap-[24px] lg:py-[30px]"
-                >
-                  <span className="text-[17px] leading-[1.35] font-medium tracking-[-0.015em] text-[#17181C] lg:text-[20px]">
-                    {item.q}
-                  </span>
-                  <motion.span
-                    animate={{ rotate: isOpen ? 180 : 0, color: isOpen ? '#111318' : '#9B9DA3' }}
-                    transition={{ duration: 0.3, ease }}
-                    className="inline-flex size-[24px] shrink-0 items-center justify-center"
-                  >
-                    <ChevronDown width="18" height="18" strokeWidth={1.8} />
-                  </motion.span>
-                </button>
-
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.36, ease }}
-                      className="overflow-hidden"
-                    >
-                      <p className="max-w-[680px] pb-[28px] text-[15.5px] leading-[1.65] text-[#6B6D74] lg:pr-[60px] lg:pb-[32px] lg:text-[16.5px]">
-                        {item.a}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )
-          })}
-          <div className="border-t border-[#ECEAE6]" />
+          <Accordion items={faqs} firstBorder="#DFE7EB" />
         </motion.div>
       </div>
     </section>

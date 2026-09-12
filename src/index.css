@@ -19,6 +19,14 @@
 }
 
 @layer base {
+  :root {
+    --u: 1px;
+  }
+
+  [id] {
+    scroll-margin-top: 80px;
+  }
+
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
@@ -28,6 +36,7 @@
     background-color: var(--color-page);
     color: var(--color-ink-soft);
     font-family: var(--font-sans);
+    font-optical-sizing: none;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -41,6 +50,10 @@
     outline-offset: 3px;
     border-radius: 6px;
   }
+}
+
+@utility zoom-canvas {
+  zoom: calc(min(calc(100vw / 1672), 1px) / 1px);
 }
 
 @utility display {

@@ -6,7 +6,7 @@ import { ease, fadeUp, stagger } from '../lib/motion'
 
 export function Hero() {
   return (
-    <section id="top" className="relative overflow-hidden pt-16">
+    <section id="top" className="canvas relative overflow-hidden pt-16">
       <img
         src={asset('hero-clouds-cotton-blue-v7.png', 1920)}
         srcSet={assetSrcSet('hero-clouds-cotton-blue-v7.png')}
@@ -41,9 +41,10 @@ export function Hero() {
 
         <motion.h1
           variants={fadeUp}
-          className="display mt-7 max-w-[41rem] text-[2.25rem] sm:text-[3.6rem] lg:text-[4.5rem]"
+          className="display mt-7 max-w-[41rem] text-[2.25rem] tracking-[-0.04em] sm:text-[3.6rem] lg:max-w-[calc(980*var(--u))] lg:text-[calc(77*var(--u))] lg:leading-[1.05]"
         >
-          The B2B LinkedIn Creator Marketplace.
+          The B2B LinkedIn
+          <br className="max-lg:hidden" /> Creator Marketplace.
         </motion.h1>
 
         <motion.p

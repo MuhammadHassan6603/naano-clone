@@ -185,7 +185,7 @@ export function Proof() {
       >
         <motion.h2
           variants={fadeUp}
-          className="text-center text-[2.25rem] font-semibold tracking-[-0.03em] text-balance text-ink sm:text-[3rem] lg:text-[52px]"
+          className="text-center text-[2.25rem] leading-[1.03] font-semibold tracking-[-0.045em] text-balance text-ink sm:text-[3rem] lg:text-[51.84px]"
         >
           Real teams. Measurable pipeline.
         </motion.h2>

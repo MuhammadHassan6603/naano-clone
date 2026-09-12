@@ -1,24 +1,33 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'motion/react'
+import { motion as m } from 'motion/react'
+import { Link, useLocation } from 'react-router-dom'
 import { Button } from '../components/Button'
 import { ChevronDown, Close, Globe, Menu } from '../components/Icons'
+import { SmartLink } from '../components/SmartLink'
 import { asset } from '../lib/assets'
 import { ease, press, spring } from '../lib/motion'
 
 const primaryLinks = [
-  { label: 'For companies', href: '#marketplace' },
-  { label: 'For creators', href: '#results' },
-  { label: 'For agencies', href: '#proof' },
-  { label: 'How it works', href: '#workflow' },
+  { label: 'For companies', href: '/' },
+  { label: 'For creators', href: '/creators' },
+  { label: 'For agencies', href: '/agencies' },
+  { label: 'How it works', href: '/#workflow' },
 ]
 
 const resourceLinks = [
-  { label: 'Blog', href: 'https://naano.com/blog' },
-  { label: 'Free Tools', href: 'https://naano.com/tools' },
-  { label: 'Case study: BlogSEO', href: '#proof' },
+  { label: 'Blog', href: '/blog' },
+  { label: 'Free Tools', href: '/free-tools' },
+  { label: 'Case study: BlogSEO', href: '/case-studies/blogseo' },
 ]
 
+const ctaByPath: Record<string, { label: string; href: string }> = {
+  '/creators': { label: 'Start earning', href: '/creators#apply' },
+}
+
 export function Header() {
+  const { pathname } = useLocation()
+  const cta = ctaByPath[pathname] ?? { label: 'Sign up', href: '/#cta' }
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { scrollY } = useScroll()
@@ -45,28 +54,28 @@ export function Header() {
     >
       <nav
         aria-label="Primary"
-        className="mx-auto flex h-16 max-w-[1680px] items-center gap-4 px-5 sm:px-8 lg:gap-0 lg:px-12"
+        className="mx-auto flex h-16 max-w-[1680px] items-center gap-[14px] px-[14px] sm:gap-4 sm:px-8 lg:gap-0 lg:px-12"
       >
-        <a href="#top" className="flex shrink-0 items-center" onClick={close}>
+        <Link to="/" className="flex shrink-0 items-center" onClick={close}>
           <img
             src={asset('naano-logo-nav.png', 384)}
             alt="naano"
             width={123}
             height={26}
-            className="h-[26px] w-auto max-sm:h-6"
+            className="h-[26px] w-auto max-sm:h-[22px]"
             fetchPriority="high"
           />
-        </a>
+        </Link>
 
         <ul className="ml-auto hidden items-center gap-[20px] lg:flex xl:gap-[27.6px]">
           {primaryLinks.map((link) => (
             <li key={link.label}>
-              <a
+              <SmartLink
                 href={link.href}
                 className="text-[12.9px] font-medium whitespace-nowrap text-[#17181c] transition-colors hover:text-ink/70"
               >
                 {link.label}
-              </a>
+              </SmartLink>
             </li>
           ))}
           <li className="group relative">
@@ -80,13 +89,13 @@ export function Header() {
             <div className="invisible absolute top-full left-1/2 w-56 -translate-x-1/2 pt-3 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
               <div className="rounded-2xl border border-line bg-white p-2 shadow-card">
                 {resourceLinks.map((link) => (
-                  <a
+                  <SmartLink
                     key={link.label}
                     href={link.href}
                     className="block rounded-xl px-3 py-2 text-sm text-ink-soft transition-colors hover:bg-page hover:text-ink"
                   >
                     {link.label}
-                  </a>
+                  </SmartLink>
                 ))}
               </div>
             </div>
@@ -113,11 +122,11 @@ export function Header() {
             <Globe />
             EN
           </button>
-          <Button href="#pricing" variant="secondary" size="sm">
+          <Button href="/#pricing" variant="secondary" size="sm" className="max-sm:px-3">
             Sign in
           </Button>
-          <Button href="#cta" size="sm">
-            Sign up
+          <Button href={cta.href} size="sm" className="max-sm:px-3">
+            {cta.label}
           </Button>
         </div>
       </nav>
@@ -134,17 +143,20 @@ export function Header() {
           >
             <div className="space-y-1 px-5 pt-2 pb-6 sm:px-8">
               {[...primaryLinks, ...resourceLinks].map((link, index) => (
-                <motion.a
+                <m.div
                   key={link.label}
-                  href={link.href}
-                  onClick={close}
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.05 + index * 0.04, duration: 0.3, ease }}
-                  className="block rounded-xl px-3 py-3 text-[1.0625rem] font-medium text-ink transition-colors hover:bg-ink/5"
                 >
-                  {link.label}
-                </motion.a>
+                  <SmartLink
+                    href={link.href}
+                    onClick={close}
+                    className="block rounded-xl px-3 py-3 text-[1.0625rem] font-medium text-ink transition-colors hover:bg-ink/5"
+                  >
+                    {link.label}
+                  </SmartLink>
+                </m.div>
               ))}
             </div>
           </motion.div>

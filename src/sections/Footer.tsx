@@ -1,14 +1,16 @@
 import type { CSSProperties } from 'react'
 import { motion } from 'motion/react'
+import { Link, useLocation } from 'react-router-dom'
 import { LinkedIn } from '../components/Icons'
+import { SmartLink } from '../components/SmartLink'
 import { asset } from '../lib/assets'
 import { fadeUp, stagger, viewport } from '../lib/motion'
 
 const product = [
-  { label: 'Features', href: '#workflow' },
-  { label: 'Pricing', href: '#pricing' },
-  { label: 'FAQs', href: '#faq' },
-  { label: 'Blog', href: 'https://naano.com/blog' },
+  { label: 'Features', href: '/#workflow' },
+  { label: 'Pricing', href: '/#pricing' },
+  { label: 'FAQs', href: '/#faq' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Reports & benchmarks', href: 'https://naano.com/reports' },
   { label: 'About', href: 'https://naano.com/about' },
 ]
@@ -113,20 +115,26 @@ const layerClouds: CSSProperties = {
   WebkitMaskImage: maskClouds,
 }
 
-const ExternalLink = ({ label, href }: { label: string; href: string }) =>
-  href.startsWith('#') ? (
-    <a href={href} className={linkClass}>
-      {label}
-    </a>
-  ) : (
-    <a href={href} target="_blank" rel="noopener noreferrer" className={linkClass}>
-      {label}
-    </a>
-  )
+const FooterLink = ({ label, href }: { label: string; href: string }) => (
+  <SmartLink href={href} className={linkClass}>
+    {label}
+  </SmartLink>
+)
+
+const taglines: Record<string, string> = {
+  '/creators': 'Turn your LinkedIn audience into a paid channel.',
+}
+
+const zoomedRoutes = ['/creators']
 
 export function Footer() {
+  const { pathname } = useLocation()
+  const tagline =
+    taglines[pathname] ?? 'Turn LinkedIn creators into your best acquisition channel.'
+  const zoomed = zoomedRoutes.includes(pathname) ? 'lg:zoom-canvas' : ''
+
   return (
-    <footer className="relative isolate -mt-[10px] overflow-hidden bg-[linear-gradient(180deg,#E9F7FC_0%,#EDF9FD_48%,#FFFFFF_100%)] px-5 pt-[235px] shadow-[0_-54px_96px_44px_rgba(233,247,252,0.96)] sm:px-8 lg:px-[72px] lg:pt-[290px]">
+    <footer className={`relative isolate -mt-[10px] overflow-hidden bg-[linear-gradient(180deg,#E9F7FC_0%,#EDF9FD_48%,#FFFFFF_100%)] px-5 pt-[235px] shadow-[0_-54px_96px_44px_rgba(233,247,252,0.96)] sm:px-8 lg:px-[72px] lg:pt-[290px] ${zoomed}`}>
       <div
         aria-hidden
         className="pointer-events-none absolute -top-px right-0 bottom-0 left-0 z-0"
@@ -146,15 +154,17 @@ export function Footer() {
         className="relative z-2 mx-auto grid w-full max-w-[1280px] items-start gap-x-6 gap-y-9 pt-[34px] pb-[46px] lg:grid-cols-[1.1fr_0.62fr_0.72fr_0.82fr_2.2fr] lg:gap-[clamp(24px,3vw,46px)]"
       >
         <motion.div variants={fadeUp} className="flex flex-col">
-          <img
-            src={asset('naano-logo-nav.png', 384)}
-            alt="naano"
-            loading="lazy"
-            decoding="async"
-            className="h-[28px] w-auto self-start"
-          />
+          <Link to="/" className="self-start">
+            <img
+              src={asset('naano-logo-nav.png', 384)}
+              alt="naano"
+              loading="lazy"
+              decoding="async"
+              className="h-[28px] w-auto"
+            />
+          </Link>
           <p className="mt-[22px] max-w-[210px] text-[15px] leading-[1.55] text-[#5F737E]">
-            Turn LinkedIn creators into your best acquisition channel.
+            {tagline}
           </p>
           <a
             href="https://www.linkedin.com/company/naanooo/"
@@ -170,25 +180,25 @@ export function Footer() {
         <motion.div variants={fadeUp} className="flex flex-col gap-[14px]">
           <span className={headingClass}>PRODUCT</span>
           {product.map((link) => (
-            <ExternalLink key={link.label} {...link} />
+            <FooterLink key={link.label} {...link} />
           ))}
         </motion.div>
 
         <motion.div variants={fadeUp} className="flex flex-col gap-[14px]">
           <span className={headingClass}>COMPANY</span>
           {company.map((link) => (
-            <ExternalLink key={link.label} {...link} />
+            <FooterLink key={link.label} {...link} />
           ))}
           <span className={`${headingClass} mt-[14px]`}>For AI agents</span>
           {agents.map((link) => (
-            <ExternalLink key={link.label} {...link} />
+            <FooterLink key={link.label} {...link} />
           ))}
         </motion.div>
 
         <motion.div variants={fadeUp} className="flex flex-col gap-[14px]">
           <span className={headingClass}>PRESS</span>
           {press.map((link) => (
-            <ExternalLink key={link.label} {...link} />
+            <FooterLink key={link.label} {...link} />
           ))}
         </motion.div>
 
@@ -198,7 +208,7 @@ export function Footer() {
         >
           <span className={`${headingClass} col-span-2`}>RESOURCES</span>
           {resources.map((link) => (
-            <ExternalLink key={link.label} {...link} />
+            <FooterLink key={link.label} {...link} />
           ))}
         </motion.div>
       </motion.div>

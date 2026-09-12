@@ -60,7 +60,7 @@ export function Pricing() {
         <div className="mx-auto max-w-[710px] text-center">
           <motion.h2
             variants={fadeUp}
-            className="text-[2.25rem] leading-none font-semibold tracking-[-0.035em] text-ink sm:text-[3rem] lg:text-[52px]"
+            className="text-[2.25rem] leading-[1.03] font-semibold tracking-[-0.045em] text-ink sm:text-[3rem] lg:text-[51.84px]"
           >
             Pricing.
           </motion.h2>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import { motion as m } from 'motion/react'
 import { Link, useLocation } from 'react-router-dom'
 import { Button } from '../components/Button'
@@ -30,10 +30,6 @@ export function Header() {
   const { pathname } = useLocation()
   const cta = ctaByPath[pathname] ?? { label: 'Sign up', href: '/#cta' }
   const [open, setOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-  const { scrollY } = useScroll()
-
-  useMotionValueEvent(scrollY, 'change', (value) => setScrolled(value > 24))
 
   useEffect(() => {
     if (!open) return
@@ -49,9 +45,7 @@ export function Header() {
       initial={{ y: -24, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease }}
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
-        open ? 'border-b border-line bg-page' : scrolled ? 'border-b border-line/80 bg-page/85 backdrop-blur-xl' : ''
-      }`}
+      className="fixed inset-x-0 top-0 z-50 bg-[#C5EBFD]"
     >
       <nav
         aria-label="Primary"
@@ -140,7 +134,7 @@ export function Header() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.32, ease }}
-            className="overflow-hidden lg:hidden"
+            className="overflow-hidden bg-page lg:hidden"
           >
             <div className="space-y-1 px-5 pt-2 pb-6 sm:px-8">
               {[...primaryLinks, ...resourceLinks].map((link, index) => (

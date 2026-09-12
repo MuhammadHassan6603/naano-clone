@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'motion/react'
 import { motion as m } from 'motion/react'
 import { Link, useLocation } from 'react-router-dom'
 import { Button } from '../components/Button'
@@ -28,9 +28,14 @@ const ctaByPath: Record<string, { label: string; href: string }> = {
 
 export function Header() {
   const { pathname } = useLocation()
-  const cta = ctaByPath[pathname] ?? { label: 'Sign up', href: '/#cta' }
+  const cta = ctaByPath[pathname] ?? { label: 'Sign up', href: '/register' }
   const [open, setOpen] = useState(false)
   const [resourcesOpen, setResourcesOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const solid = pathname.startsWith('/blog')
+  const { scrollY } = useScroll()
+
+  useMotionValueEvent(scrollY, 'change', (value) => setScrolled(value > 24))
 
   useEffect(() => {
     if (!open) return
@@ -51,7 +56,15 @@ export function Header() {
       initial={{ y: -24, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease }}
-      className="fixed inset-x-0 top-0 z-50 bg-[#C5EBFD]"
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+        solid
+          ? 'bg-[#C5EBFD]'
+          : open
+            ? 'border-b border-line bg-page'
+            : scrolled
+              ? 'border-b border-line/80 bg-page/85 backdrop-blur-xl'
+              : ''
+      }`}
     >
       <nav
         aria-label="Primary"
@@ -134,7 +147,7 @@ export function Header() {
             <Globe />
             EN
           </button>
-          <Button href="/#pricing" variant="secondary" size="sm" className="max-sm:px-3">
+          <Button href="/login?reauth=1" variant="secondary" size="sm" className="max-sm:px-3">
             Sign in
           </Button>
           <Button href={cta.href} size="sm" className="max-sm:px-3">

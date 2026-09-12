@@ -9,15 +9,18 @@ const Creators = lazy(() => import('./pages/Creators'))
 const Agencies = lazy(() => import('./pages/Agencies'))
 const Blog = lazy(() => import('./pages/Blog'))
 const BlogPost = lazy(() => import('./pages/BlogPost'))
+const Login = lazy(() => import('./pages/Login'))
+const Register = lazy(() => import('./pages/Register'))
 
 export default function App() {
   const { pathname } = useLocation()
-  const hasOwnFooter = pathname.startsWith('/blog')
+  const bare = pathname === '/login' || pathname === '/register'
+  const hasOwnFooter = bare || pathname.startsWith('/blog')
 
   return (
     <>
       <ScrollManager />
-      <Header />
+      {!bare && <Header />}
       <Suspense fallback={<div className="min-h-svh" />}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -25,6 +28,8 @@ export default function App() {
           <Route path="/agencies" element={<Agencies />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </Suspense>

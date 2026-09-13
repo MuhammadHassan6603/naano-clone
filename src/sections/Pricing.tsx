@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { MotionLink } from '../components/MotionLink'
 import { fadeUp, scaleIn, stagger, viewport } from '../lib/motion'
 
 const plans = [
@@ -16,7 +17,7 @@ const plans = [
       'Automatic creator payouts',
     ],
     cta: 'Start for free',
-    ctaHref: '#cta',
+    ctaHref: '/register',
     ctaStyle: 'link' as const,
   },
   {
@@ -33,7 +34,7 @@ const plans = [
       'Reporting and optimisation',
     ],
     cta: 'Book a campaign call',
-    ctaHref: '#cta',
+    ctaHref: '/book',
     ctaStyle: 'button' as const,
   },
 ]
@@ -122,24 +123,24 @@ export function Pricing() {
               </div>
 
               {plan.ctaStyle === 'link' ? (
-                <motion.a
-                  href={plan.ctaHref}
+                <MotionLink
+                  to={plan.ctaHref}
                   whileHover={{ x: 3 }}
                   className="mt-[40px] inline-flex touch-manipulation items-center gap-[9px] self-start border-b-[1.5px] border-[#17181C] pb-[3px] text-[16px] font-bold tracking-[-0.01em] text-[#17181C]"
                 >
                   {plan.cta}
                   <Arrow />
-                </motion.a>
+                </MotionLink>
               ) : (
-                <motion.a
-                  href={plan.ctaHref}
+                <MotionLink
+                  to={plan.ctaHref}
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.97 }}
                   className="mt-[40px] inline-flex items-center gap-[10px] self-start rounded-[12px] bg-[#17181C] px-[28px] py-[16px] text-[16px] font-semibold tracking-[-0.01em] text-white"
                 >
                   {plan.cta}
                   <Arrow />
-                </motion.a>
+                </MotionLink>
               )}
             </motion.div>
           ))}

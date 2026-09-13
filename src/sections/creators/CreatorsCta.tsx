@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { MotionLink } from '../../components/MotionLink'
 import { fadeUp, stagger, viewport } from '../../lib/motion'
 
 const badges = ['2,000+ creators paid', 'Paid within 24h', 'Quit anytime, keep your earnings']
@@ -40,8 +41,8 @@ export function CreatorsCta() {
         </motion.p>
 
         <motion.div variants={fadeUp} className="mt-9 flex justify-center lg:mt-[calc(40*var(--u))]">
-          <motion.a
-            href="#top"
+          <MotionLink
+            to="/register"
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.97 }}
             className="inline-flex items-center gap-[11px] rounded-[12px] bg-[#17181C] px-[28px] py-[16px] text-[16px] font-semibold whitespace-nowrap text-white shadow-[0_12px_30px_rgba(23,24,28,0.18)]"
@@ -51,7 +52,7 @@ export function CreatorsCta() {
               <line x1="4" y1="12" x2="20" y2="12" />
               <polyline points="13 5 20 12 13 19" />
             </svg>
-          </motion.a>
+          </MotionLink>
         </motion.div>
 
         <motion.div

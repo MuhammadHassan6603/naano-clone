@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { MotionLink } from '../../components/MotionLink'
 import { MetricsPanel } from '../../components/MetricsPanel'
 import { PostCard } from '../../components/PostCard'
 import { posts } from '../../lib/posts'
@@ -111,8 +112,8 @@ export function CreatorResults() {
           variants={fadeUp}
           className="mt-10 flex flex-col items-center lg:mt-[calc(44*var(--u))]"
         >
-          <motion.a
-            href="#apply"
+          <MotionLink
+            to="/register"
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.97 }}
             className="inline-flex items-center gap-[11px] rounded-[12px] bg-[#17181C] px-[28px] py-[16px] text-[16px] font-semibold text-white shadow-[0_12px_30px_rgba(23,24,28,0.18)]"
@@ -122,7 +123,7 @@ export function CreatorResults() {
               <line x1="4" y1="12" x2="20" y2="12" />
               <polyline points="13 5 20 12 13 19" />
             </svg>
-          </motion.a>
+          </MotionLink>
           <span className="mt-[16px] text-[15px] text-[#9B9DA3]">
             Free to join. Paid within 24h. Quit anytime.
           </span>

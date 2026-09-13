@@ -13,6 +13,8 @@ const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
 const FreeTools = lazy(() => import('./pages/FreeTools'))
 const CaseStudy = lazy(() => import('./pages/CaseStudy'))
+const Book = lazy(() => import('./pages/Book'))
+const AgencySignup = lazy(() => import('./pages/AgencySignup'))
 
 export default function App() {
   const { pathname } = useLocation()
@@ -20,6 +22,9 @@ export default function App() {
     pathname === '/login' ||
     pathname === '/register' ||
     pathname === '/free-tools' ||
+    pathname === '/book' ||
+    pathname === '/agency' ||
+    pathname === '/talent-agency' ||
     pathname.startsWith('/case-studies')
   const hasOwnFooter = bare || pathname.startsWith('/blog')
 
@@ -38,6 +43,9 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/free-tools" element={<FreeTools />} />
           <Route path="/case-studies/blogseo" element={<CaseStudy />} />
+          <Route path="/book" element={<Book />} />
+          <Route path="/agency" element={<AgencySignup variant="brand" />} />
+          <Route path="/talent-agency" element={<AgencySignup variant="talent" />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </Suspense>

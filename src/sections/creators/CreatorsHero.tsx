@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import { motion } from 'motion/react'
+import { MotionLink } from '../../components/MotionLink'
 import { asset, assetSrcSet } from '../../lib/assets'
 import { fadeUp, stagger } from '../../lib/motion'
 
@@ -85,15 +86,15 @@ export function CreatorsHero() {
           variants={fadeUp}
           className="mt-8 flex flex-col items-center gap-5 sm:flex-row lg:mt-[calc(44*var(--u))] lg:gap-[calc(24*var(--u))]"
         >
-          <motion.a
-            href="#apply"
+          <MotionLink
+            to="/register"
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.97 }}
             className="inline-flex items-center gap-[11px] rounded-[12px] bg-[#17181C] px-[28px] py-[16px] text-[16px] font-semibold whitespace-nowrap text-white lg:gap-[calc(11*var(--u))] lg:rounded-[calc(12*var(--u))] lg:px-[calc(28*var(--u))] lg:py-[calc(16*var(--u))] lg:text-[calc(16*var(--u))]"
           >
             Start earning
             <Arrow />
-          </motion.a>
+          </MotionLink>
           <motion.a
             href="#monetize"
             whileHover={{ x: 3 }}

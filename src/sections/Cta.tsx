@@ -1,4 +1,6 @@
 import { motion } from 'motion/react'
+import { Link } from 'react-router-dom'
+import { MotionLink } from '../components/MotionLink'
 import { ArrowRight } from '../components/Icons'
 import { asset } from '../lib/assets'
 import { fadeUp, scaleIn, stagger, viewport } from '../lib/motion'
@@ -80,26 +82,26 @@ export function Cta() {
           ))}
         </div>
 
-        <motion.a
-          href="#pricing"
+        <MotionLink
+          to="/book"
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.97 }}
           className="mt-[32px] inline-flex items-center justify-center gap-[10px] rounded-[12px] bg-[#17181C] px-[28px] py-[16px] text-[16px] font-semibold tracking-[-0.01em] text-white"
         >
           Book a campaign call
           <ArrowRight width="16" height="16" strokeWidth={2} />
-        </motion.a>
+        </MotionLink>
 
         <span className="mt-[14px] text-center text-[13.5px] text-[#9B9DA3]">
           Pick a time on the next page.
         </span>
 
-        <a
-          href="#pricing"
+        <Link
+          to="/register"
           className="mt-[20px] text-center text-[14.5px] tracking-[-0.005em] text-[#55575E]"
         >
           Prefer to start yourself? <span className="font-semibold text-[#111318]">Start for free →</span>
-        </a>
+        </Link>
       </motion.div>
 
       <motion.p

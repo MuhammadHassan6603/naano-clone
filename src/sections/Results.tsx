@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { MotionLink } from '../components/MotionLink'
 import { MetricsPanel } from '../components/MetricsPanel'
 import { PostCard } from '../components/PostCard'
 import { posts } from '../lib/posts'
@@ -50,8 +51,8 @@ export function Results() {
         </motion.div>
 
         <motion.div variants={fadeUp} className="mt-[44px] flex flex-col items-center">
-          <motion.a
-            href="#cta"
+          <MotionLink
+            to="/register"
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.97 }}
             className="inline-flex items-center gap-[11px] rounded-[12px] bg-[#17181C] px-[28px] py-[16px] text-[16px] font-semibold text-white shadow-[0_12px_30px_rgba(23,24,28,0.18)]"
@@ -61,7 +62,7 @@ export function Results() {
               <line x1="4" y1="12" x2="20" y2="12" />
               <polyline points="13 5 20 12 13 19" />
             </svg>
-          </motion.a>
+          </MotionLink>
           <span className="mt-[16px] text-[15px] text-[#9B9DA3]">
             Start free. Pay per post when you're ready.
           </span>

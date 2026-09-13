@@ -513,3 +513,258 @@
     width: 100%;
   }
 }
+
+.ag-page {
+  display: grid;
+  place-items: center;
+  min-height: 100svh;
+  padding: 32px;
+  color: #111827;
+  background: #f5f7fb;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+.ag-shell {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  width: min(1060px, 100%);
+  min-height: 680px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e5e9f2;
+  border-radius: 28px;
+  box-shadow: 0 24px 70px #0f172a17;
+}
+
+.ag-intro {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 48px;
+  padding: 48px;
+  color: #fff;
+  background: linear-gradient(145deg, #111827 0%, #172554 64%, #2762ee 150%);
+}
+
+.ag-logo {
+  color: #fff;
+  font-size: 25px;
+  font-weight: 850;
+  letter-spacing: -1.3px;
+}
+
+.ag-eyebrow,
+.ag-step {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7ea2ff;
+}
+
+.ag-intro h1 {
+  margin: 0;
+  max-width: 430px;
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  font-size: 43px;
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+}
+
+.ag-intro p {
+  margin: 20px 0 0;
+  font-size: 16px;
+  line-height: 1.65;
+  color: #cbd5e1;
+}
+
+.ag-intro ul {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ag-intro li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #e2e8f0;
+}
+
+.ag-intro li svg {
+  flex-shrink: 0;
+  color: #7ea2ff;
+}
+
+.ag-form-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 54px 64px;
+}
+
+.ag-progress {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 48px;
+}
+
+.ag-progress span {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: #e5e7eb;
+}
+
+.ag-progress .ag-current {
+  background: #2762ee;
+}
+
+.ag-form {
+  display: grid;
+  gap: 22px;
+}
+
+.ag-form h2 {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  font-size: 30px;
+  letter-spacing: -0.035em;
+  color: #111827;
+}
+
+.ag-form p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #667085;
+}
+
+.ag-form label {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #344054;
+}
+
+.ag-form input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 13px 14px;
+  font: inherit;
+  color: #111827;
+  background: #fff;
+  border: 1px solid #d0d5dd;
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.16s;
+}
+
+.ag-form input:focus {
+  border-color: #2762ee;
+  box-shadow: 0 0 0 4px #2762ee1a;
+}
+
+.ag-form small {
+  font-size: 11px;
+  font-weight: 500;
+  color: #98a2b3;
+}
+
+.ag-two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.ag-form button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 0 18px;
+  font-size: 14px;
+  font-weight: 750;
+  color: #fff;
+  cursor: pointer;
+  background: #2762ee;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px #2762ee33;
+}
+
+.ag-form button:hover {
+  background: #1e4fd0;
+}
+
+.ag-status {
+  margin: 0 !important;
+  padding: 11px 13px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 11px;
+  color: #1d4ed8 !important;
+}
+
+.ag-login {
+  margin: 0 !important;
+  text-align: center !important;
+}
+
+.ag-login a {
+  color: #2762ee;
+  font-weight: 700;
+}
+
+@media (max-width: 800px) {
+  .ag-page {
+    padding: 0;
+    background: #fff;
+  }
+
+  .ag-shell {
+    display: block;
+    min-height: 100svh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .ag-intro {
+    gap: 24px;
+    padding: 28px 24px 32px;
+  }
+
+  .ag-intro h1 {
+    font-size: 31px;
+  }
+
+  .ag-intro ul {
+    display: none;
+  }
+
+  .ag-form-panel {
+    padding: 36px 24px;
+  }
+
+  .ag-progress {
+    margin-bottom: 34px;
+  }
+}
+
+@media (max-width: 480px) {
+  .ag-two-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .ag-form-panel {
+    padding: 30px 20px;
+  }
+}

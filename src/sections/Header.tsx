@@ -22,7 +22,7 @@ const resourceLinks = [
 ]
 
 const ctaByPath: Record<string, { label: string; href: string }> = {
-  '/creators': { label: 'Start earning', href: '/creators#apply' },
+  '/creators': { label: 'Start earning', href: '/register' },
   '/agencies': { label: 'Choose your agency', href: '/agencies#choose' },
 }
 

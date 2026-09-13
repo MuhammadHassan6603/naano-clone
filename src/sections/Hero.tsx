@@ -6,7 +6,10 @@ import { ease, fadeUp, stagger } from '../lib/motion'
 
 export function Hero() {
   return (
-    <section id="top" className="canvas relative overflow-hidden pt-16">
+    <section
+      id="top"
+      className="canvas relative flex flex-col overflow-hidden pt-16 lg:min-h-svh lg:justify-center lg:pt-[calc(64px+40*var(--u))] lg:pb-[calc(60*var(--u))]"
+    >
       <img
         src={asset('hero-clouds-cotton-blue-v7.png', 1920)}
         srcSet={assetSrcSet('hero-clouds-cotton-blue-v7.png')}
@@ -24,7 +27,7 @@ export function Hero() {
         variants={stagger(0.09, 0.1)}
         initial="hidden"
         animate="show"
-        className="mx-auto flex max-w-[1320px] flex-col items-center px-5 pt-14 pb-8 text-center sm:px-8 sm:pt-24"
+        className="mx-auto flex max-w-[1320px] flex-col items-center px-5 pt-14 pb-8 text-center sm:px-8 sm:pt-24 lg:pt-0 lg:pb-[calc(52*var(--u))]"
       >
         <motion.div
           variants={fadeUp}
@@ -59,7 +62,7 @@ export function Hero() {
           variants={fadeUp}
           className="mt-8 flex w-full flex-col items-center gap-4 sm:w-auto sm:flex-row sm:gap-6"
         >
-          <Button href="#cta" size="lg" arrow className="w-full sm:w-auto">
+          <Button href="/register" size="lg" arrow className="w-full sm:w-auto">
             Launch a campaign
           </Button>
           <Button href="#workflow" variant="link" size="lg" arrow>
@@ -80,7 +83,7 @@ export function Hero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6, duration: 0.8, ease }}
-        className="marquee relative mx-auto max-w-[1320px] overflow-hidden pb-10 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
+        className="marquee relative mx-auto max-w-[1320px] overflow-hidden pb-10 lg:pb-0 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
       >
         <div className="marquee-track flex w-max items-center">
           {[0, 1].map((copy) => (

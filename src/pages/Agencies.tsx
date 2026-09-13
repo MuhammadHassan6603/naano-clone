@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { MotionLink } from '../components/MotionLink'
 import { asset, assetSrcSet } from '../lib/assets'
 import { fadeUp, scaleIn, stagger, viewport } from '../lib/motion'
 
@@ -14,6 +15,7 @@ const cards = [
       'Track campaigns and next actions',
     ],
     cta: 'Create a brand agency workspace',
+    ctaHref: '/agency',
     note: 'You will create the agency manager account first.',
   },
   {
@@ -27,6 +29,7 @@ const cards = [
       'Track collaborations and earnings',
     ],
     cta: 'Create a creator agency workspace',
+    ctaHref: '/talent-agency',
     note: 'Your creators do not need individual Naano accounts.',
   },
 ]
@@ -45,7 +48,7 @@ export default function Agencies() {
     <main className="canvas">
       <section
         id="top"
-        className="relative flex flex-col items-center justify-center overflow-hidden bg-[#C5EBFD] px-5 pt-28 pb-16 text-center sm:px-8 lg:min-h-[calc(1045*var(--u))] lg:px-[calc(84*var(--u))] lg:pt-[calc(138*var(--u))] lg:pb-[calc(88*var(--u))]"
+        className="relative flex flex-col items-center justify-center overflow-hidden bg-[#C5EBFD] px-5 pt-28 pb-16 text-center sm:px-8 lg:min-h-svh lg:px-[calc(84*var(--u))] lg:pt-[calc(138*var(--u))] lg:pb-[calc(88*var(--u))]"
       >
         <img
           src={asset('hero-clouds-cotton-blue-v7.png', 1920)}
@@ -162,15 +165,15 @@ export default function Agencies() {
                   ))}
                 </ul>
 
-                <motion.a
-                  href="#book-a-call"
+                <MotionLink
+                  to={card.ctaHref}
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.98 }}
                   className="flex items-center justify-between gap-4 rounded-[12px] bg-[#17181C] px-[18px] py-[16px] text-[15px] font-[650] text-white lg:mt-auto lg:rounded-[calc(12*var(--u))] lg:px-[calc(18*var(--u))] lg:py-[calc(16*var(--u))] lg:text-[calc(15*var(--u))]"
                 >
                   {card.cta}
                   <Arrow />
-                </motion.a>
+                </MotionLink>
 
                 <small className="mt-3.5 text-[12px] leading-[1.45] text-[#8993A2] lg:mt-[calc(14*var(--u))] lg:text-[calc(12*var(--u))]">
                   {card.note}
@@ -211,9 +214,9 @@ export default function Agencies() {
             point you to the right setup.
           </motion.p>
 
-          <motion.a
+          <MotionLink
             variants={fadeUp}
-            href="/#cta"
+            to="/book"
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.97 }}
             className="mt-9 inline-flex items-center gap-[10px] rounded-[12px] bg-[#17181C] px-[24px] py-[16px] text-[16px] font-[650] text-white lg:mt-[calc(38*var(--u))] lg:gap-[calc(10*var(--u))] lg:rounded-[calc(12*var(--u))] lg:px-[calc(24*var(--u))] lg:py-[calc(16*var(--u))] lg:text-[calc(16*var(--u))]"
@@ -232,7 +235,7 @@ export default function Agencies() {
             </svg>
             Book a call
             <Arrow />
-          </motion.a>
+          </MotionLink>
 
           <motion.small
             variants={fadeUp}

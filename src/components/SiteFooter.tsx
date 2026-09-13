@@ -90,7 +90,7 @@ export function SiteFooter() {
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
-              to="/#pricing"
+              to="/register"
               className="inline-flex h-[50px] items-center rounded-[10px] bg-white px-7 text-[15px] font-bold tracking-[-0.01em] text-[#37352f] shadow-[0_8px_30px_rgba(4,18,60,0.28)]"
             >
               Get started

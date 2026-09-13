@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { MotionLink } from '../components/MotionLink'
 import { Accordion } from '../components/Accordion'
 import { ArrowRight } from '../components/Icons'
 import { fadeUp, stagger, viewport } from '../lib/motion'
@@ -71,14 +72,14 @@ export function Faq() {
             className="mt-[28px] flex flex-wrap items-center gap-[10px] text-[15px] text-[#70747B]"
           >
             <span>Still have questions?</span>
-            <motion.a
-              href="#cta"
+            <MotionLink
+              to="/book"
               whileHover={{ x: 3 }}
               className="inline-flex items-center gap-[7px] font-[650] text-[#111318]"
             >
               Talk to our team
               <ArrowRight width="15" height="15" strokeWidth={2} />
-            </motion.a>
+            </MotionLink>
           </motion.div>
         </motion.div>
 

@@ -1,5 +1,6 @@
 import { Suspense, lazy } from 'react'
 import { Route, Routes, useLocation } from 'react-router-dom'
+import { AiBar } from './components/AiBar'
 import { ScrollManager } from './components/ScrollManager'
 import { Header } from './sections/Header'
 import { Footer } from './sections/Footer'
@@ -50,6 +51,7 @@ export default function App() {
         </Routes>
       </Suspense>
       {!hasOwnFooter && <Footer />}
+      <AiBar />
     </>
   )
 }

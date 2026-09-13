@@ -770,11 +770,7 @@
 }
 
 .ai-root {
-  position: fixed;
-  inset: 0;
-  z-index: 2147483000;
-  pointer-events: none;
-  font-family: var(--font-sans);
+  display: contents;
   --ai-thread-h: 0px;
   --ai-bar-w: min(340px, calc(100vw - 32px));
   --ai-bottom: 24px;
@@ -789,11 +785,12 @@
 .ai-bar,
 .ai-thread,
 .ai-handle {
-  pointer-events: auto;
+  position: fixed;
+  z-index: 2147483000;
+  font-family: var(--font-sans);
 }
 
 .ai-bar {
-  position: absolute;
   bottom: var(--ai-bottom);
   left: 50%;
   display: grid;
@@ -978,9 +975,9 @@
 }
 
 .ai-handle {
-  position: absolute;
   bottom: calc(var(--ai-bottom) + 62px);
   left: 50%;
+  z-index: 2147483001;
   display: grid;
   place-items: center;
   width: 38px;
@@ -1031,7 +1028,6 @@
 }
 
 .ai-thread {
-  position: absolute;
   bottom: calc(var(--ai-bottom) + 62px);
   left: 0;
   right: 0;

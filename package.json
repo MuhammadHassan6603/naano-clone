@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:pages": "VITE_BASE=/naano-clone/ npm run build && cp dist/index.html dist/404.html && touch dist/.nojekyll",
+    "deploy": "npm run build:pages && node scripts/publish-pages.mjs"
   },
   "dependencies": {
     "motion": "^13.2.0",

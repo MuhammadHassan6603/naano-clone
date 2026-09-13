@@ -9,6 +9,9 @@ browser ──POST /──► worker ──x-goog-api-key──► Gemini
         ◄─NDJSON──        ◄──────SSE─────────
 ```
 
+Deployed at `https://naano-ai.ammtech.workers.dev`, answering
+`https://muhammadhassan6603.github.io` plus the two localhost dev ports.
+
 ## First deploy
 
 ```bash
@@ -33,9 +36,9 @@ Two things, both one-liners:
 1. Add the site's own origin to `ALLOWED_ORIGINS` in `wrangler.toml`, then
    `npx wrangler deploy` again. Anything not on that list gets a 403, so the
    worker cannot be used as a free Gemini proxy by someone else's page.
-2. Set `VITE_AI_ENDPOINT` to the worker URL in the host's environment
-   variables (Vercel/Netlify/Cloudflare Pages → Environment Variables) and
-   redeploy the site. See `.env.example` in the repo root.
+2. Set `VITE_AI_ENDPOINT` to the worker URL and rebuild the site. On GitHub
+   Pages the value is baked in at build time from `.env.production` in the repo
+   root; on a host with real environment variables, set it there instead.
 
 ## Running it locally
 

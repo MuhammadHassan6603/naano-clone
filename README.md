@@ -49,13 +49,19 @@ worker/             Cloudflare Worker holding the Gemini key
 
 ## Deployment
 
-The site is static and deploys to GitHub Pages from `.github/workflows/deploy.yml`
-on every push to `main`. Two settings live outside the repo:
+Live at **https://muhammadhassan6603.github.io/naano-clone/**
 
-- **Repository variable `VITE_AI_ENDPOINT`** — the deployed worker's URL. Public,
-  not a secret.
-- **`ALLOWED_ORIGINS` in `worker/wrangler.toml`** — the origins the worker will
-  answer, so it cannot be reused as an open Gemini proxy.
+```bash
+npm run deploy      # builds with the Pages base path, force-pushes dist/ to gh-pages
+```
 
-The Gemini key is a Cloudflare secret. It is not in this repository, not in the
+Pages serves the `gh-pages` branch. `VITE_BASE` in the `build:pages` script sets
+the subpath for both the bundle and the router, so renaming the repo means
+editing that one string. `index.html` is copied to `404.html` because Pages has
+no rewrite rules — that is what makes deep links work.
+
+The assistant's endpoint is baked in from `.env.production`. That URL is public
+on purpose: the Gemini key is a Cloudflare secret, and `ALLOWED_ORIGINS` in
+`worker/wrangler.toml` limits the worker to this site's origin so it cannot be
+reused as an open Gemini proxy. The key is not in this repository, not in the
 bundle, and never sent to the browser.

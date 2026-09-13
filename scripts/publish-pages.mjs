@@ -10,10 +10,11 @@ const run = (...args) => execFileSync('git', args, { stdio: 'inherit' })
 const quiet = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim()
 
 const work = mkdtempSync(join(tmpdir(), 'gh-pages-'))
+const branch = `gh-pages-build-${Date.now()}`
 
 try {
   run('worktree', 'add', '--detach', work)
-  execFileSync('git', ['checkout', '--orphan', 'gh-pages-tmp'], { cwd: work, stdio: 'inherit' })
+  execFileSync('git', ['checkout', '--orphan', branch], { cwd: work, stdio: 'inherit' })
   for (const entry of readdirSync(work)) {
     if (entry !== '.git') rmSync(join(work, entry), { recursive: true, force: true })
   }
@@ -28,4 +29,10 @@ try {
 } finally {
   run('worktree', 'remove', '--force', work)
   rmSync(work, { recursive: true, force: true })
+  // the orphan only existed to build the commit; it must not linger
+  try {
+    execFileSync('git', ['branch', '-D', branch], { stdio: 'ignore' })
+  } catch {
+    // never created, nothing to clean
+  }
 }

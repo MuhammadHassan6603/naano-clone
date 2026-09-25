@@ -25,4 +25,5 @@ export const env = {
   port: Number(process.env.PORT ?? 4000),
   publicApiUrl: process.env.PUBLIC_API_URL?.replace(/\/+$/, '') || undefined,
   autoApproveMs: positiveNumber('AUTO_APPROVE_HOURS', 72) * 3_600_000,
+  geminiApiKey: process.env.GEMINI_API_KEY || undefined,
 }

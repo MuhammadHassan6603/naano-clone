@@ -195,7 +195,7 @@ export default function BookingDetail() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_340px] lg:items-start">
         <div className="space-y-6">
-          <Panel title="What happens now">
+          <Panel title="What happens now" guide="next-step">
             <p className="leading-7 text-body">{nextStepText(booking, role)}</p>
             {actions.message && (
               <div className="mt-4">
@@ -207,11 +207,11 @@ export default function BookingDetail() {
             </div>
           </Panel>
 
-          <Panel title="Timeline">
+          <Panel title="Timeline" guide="timeline">
             <BookingTimeline booking={booking} />
           </Panel>
 
-          <Panel title="The brief">
+          <Panel title="The brief" guide="brief">
             <p className="leading-7 whitespace-pre-line text-body">{booking.brief}</p>
             <dl className="mt-5 space-y-3 border-t border-line pt-5 text-sm">
               <div>
@@ -229,7 +229,7 @@ export default function BookingDetail() {
         </div>
 
         <div className="space-y-6 lg:sticky lg:top-6">
-          <Panel title="Money">
+          <Panel title="Money" guide="money">
             <p className="text-3xl font-bold tracking-tight text-ink">{formatMoney(booking.priceCents)}</p>
             <p className={`mt-1 text-sm font-semibold ${booking.status === 'paid' ? 'text-good' : booking.status === 'refunded' ? 'text-muted' : 'text-held'}`}>
               {moneyLine(booking, role)}
@@ -252,7 +252,7 @@ export default function BookingDetail() {
             </dl>
           </Panel>
 
-          <Panel title="Link insights">
+          <Panel title="Link insights" guide="insights">
             {role === 'brand' && booking.trackingUrl && (
               <div className="mb-5">
                 <CopyField label="Tracked link in the post" value={booking.trackingUrl} />

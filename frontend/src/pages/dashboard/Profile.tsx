@@ -94,7 +94,7 @@ function ProfileForm({ user, profile, niches, reliability }: { user: User; profi
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_380px] lg:items-start">
-      <Panel>
+      <Panel guide="profile-form">
         <form onSubmit={save} noValidate className="space-y-5">
           {result && <Notice tone={result.tone}>{result.text}</Notice>}
           <div className="space-y-1.5">
@@ -171,7 +171,7 @@ function ProfileForm({ user, profile, niches, reliability }: { user: User; profi
           <p className="text-sm text-muted">A new price only applies to new bookings. Bookings already made keep their price.</p>
         </form>
       </Panel>
-      <div className="space-y-3 lg:sticky lg:top-6">
+      <div data-guide="profile-preview" className="space-y-3 lg:sticky lg:top-6">
         <p className="text-sm font-semibold text-muted">
           {listed ? 'Live on the marketplace' : 'Preview. Not on the marketplace until you save a niche and price.'}
         </p>

@@ -48,7 +48,7 @@ export default function Bookings() {
         subtitle={role === 'brand' ? 'Every creator you booked and where each post stands.' : 'Every brand that booked you and what you need to do next.'}
         actions={role === 'brand' ? <ButtonLink to="/#creators">Book a creator</ButtonLink> : undefined}
       />
-      <div className="-mx-4 mb-4 overflow-x-auto px-4 sm:mx-0 sm:px-0" role="tablist" aria-label="Booking filters">
+      <div data-guide="booking-tabs" className="-mx-4 mb-4 overflow-x-auto px-4 sm:mx-0 sm:px-0" role="tablist" aria-label="Booking filters">
         <div className="flex w-max gap-2">
           {TABS.map((option) => {
             const count = all.filter((b) => inTab(b, option.value, role)).length
@@ -73,7 +73,7 @@ export default function Bookings() {
           })}
         </div>
       </div>
-      <Panel>
+      <Panel guide="booking-list">
         {data ? (
           <BookingList bookings={shown} role={role} empty={<p className="py-6 text-center text-sm text-muted">{EMPTY[tab][role]}</p>} />
         ) : error ? (

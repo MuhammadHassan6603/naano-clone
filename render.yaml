@@ -21,3 +21,5 @@ services:
         value: http://localhost:5173,https://muhammadhassan6603.github.io
       - key: PUBLIC_API_URL
         value: https://naano-clone-9pyv.onrender.com
+      - key: GEMINI_API_KEY
+        sync: false

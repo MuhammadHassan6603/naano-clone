@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { type ReactNode, startTransition } from 'react'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../lib/auth'
 import type { Role, User } from '../../lib/types'
@@ -51,8 +51,8 @@ export function DashboardLayout() {
   if (!user) return null
   const items = itemsFor(user.role)
   const signOut = () => {
-    logout()
     navigate('/')
+    startTransition(logout)
   }
 
   return (
@@ -102,7 +102,7 @@ export function DashboardLayout() {
             </Link>
           </nav>
         </header>
-        <main className="mx-auto w-full max-w-[1100px] px-4 py-6 sm:px-8 sm:py-8">
+        <main className="mx-auto w-full max-w-[1100px] px-4 pt-6 pb-32 sm:px-8 sm:pt-8">
           <Outlet />
         </main>
       </div>
@@ -122,9 +122,9 @@ export function DashboardHeader({ title, subtitle, actions }: { title: string; s
   )
 }
 
-export function Panel({ title, action, children, className = '' }: { title?: string; action?: ReactNode; children: ReactNode; className?: string }) {
+export function Panel({ title, action, children, className = '', guide }: { title?: string; action?: ReactNode; children: ReactNode; className?: string; guide?: string }) {
   return (
-    <section className={`min-w-0 rounded-2xl border border-line bg-white p-5 shadow-[0_1px_2px_rgb(17_19_24/0.04)] sm:p-6 ${className}`}>
+    <section data-guide={guide} className={`min-w-0 rounded-2xl border border-line bg-white p-5 shadow-[0_1px_2px_rgb(17_19_24/0.04)] sm:p-6 ${className}`}>
       {(title || action) && (
         <div className="mb-4 flex items-center justify-between gap-3">
           {title && <h2 className="text-base font-semibold">{title}</h2>}

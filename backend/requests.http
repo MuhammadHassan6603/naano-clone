@@ -259,3 +259,16 @@ GET {{base}}/auth/me
 ### Garbage token: 401
 GET {{base}}/auth/me
 Authorization: Bearer not.a.token
+
+### Ask the dashboard assistant (503 until GEMINI_API_KEY is set)
+POST {{base}}/assistant
+Authorization: Bearer {{brandToken}}
+Content-Type: application/json
+
+{ "messages": [{ "role": "user", "text": "How much money is held in escrow, and where can I see my link insights?" }], "page": "/dashboard" }
+
+### Assistant without a token: 401
+POST {{base}}/assistant
+Content-Type: application/json
+
+{ "messages": [{ "role": "user", "text": "hi" }] }

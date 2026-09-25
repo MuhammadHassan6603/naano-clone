@@ -8,8 +8,12 @@ import { creatorsRouter } from './routes/creators.js'
 import { walletRouter } from './routes/wallet.js'
 import { bookingsRouter } from './routes/bookings.js'
 import { trackingRouter } from './routes/tracking.js'
+import { assistantRouter } from './routes/assistant.js'
+import { type Model, geminiModel } from './assistant.js'
 
-export function createApp() {
+const defaultModel = () => (env.geminiApiKey ? geminiModel(env.geminiApiKey) : null)
+
+export function createApp({ assistantModel = defaultModel() }: { assistantModel?: Model | null } = {}) {
   const app = express()
   app.disable('x-powered-by')
   app.set('trust proxy', true)
@@ -30,6 +34,7 @@ export function createApp() {
   app.use('/creators', creatorsRouter)
   app.use('/wallet', walletRouter)
   app.use('/bookings', bookingsRouter)
+  app.use('/assistant', assistantRouter(assistantModel))
   app.use(trackingRouter)
 
   app.use(unknownRoute)

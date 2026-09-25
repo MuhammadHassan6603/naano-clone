@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { AssistantBar } from './components/assistant/AssistantBar'
 import { DashboardLayout } from './components/dashboard/DashboardLayout'
 import { Layout } from './components/Layout'
 import { RequireAuth } from './components/RequireAuth'
@@ -14,11 +15,18 @@ import Marketplace from './pages/Marketplace'
 import NewBooking from './pages/NewBooking'
 import NotFound from './pages/NotFound'
 import Signup from './pages/Signup'
+import { useAuth } from './lib/auth'
+
+function Assistant() {
+  const { user } = useAuth()
+  return user ? <AssistantBar key={user.id} user={user} /> : null
+}
 
 export default function App() {
   return (
     <>
       <ScrollManager />
+      <Assistant />
       <Routes>
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<Signup />} />

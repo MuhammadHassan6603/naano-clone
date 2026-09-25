@@ -29,8 +29,8 @@ export const defaultProfile = {
 
 const testUsers = { email: { endsWith: `@${TEST_DOMAIN}` } }
 
-export async function startServer() {
-  const server: Server = createApp().listen(0)
+export async function startServer(options: Parameters<typeof createApp>[0] = {}) {
+  const server: Server = createApp(options).listen(0)
   await new Promise<void>((resolve) => server.once('listening', resolve))
   const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
 

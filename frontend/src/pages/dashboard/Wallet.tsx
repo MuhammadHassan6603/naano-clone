@@ -84,7 +84,7 @@ export default function Wallet() {
         )
       ) : (
         <div className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div data-guide="balance" className="grid gap-4 sm:grid-cols-2">
             <StatCard
               icon={<WalletIcon />}
               label={brand ? 'Available' : 'Earned'}
@@ -120,13 +120,13 @@ export default function Wallet() {
           </p>
 
           {brand && (
-            <Panel title="Add demo money">
+            <Panel title="Add demo money" guide="top-up">
               <p className="-mt-2 mb-5 text-sm text-muted">This demo has no card payments. Top-ups create real ledger entries so you can book creators.</p>
               <TopUpForm onDone={refresh} />
             </Panel>
           )}
 
-          <Panel title="History" action={brand ? <ButtonLink to="/#creators" variant="ghost" size="sm">Book a creator</ButtonLink> : undefined}>
+          <Panel title="History" guide="history" action={brand ? <ButtonLink to="/#creators" variant="ghost" size="sm">Book a creator</ButtonLink> : undefined}>
             <p className="-mt-2 mb-2 text-sm text-muted">Newest first. Entries are never edited or deleted.</p>
             {history.data ? (
               <History user={user} transactions={history.data.transactions} />

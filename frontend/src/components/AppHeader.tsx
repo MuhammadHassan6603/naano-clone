@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { startTransition, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import type { User } from '../lib/types'
@@ -45,8 +45,8 @@ export function AppHeader() {
 
   const signOut = () => {
     close()
-    logout()
     navigate('/')
+    startTransition(logout)
   }
 
   const isActive = (to: string) => (to.includes('#') ? pathname === '/' && hash === to.slice(1) : pathname === to)

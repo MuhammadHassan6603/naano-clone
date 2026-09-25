@@ -47,7 +47,7 @@ function BrandOverview({ user }: { user: User }) {
           const delivered = bookings.filter((b) => b.status === 'paid').length
           return (
             <div className="space-y-6">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div data-guide="stats" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <StatCard icon={<WalletIcon />} label="Available" value={formatMoney(wallet.availableCents)} note="Ready for new bookings" />
                 <StatCard icon={<LockIcon className="text-held" />} label="Held in escrow" value={formatMoney(wallet.heldCents)} tone="text-held" note="Locked until posts are verified" />
                 <StatCard label="Active bookings" value={String(toApprove.length + running.length)} note={`${toApprove.length} waiting for your approval`} />
@@ -68,7 +68,7 @@ function BrandOverview({ user }: { user: User }) {
                 </Panel>
               ) : (
                 <>
-                  <Panel title="Needs your approval">
+                  <Panel title="Needs your approval" guide="needs-action">
                     <BookingList bookings={toApprove} role="brand" empty={quiet('Nothing to approve. When a creator submits a post, it shows up here.')} />
                   </Panel>
                   <div className="grid gap-6 lg:grid-cols-2">
@@ -120,7 +120,7 @@ function CreatorOverview({ user }: { user: User }) {
           const finished = bookings.filter((b) => !isOpen(b)).slice(0, 5)
           return (
             <div className="space-y-6">
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div data-guide="stats" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <StatCard icon={<WalletIcon />} label="Earned" value={formatMoney(wallet.availableCents)} tone="text-good" note="Paid for verified posts" />
                 <StatCard label="New requests" value={String(requests.length)} note="Waiting for your answer" />
                 <StatCard label="In progress" value={String(toPost.length + verifying.length)} note={`${toPost.length} to post, ${verifying.length} being verified`} />
@@ -130,7 +130,7 @@ function CreatorOverview({ user }: { user: User }) {
                   note={reliability?.total ? 'Bookings delivered' : 'No finished bookings yet'}
                 />
               </div>
-              <Panel title="New requests">
+              <Panel title="New requests" guide="needs-action">
                 <BookingList bookings={requests} role="creator" empty={quiet('No new requests. Brands that book you appear here, with the money already held in escrow.')} />
               </Panel>
               <div className="grid gap-6 lg:grid-cols-2">

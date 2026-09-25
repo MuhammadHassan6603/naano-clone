@@ -6,8 +6,13 @@
  *
  * Everything goes through escrow.ts with past timestamps, so balances, ledger rows and
  * reliability scores are exactly what real use would have produced. It refuses to run twice.
+ *
+ * Each booking's whole history is played inside one transaction. A live server's
+ * background sweep would otherwise see a booking dated weeks ago halfway through,
+ * treat it as overdue, and refund it before the seed finished it.
  */
 import { db } from '../src/db.js'
+import type { Tx } from '../src/escrow.js'
 import { hashPassword } from '../src/auth.js'
 import { hashIp } from '../src/ip.js'
 import * as escrow from '../src/escrow.js'
@@ -53,7 +58,7 @@ const creators = [
   { key: 'lucas', name: 'Lucas Moreau', niche: 'SEO', price: 30_000, followers: 12_500,
     bio: 'Technical SEO consultant. Case studies with real traffic numbers.',
     audience: 'Content and growth teams at SaaS companies' },
-] as const satisfies readonly { niche: Niche }[]
+] as const satisfies readonly (Record<string, unknown> & { niche: Niche })[]
 
 type BrandKey = (typeof brands)[number]['key']
 type CreatorKey = (typeof creators)[number]['key']
@@ -68,7 +73,7 @@ async function createUsers() {
       data: { email: brand.email, name: brand.name, role: 'brand', passwordHash, wallet: { create: {} }, createdAt: ago(40) },
     })
     ids[brand.key] = user.id
-    await escrow.topUp(user.id, brand.topUpCents, ago(40))
+    await escrow.topUp(user.id, brand.topUpCents, { at: ago(40) })
   }
   for (const c of creators) {
     const user = await db.user.create({
@@ -100,8 +105,8 @@ let postCounter = 0
 let visitorCounter = 0
 
 /** Adds human clicks from distinct visitors, spread over the given times. */
-async function addClicks(bookingId: string, times: Date[]) {
-  await db.click.createMany({
+async function addClicks(tx: Tx, bookingId: string, times: Date[]) {
+  await tx.click.createMany({
     data: times.map((clickedAt) => ({
       bookingId,
       clickedAt,
@@ -115,7 +120,18 @@ async function addClicks(bookingId: string, times: Date[]) {
  * Plays one booking forward through escrow.ts. `start` is when it was booked; every later
  * step happens at a fixed offset from it, so the timeline reads naturally.
  */
-async function play(ids: Record<BrandKey | CreatorKey, string>, brand: BrandKey, creator: CreatorKey, outcome: Outcome, start: Date) {
+function play(ids: Record<BrandKey | CreatorKey, string>, brand: BrandKey, creator: CreatorKey, outcome: Outcome, start: Date) {
+  return db.$transaction((tx) => playSteps(tx, ids, brand, creator, outcome, start), { ...escrow.TX_LIMITS, timeout: 60_000 })
+}
+
+async function playSteps(
+  tx: Tx,
+  ids: Record<BrandKey | CreatorKey, string>,
+  brand: BrandKey,
+  creator: CreatorKey,
+  outcome: Outcome,
+  start: Date,
+) {
   const deadline = outcome === 'expired' ? plus(start, 3 * DAY) : plus(start, 7 * DAY)
   const id = await escrow.createBooking(
     {
@@ -125,31 +141,32 @@ async function play(ids: Record<BrandKey | CreatorKey, string>, brand: BrandKey,
       destinationUrl: `${siteOf[brand]}/linkedin?utm_source=${creator}`,
       deadline,
     },
-    start,
+    { at: start, tx },
   )
   if (outcome === 'requested') return id
-  if (outcome === 'declined') return escrow.decline(id, plus(start, 20 * HOUR)).then(() => id)
-  if (outcome === 'expired') return escrow.refund(id, 'expired', plus(deadline, HOUR)).then(() => id)
+  if (outcome === 'declined') return escrow.decline(id, { at: plus(start, 20 * HOUR), tx }).then(() => id)
+  if (outcome === 'expired') return escrow.refund(id, 'expired', { at: plus(deadline, HOUR), tx }).then(() => id)
 
-  const acceptedAt = plus(start, 6 * HOUR)
-  await escrow.accept(id, acceptedAt)
+  await escrow.accept(id, { at: plus(start, 6 * HOUR), tx })
   if (outcome === 'accepted') return id
 
   // The creator posts, a few readers click, and then the creator submits the link.
   const postedAt = plus(start, 30 * HOUR)
-  await addClicks(id, [plus(postedAt, 20 * 60_000), plus(postedAt, 2 * HOUR), plus(postedAt, 5 * HOUR)])
+  await addClicks(tx, id, [plus(postedAt, 20 * 60_000), plus(postedAt, 2 * HOUR), plus(postedAt, 5 * HOUR)])
   const submittedAt = plus(postedAt, 6 * HOUR)
   const postUrl = `https://www.linkedin.com/posts/${creator}-demo_activity-${7_300_000_000 + ++postCounter}`
-  await escrow.submit(id, { postUrl, submitIpHash: hashIp('203.0.113.50') }, submittedAt)
+  await escrow.submit(id, { postUrl, submitIpHash: hashIp('203.0.113.50') }, { at: submittedAt, tx })
   if (outcome === 'submitted') return id
 
-  if (outcome === 'paid-brand') await escrow.approve(id, plus(submittedAt, 9 * HOUR))
+  if (outcome === 'paid-brand') await escrow.approve(id, { at: plus(submittedAt, 9 * HOUR), tx })
   if (outcome === 'paid-click') {
     const firstClickAfterSubmit = plus(submittedAt, 25 * 60_000)
-    await addClicks(id, [firstClickAfterSubmit])
-    await escrow.pay(id, 'click', firstClickAfterSubmit)
+    await addClicks(tx, id, [firstClickAfterSubmit])
+    await escrow.pay(id, 'click', { at: firstClickAfterSubmit, tx })
   }
-  if (outcome === 'paid-timeout') await escrow.pay(id, 'timeout', plus(submittedAt, env.autoApproveMs + 10 * 60_000))
+  if (outcome === 'paid-timeout') {
+    await escrow.pay(id, 'timeout', { at: plus(submittedAt, env.autoApproveMs + 10 * 60_000), tx })
+  }
   return id
 }
 

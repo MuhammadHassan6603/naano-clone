@@ -7,7 +7,9 @@
  * condition, so two racing requests can never both succeed. Rows are always locked
  * in the same order (booking, brand wallet, creator wallet), which rules out deadlocks.
  *
- * Every function takes an optional `at` so the seed can write history in the past.
+ * Every function takes optional `{ at, tx }`: `at` lets the seed write history in the
+ * past, and `tx` lets it chain several steps into one transaction so nothing else ever
+ * sees a half-played booking.
  */
 import { randomBytes } from 'node:crypto'
 import { db } from './db.js'
@@ -17,10 +19,14 @@ import { listed } from './creators.js'
 import type { Prisma } from './generated/prisma/client.js'
 import type { BookingStatus, RefundReason, VerifiedVia } from './generated/prisma/enums.js'
 
-type Tx = Prisma.TransactionClient
+export type Tx = Prisma.TransactionClient
+export type EscrowOptions = { at?: Date; tx?: Tx }
 
 // Generous limits: each transaction is a handful of round trips to Neon.
-const inTx = <T>(fn: (tx: Tx) => Promise<T>) => db.$transaction(fn, { maxWait: 10_000, timeout: 20_000 })
+export const TX_LIMITS = { maxWait: 10_000, timeout: 20_000 }
+
+/** Runs inside the caller's transaction when one is given, otherwise in a new one. */
+const inTx = <T>(tx: Tx | undefined, fn: (tx: Tx) => Promise<T>) => (tx ? fn(tx) : db.$transaction(fn, TX_LIMITS))
 
 export const MIN_TOPUP_CENTS = 100
 export const MAX_TOPUP_CENTS = 1_000_000
@@ -32,8 +38,8 @@ const autoApproveCutoff = (at: Date) => new Date(at.getTime() - env.autoApproveM
 
 // ─── Wallet ──────────────────────────────────────────────────────────────────
 
-export async function topUp(brandId: string, amountCents: number, at = new Date()): Promise<void> {
-  await inTx(async (tx) => {
+export async function topUp(brandId: string, amountCents: number, { at = new Date(), tx }: EscrowOptions = {}) {
+  await inTx(tx, async (tx) => {
     await tx.wallet.update({
       where: { userId: brandId },
       data: { availableCents: { increment: amountCents } },
@@ -53,8 +59,8 @@ export type NewBooking = {
 }
 
 /** Holds the creator's current price from the brand's wallet and opens the booking. */
-export function createBooking(input: NewBooking, at = new Date()): Promise<string> {
-  return inTx(async (tx) => {
+export function createBooking(input: NewBooking, { at = new Date(), tx }: EscrowOptions = {}): Promise<string> {
+  return inTx(tx, async (tx) => {
     const creator = await tx.user.findFirst({
       where: { id: input.creatorId, ...listed },
       select: { profile: { select: { priceCents: true } } },
@@ -80,8 +86,8 @@ export function createBooking(input: NewBooking, at = new Date()): Promise<strin
   })
 }
 
-export async function accept(bookingId: string, at = new Date()): Promise<void> {
-  await inTx((tx) =>
+export async function accept(bookingId: string, { at = new Date(), tx }: EscrowOptions = {}) {
+  await inTx(tx, (tx) =>
     transition(tx, bookingId, 'accept', at, {
       where: { status: 'requested', deadline: { gte: at } },
       data: { status: 'accepted', acceptedAt: at },
@@ -92,9 +98,9 @@ export async function accept(bookingId: string, at = new Date()): Promise<void> 
 export async function submit(
   bookingId: string,
   post: { postUrl: string; submitIpHash: string },
-  at = new Date(),
-): Promise<void> {
-  await inTx((tx) =>
+  { at = new Date(), tx }: EscrowOptions = {},
+) {
+  await inTx(tx, (tx) =>
     transition(tx, bookingId, 'submit', at, {
       where: { status: 'accepted', deadline: { gte: at } },
       data: { status: 'submitted', ...post, submittedAt: at },
@@ -102,15 +108,15 @@ export async function submit(
   )
 }
 
-export const decline = (bookingId: string, at = new Date()) => refund(bookingId, 'declined', at)
+export const decline = (bookingId: string, options?: EscrowOptions) => refund(bookingId, 'declined', options)
 
-export const approve = (bookingId: string, at = new Date()) => pay(bookingId, 'brand', at)
+export const approve = (bookingId: string, options?: EscrowOptions) => pay(bookingId, 'brand', options)
 
 const PAY_VERB: Record<VerifiedVia, string> = { brand: 'approve', click: 'verify', timeout: 'auto-approve' }
 
 /** Verified delivery: releases the brand's held money and pays the creator. */
-export async function pay(bookingId: string, via: VerifiedVia, at = new Date()): Promise<void> {
-  await inTx(async (tx) => {
+export async function pay(bookingId: string, via: VerifiedVia, { at = new Date(), tx }: EscrowOptions = {}) {
+  await inTx(tx, async (tx) => {
     const booking = await transition(tx, bookingId, PAY_VERB[via], at, {
       where:
         via === 'timeout'
@@ -136,8 +142,8 @@ export async function pay(bookingId: string, via: VerifiedVia, at = new Date()):
 }
 
 /** Returns the held money to the brand: the creator declined, or the deadline passed. */
-export async function refund(bookingId: string, reason: RefundReason, at = new Date()): Promise<void> {
-  await inTx(async (tx) => {
+export async function refund(bookingId: string, reason: RefundReason, { at = new Date(), tx }: EscrowOptions = {}) {
+  await inTx(tx, async (tx) => {
     const booking = await transition(tx, bookingId, reason === 'declined' ? 'decline' : 'expire', at, {
       where:
         reason === 'declined'
@@ -174,8 +180,8 @@ export async function sweep({ at = new Date(), bookingId }: { at?: Date; booking
       select: { id: true },
     }),
   ])
-  for (const { id } of overdue) await refund(id, 'expired', at).catch(ignoreConflict)
-  for (const { id } of ignored) await pay(id, 'timeout', at).catch(ignoreConflict)
+  for (const { id } of overdue) await refund(id, 'expired', { at }).catch(ignoreConflict)
+  for (const { id } of ignored) await pay(id, 'timeout', { at }).catch(ignoreConflict)
 }
 
 export function ignoreConflict(err: unknown) {

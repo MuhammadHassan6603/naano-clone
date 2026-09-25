@@ -7,10 +7,15 @@ import { authRouter } from './routes/auth.js'
 import { creatorsRouter } from './routes/creators.js'
 import { walletRouter } from './routes/wallet.js'
 import { bookingsRouter } from './routes/bookings.js'
+import { trackingRouter } from './routes/tracking.js'
 
 export function createApp() {
   const app = express()
   app.disable('x-powered-by')
+  // Render sits behind proxies, so req.ip must come from X-Forwarded-For; otherwise every
+  // visitor would share the proxy's address. ponytail: the header's first entry can be
+  // spoofed by the client, which only weakens the self-click check (see Known limitations).
+  app.set('trust proxy', true)
   app.use(cors({ origin: env.allowedOrigins }))
   app.use(express.json({ limit: '100kb' }))
 
@@ -28,6 +33,7 @@ export function createApp() {
   app.use('/creators', creatorsRouter)
   app.use('/wallet', walletRouter)
   app.use('/bookings', bookingsRouter)
+  app.use(trackingRouter)
 
   app.use(unknownRoute)
   app.use(errorHandler)

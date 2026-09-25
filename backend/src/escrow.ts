@@ -178,7 +178,7 @@ export async function sweep({ at = new Date(), bookingId }: { at?: Date; booking
   for (const { id } of ignored) await pay(id, 'timeout', at).catch(ignoreConflict)
 }
 
-function ignoreConflict(err: unknown) {
+export function ignoreConflict(err: unknown) {
   if (!(err instanceof HttpError && err.status === 409)) throw err
 }
 

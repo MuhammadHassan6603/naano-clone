@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { after, before, describe, test } from 'node:test'
 import { randomUUID } from 'node:crypto'
+import { reliabilityScore } from '../src/creators.js'
 import { type Session, defaultProfile as validProfile, insertBooking, startServer } from './helpers.js'
 
 let api: Awaited<ReturnType<typeof startServer>>
@@ -139,6 +140,15 @@ describe('GET /creators', () => {
 })
 
 describe('reliability score', () => {
+  test('ranks by confidence: a longer perfect record beats a single delivery', () => {
+    const records = [[1, 1], [0, 0], [2, 4], [5, 5], [0, 1], [4, 5], [3, 3]]
+    const ranked = records
+      .map(([delivered, total]) => ({ delivered, total }))
+      .sort((a, b) => reliabilityScore(b) - reliabilityScore(a))
+      .map(({ delivered, total }) => `${delivered}/${total}`)
+    assert.deepEqual(ranked, ['5/5', '3/3', '4/5', '1/1', '2/4', '0/1', '0/0'])
+  })
+
   test('counts paid as delivered, expired as a miss, and ignores declined and open bookings', async () => {
     const brand = await api.signup('brand')
     const creator = await listedCreator()

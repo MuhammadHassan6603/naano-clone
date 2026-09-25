@@ -49,9 +49,11 @@ export async function startServer() {
         ...headers,
       },
       body: raw ?? (body === undefined ? undefined : JSON.stringify(body)),
+      redirect: 'manual',
     })
     const text = await res.text()
-    return { status: res.status, body: text ? JSON.parse(text) : null, headers: res.headers }
+    const isJson = res.headers.get('content-type')?.includes('application/json')
+    return { status: res.status, body: isJson && text ? JSON.parse(text) : text || null, headers: res.headers }
   }
 
   async function signup(role: Role, name = `Test ${role}`): Promise<Session> {

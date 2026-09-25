@@ -6,6 +6,7 @@ import { badRequest, forbidden, notFound } from '../errors.js'
 import { BOOKING_STATUSES, findBooking, listBookings } from '../bookings.js'
 import { accept, approve, createBooking, decline, submit, sweep } from '../escrow.js'
 import { hashIp } from '../ip.js'
+import { clickStats } from '../tracking.js'
 import type { Role } from '../generated/prisma/enums.js'
 import {
   type Body,
@@ -79,6 +80,10 @@ bookingsRouter.get('/', async (req, res) => {
 
 bookingsRouter.get('/:id', async (req, res) => {
   await sendBooking(req, res, await bookingForCaller(req))
+})
+
+bookingsRouter.get('/:id/stats', async (req, res) => {
+  res.json(await clickStats(await bookingForCaller(req)))
 })
 
 bookingsRouter.post('/:id/accept', async (req, res) => {

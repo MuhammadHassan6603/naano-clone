@@ -260,7 +260,7 @@ Body: `{ email, password }`
 Query: `?niche=RevOps&maxPriceCents=50000&sort=reliability|price|followers` (default `reliability`)
 - Returns only creators with a price set.
 - Reliability: `delivered` = paid bookings, `total` = paid + expired. Declined bookings don't count: turning down a brief isn't a delivery failure. Computed with one `GROUP BY` query joined onto the list.
-- Sorted by reliability: delivered/total descending, with new creators (total = 0) last. Ties are broken by followers.
+- Sorted by reliability using the lower bound of the 95% Wilson score interval, not the raw rate, so "5 of 5" ranks above "1 of 1" and "4 of 5" above "1 of 1". New creators (total = 0) come last. Ties are broken by followers.
 - 200 → `{ creators: Creator[], niches: string[] }`. `niches` is the fixed list, so the frontend's filter never drifts from what the API accepts.
 
 **5. `GET /creators/:id`** (anyone)
@@ -362,7 +362,7 @@ It runs every 60 seconds, and also before `GET /bookings` and `GET /bookings/:id
 - The seed creates everything through the `escrow.ts` functions, not raw inserts, and passes past `at` times for history (decision 8). The ledger always reconciles.
 - There are no time-sensitive seeded bookings, because the seed runs hours or days before anyone reviews. To see a live expire-and-refund, the reviewer books with the "2 minutes (demo)" deadline in the booking form.
 
-Demo logins (e.g. `brand@demo.naano`) go in the README. They are throwaway accounts on purpose, so the reviewer can log in. They are not secrets.
+Demo logins (`acme@demo.test`, `pipewise@demo.test`, and `<name>@demo.test` for the eight creators, all with password `naano-demo-2026`) go in the README. They are throwaway accounts on purpose, so the reviewer can log in. They are not secrets.
 
 ### 2.8 Testing
 

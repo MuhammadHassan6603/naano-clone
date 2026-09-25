@@ -133,6 +133,15 @@ Authorization: Bearer {{creatorToken}}
 GET {{base}}/bookings
 Authorization: Bearer {{brandToken}}
 
+### Click stats for the booking: total, unique visitors, per day
+GET {{base}}/bookings/{{bookingId}}/stats
+Authorization: Bearer {{brandToken}}
+
+### The tracking link from the post (use the trackingUrl from the accept response).
+# A browser user agent is counted; a crawler like LinkedInBot is redirected but ignored.
+GET {{base}}/r/REPLACE_WITH_CODE
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.15 Safari/605.1.15
+
 ### Creator's wallet after payout
 GET {{base}}/wallet
 Authorization: Bearer {{creatorToken}}

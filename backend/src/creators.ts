@@ -78,8 +78,18 @@ function toPublic(row: CreatorRow, reliability: Reliability): PublicCreator | nu
   }
 }
 
-// New creators (no finished bookings yet) sort after anyone with a track record.
-const reliabilityScore = ({ delivered, total }: Reliability) => (total === 0 ? -1 : delivered / total)
+/**
+ * Ranks by how confident we can be in the delivery rate, not the raw rate: the lower bound
+ * of the 95% Wilson score interval. So "5 of 5" outranks "1 of 1", and "4 of 5" outranks
+ * "1 of 1" too. New creators (no finished bookings yet) sort after anyone with a track record.
+ */
+export function reliabilityScore({ delivered, total }: Reliability): number {
+  if (total === 0) return -1
+  const z = 1.96
+  const p = delivered / total
+  const z2n = (z * z) / total
+  return (p + z2n / 2 - z * Math.sqrt((p * (1 - p)) / total + z2n / (4 * total))) / (1 + z2n)
+}
 
 const compare: Record<CreatorSort, (a: PublicCreator, b: PublicCreator) => number> = {
   reliability: (a, b) =>

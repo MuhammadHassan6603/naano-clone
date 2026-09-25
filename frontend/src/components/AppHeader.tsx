@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import type { User } from '../lib/types'
 import { Logo } from './Logo'
@@ -9,19 +9,17 @@ import { CloseIcon, MenuIcon } from './ui/Icons'
 type NavItem = { to: string; label: string }
 
 function navFor(user: User | null): NavItem[] {
-  const items: NavItem[] = [{ to: '/', label: 'Marketplace' }]
+  const items: NavItem[] = [
+    { to: '/#how-it-works', label: 'How it works' },
+    { to: '/#creators', label: 'Creators' },
+  ]
   if (user) items.push({ to: '/wallet', label: 'Wallet' })
   return items
 }
 
-const navClass = ({ isActive }: { isActive: boolean }) =>
-  `rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
-    isActive ? 'bg-ink/[0.06] text-ink' : 'text-muted hover:text-ink'
-  }`
-
 function RoleBadge({ user }: { user: User }) {
   return (
-    <span className="rounded-md border border-line px-1.5 py-0.5 text-[11px] font-semibold tracking-wide text-muted uppercase">
+    <span className="rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-semibold tracking-wide text-accent-strong uppercase">
       {user.role}
     </span>
   )
@@ -30,9 +28,18 @@ function RoleBadge({ user }: { user: User }) {
 export function AppHeader() {
   const { user, status, logout } = useAuth()
   const navigate = useNavigate()
+  const { pathname, hash } = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const items = navFor(user)
   const close = () => setMenuOpen(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   useEffect(() => {
     if (!menuOpen) return
@@ -47,85 +54,91 @@ export function AppHeader() {
     navigate('/')
   }
 
+  const isActive = (to: string) => (to.includes('#') ? pathname === '/' && hash === to.slice(1) : pathname === to)
+
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 sm:px-6">
+    <header
+      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
+        menuOpen ? 'border-b border-line bg-page' : scrolled ? 'border-b border-line/80 bg-page/85 backdrop-blur-xl' : ''
+      }`}
+    >
+      <nav aria-label="Main" className="mx-auto flex h-16 max-w-[1320px] items-center gap-4 px-4 sm:px-8 lg:px-12">
         <Logo onClick={close} />
 
-        <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
+        <ul className="ml-auto hidden items-center gap-7 lg:flex">
           {items.map((item) => (
-            <NavLink key={item.to} to={item.to} end className={navClass}>
-              {item.label}
-            </NavLink>
+            <li key={item.to}>
+              <Link
+                to={item.to}
+                aria-current={isActive(item.to) ? 'page' : undefined}
+                className="text-[13px] font-medium whitespace-nowrap text-[#17181c] transition-colors hover:text-ink/70 aria-[current=page]:text-accent"
+              >
+                {item.label}
+              </Link>
+            </li>
           ))}
-        </nav>
+        </ul>
 
-        <div className="ml-auto hidden items-center gap-3 md:flex">
+        <div className="ml-auto flex items-center gap-2 lg:ml-7">
           {status === 'checking' ? null : user ? (
-            <>
-              <span className="flex items-center gap-2 text-sm font-medium text-ink">
+            <div className="hidden items-center gap-3 lg:flex">
+              <span className="flex items-center gap-2 text-[13px] font-medium text-ink">
                 {user.name}
                 <RoleBadge user={user} />
               </span>
               <Button variant="secondary" size="sm" onClick={signOut}>
                 Log out
               </Button>
-            </>
+            </div>
           ) : (
             <>
-              <ButtonLink to="/login" variant="ghost" size="sm">
-                Log in
+              <ButtonLink to="/login" variant="secondary" size="sm" className="max-sm:px-3">
+                Sign in
               </ButtonLink>
-              <ButtonLink to="/signup" size="sm">
+              <ButtonLink to="/signup" size="sm" className="max-sm:px-3">
                 Sign up
               </ButtonLink>
             </>
           )}
+          <button
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            className="flex size-9 items-center justify-center rounded-full border border-line bg-white text-ink lg:hidden"
+          >
+            {menuOpen ? <CloseIcon /> : <MenuIcon />}
+          </button>
         </div>
-
-        <button
-          type="button"
-          className="ml-auto grid size-10 place-items-center rounded-lg text-ink hover:bg-ink/5 md:hidden"
-          aria-expanded={menuOpen}
-          aria-controls="mobile-menu"
-          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-          onClick={() => setMenuOpen((open) => !open)}
-        >
-          {menuOpen ? <CloseIcon className="size-5" /> : <MenuIcon className="size-5" />}
-        </button>
-      </div>
+      </nav>
 
       {menuOpen && (
-        <div id="mobile-menu" className="border-t border-line bg-surface px-4 pt-3 pb-5 md:hidden">
-          <nav aria-label="Main" className="flex flex-col gap-1">
+        <div id="mobile-menu" className="bg-page px-5 pt-2 pb-6 sm:px-8 lg:hidden">
+          <ul className="space-y-1">
             {items.map((item) => (
-              <NavLink key={item.to} to={item.to} end className={navClass} onClick={close}>
-                {item.label}
-              </NavLink>
+              <li key={item.to}>
+                <Link
+                  to={item.to}
+                  onClick={close}
+                  className="block rounded-xl px-3 py-3 text-[1.0625rem] font-medium text-ink transition-colors hover:bg-ink/5"
+                >
+                  {item.label}
+                </Link>
+              </li>
             ))}
-          </nav>
-          <div className="mt-4 border-t border-line pt-4">
-            {user ? (
-              <div className="flex items-center justify-between gap-3">
-                <span className="flex min-w-0 items-center gap-2 text-sm font-medium text-ink">
-                  <span className="truncate">{user.name}</span>
-                  <RoleBadge user={user} />
-                </span>
-                <Button variant="secondary" size="sm" onClick={signOut}>
-                  Log out
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
-                <ButtonLink to="/login" variant="secondary" onClick={close}>
-                  Log in
-                </ButtonLink>
-                <ButtonLink to="/signup" onClick={close}>
-                  Sign up
-                </ButtonLink>
-              </div>
-            )}
-          </div>
+          </ul>
+          {user && (
+            <div className="mt-3 flex items-center justify-between gap-3 border-t border-line px-3 pt-4">
+              <span className="flex min-w-0 items-center gap-2 text-sm font-medium text-ink">
+                <span className="truncate">{user.name}</span>
+                <RoleBadge user={user} />
+              </span>
+              <Button variant="secondary" size="sm" onClick={signOut}>
+                Log out
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </header>

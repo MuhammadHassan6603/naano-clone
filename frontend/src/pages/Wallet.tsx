@@ -20,7 +20,7 @@ const ENTRY: Record<TransactionType, { label: string; effect: (cents: number) =>
 
 function Balance({ icon, label, cents, note, tone = 'text-ink' }: { icon: ReactNode; label: string; cents: number; note: string; tone?: string }) {
   return (
-    <div className="rounded-3xl border border-line bg-surface p-5 shadow-card sm:p-6">
+    <div className="rounded-[28px] border border-[#e4e5e7] bg-white/95 backdrop-blur p-5 shadow-float sm:p-6">
       <p className="flex items-center gap-2 text-sm font-semibold text-muted">
         {icon}
         {label}
@@ -101,7 +101,7 @@ function WalletView({ user }: { user: User }) {
             note="Locked in open bookings. Paid to the creator when the post is verified, or refunded to you if it isn't."
           />
         ) : (
-          <div className="rounded-3xl border border-line bg-surface p-5 text-sm leading-6 text-muted shadow-card sm:p-6">
+          <div className="rounded-[28px] border border-[#e4e5e7] bg-white/95 backdrop-blur p-5 text-sm leading-6 text-muted shadow-float sm:p-6">
             <p className="font-semibold text-ink">How you get paid</p>
             <p className="mt-2">
               A brand's money is held in escrow the moment they book you. Once your post is verified live (the brand
@@ -120,7 +120,7 @@ function WalletView({ user }: { user: User }) {
       </p>
 
       {brand && (
-        <section className="rounded-3xl border border-line bg-surface p-5 shadow-card sm:p-6">
+        <section className="rounded-[28px] border border-[#e4e5e7] bg-white/95 backdrop-blur p-5 shadow-float sm:p-6">
           <h2 className="text-lg font-semibold">Add demo money</h2>
           <p className="mt-1 mb-5 text-sm text-muted">
             This demo has no card payments. Top-ups create real ledger entries so you can book creators.
@@ -129,7 +129,7 @@ function WalletView({ user }: { user: User }) {
         </section>
       )}
 
-      <section className="rounded-3xl border border-line bg-surface p-5 shadow-card sm:p-6">
+      <section className="rounded-[28px] border border-[#e4e5e7] bg-white/95 backdrop-blur p-5 shadow-float sm:p-6">
         <h2 className="text-lg font-semibold">History</h2>
         <p className="mt-1 text-sm text-muted">Newest first. Entries are never edited or deleted.</p>
         <div className="mt-2">
@@ -164,7 +164,7 @@ export default function Wallet() {
   if (!user) return null
   return (
     <Page>
-      <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Wallet</h1>
+      <h1 className="display text-[2rem] sm:text-[2.6rem]">Wallet</h1>
       <p className="mt-1 mb-6 text-muted">
         {user.role === 'brand'
           ? 'Your demo balance, the money held for open bookings, and every movement in between.'

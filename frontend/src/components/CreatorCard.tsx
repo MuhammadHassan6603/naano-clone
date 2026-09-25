@@ -2,45 +2,63 @@ import { Link } from 'react-router-dom'
 import { formatCount, formatMoney } from '../lib/format'
 import type { Creator } from '../lib/types'
 import { Avatar } from './Avatar'
-import { ReliabilityLine } from './Reliability'
-import { ArrowRightIcon } from './ui/Icons'
+import { ArrowRightIcon, LinkedInIcon } from './ui/Icons'
+
+function Stat({ label, value, divider = false }: { label: string; value: string; divider?: boolean }) {
+  return (
+    <div className={`flex min-w-0 flex-col items-center justify-center px-2 py-4 text-center ${divider ? 'border-x border-[#e7e8eb]' : ''}`}>
+      <dd className="w-full truncate text-[19px] font-bold tracking-[-0.025em] text-ink">{value}</dd>
+      <dt className="mt-0.5 text-[11px] leading-4 text-[#8a909b]">{label}</dt>
+    </div>
+  )
+}
 
 export function CreatorCard({ creator }: { creator: Creator }) {
+  const { delivered, total } = creator.reliability
   return (
     <Link
       to={`/creators/${creator.id}`}
-      className="group flex h-full flex-col gap-4 rounded-2xl border border-line bg-surface p-5 shadow-card transition-colors hover:border-accent/50"
+      className="group relative flex h-full flex-col overflow-hidden rounded-[28px] border border-[#e4e5e7] bg-white shadow-float transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-[#9fb9f7] hover:shadow-[0_30px_72px_rgba(37,62,117,0.18),0_8px_22px_rgba(49,91,194,0.09)]"
     >
-      <div className="flex items-start gap-3">
-        <Avatar name={creator.name} seed={creator.id} />
-        <div className="min-w-0 flex-1">
-          <h3 className="truncate text-base font-semibold">{creator.name}</h3>
-          <span className="mt-1 inline-block rounded-md bg-accent-soft px-2 py-0.5 text-xs font-semibold text-accent-strong">
-            {creator.niche}
-          </span>
+      <div className="relative h-[72px] bg-[radial-gradient(circle_at_12%_8%,rgba(255,255,255,0.25),transparent_28%),radial-gradient(circle_at_88%_86%,rgba(137,174,255,0.42),transparent_36%),linear-gradient(135deg,#0C3EBE_0%,#1959EF_57%,#6691FF_100%)]">
+        <span className="absolute -top-16 -right-12 size-32 rounded-full border border-white/15" />
+        <span className="absolute top-3 left-4 inline-flex size-8 items-center justify-center rounded-[10px] border border-white/75 bg-white/90 text-[#0a66c2]">
+          <LinkedInIcon className="size-4" />
+        </span>
+        <span className="absolute top-3.5 right-4 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-accent-strong">
+          {creator.niche}
+        </span>
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2">
+          <Avatar name={creator.name} seed={creator.id} size="ring" />
         </div>
       </div>
 
-      <p className="line-clamp-2 min-h-12 text-sm leading-6 text-body">
-        {creator.audience || 'Audience not described yet.'}
-      </p>
+      <div className="flex flex-1 flex-col px-5 pt-12 pb-5 text-center">
+        <h3 className="truncate text-[20px] leading-tight font-bold tracking-[-0.03em]">{creator.name}</h3>
+        <p className="mx-auto mt-2 line-clamp-2 min-h-12 max-w-[300px] text-[14px] leading-6 text-[#5f6673]">
+          {creator.audience || 'Audience not described yet.'}
+        </p>
+        <div className="mx-auto mt-3 flex w-full max-w-[280px] items-center gap-3 text-left">
+          <span className="shrink-0 text-xs font-medium text-[#8a909b]">Delivered</span>
+          <span className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-[#e8ebf1]">
+            <span
+              className="block h-full rounded-full bg-[linear-gradient(90deg,#2563EB,#7C8DF6)]"
+              style={{ width: total ? `${(delivered / total) * 100}%` : '0%' }}
+            />
+          </span>
+          <span className="shrink-0 text-xs font-semibold text-[#6b7280]">{total ? `${delivered} of ${total}` : 'New'}</span>
+        </div>
+      </div>
 
-      <dl className="grid grid-cols-2 gap-3 rounded-xl bg-page p-3">
-        <div>
-          <dt className="text-xs text-muted">Price per post</dt>
-          <dd className="text-lg font-bold text-ink">{formatMoney(creator.priceCents)}</dd>
-        </div>
-        <div>
-          <dt className="text-xs text-muted">Followers</dt>
-          <dd className="text-lg font-bold text-ink">{formatCount(creator.followers)}</dd>
-        </div>
+      <dl className="grid grid-cols-3 border-t border-[#e7e8eb] bg-[#fcfcfd]">
+        <Stat label="Followers" value={formatCount(creator.followers)} />
+        <Stat label="Price / post" value={formatMoney(creator.priceCents)} divider />
+        <Stat label={total ? 'Delivered' : 'Track record'} value={total ? `${delivered}/${total}` : 'New'} />
       </dl>
 
-      <ReliabilityLine reliability={creator.reliability} />
-
-      <span className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-accent group-hover:gap-2.5">
+      <span className="flex items-center justify-center gap-1.5 border-t border-[#e7e8eb] py-3 text-sm font-semibold text-accent transition-[gap] group-hover:gap-2.5">
         View profile and book
-        <ArrowRightIcon className="size-4 transition-all" />
+        <ArrowRightIcon className="size-4" />
       </span>
     </Link>
   )
@@ -48,17 +66,14 @@ export function CreatorCard({ creator }: { creator: Creator }) {
 
 export function CreatorCardSkeleton() {
   return (
-    <div aria-hidden className="flex h-full animate-pulse flex-col gap-4 rounded-2xl border border-line bg-surface p-5">
-      <div className="flex gap-3">
-        <div className="size-12 rounded-full bg-line" />
-        <div className="flex-1 space-y-2 pt-1">
-          <div className="h-4 w-2/3 rounded bg-line" />
-          <div className="h-4 w-1/4 rounded bg-line" />
-        </div>
+    <div aria-hidden className="flex h-full animate-pulse flex-col overflow-hidden rounded-[28px] border border-[#e4e5e7] bg-white">
+      <div className="h-[72px] bg-[#dbe5fb]" />
+      <div className="flex flex-col items-center gap-3 px-5 pt-12 pb-5">
+        <div className="h-5 w-1/2 rounded bg-line" />
+        <div className="h-10 w-3/4 rounded bg-line" />
+        <div className="h-2 w-2/3 rounded bg-line" />
       </div>
-      <div className="h-12 rounded bg-line" />
-      <div className="h-16 rounded-xl bg-line" />
-      <div className="h-6 rounded bg-line" />
+      <div className="h-16 border-t border-line bg-[#fcfcfd]" />
     </div>
   )
 }

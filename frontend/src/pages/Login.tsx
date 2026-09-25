@@ -1,11 +1,10 @@
 import { type FormEvent, useState } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { DEMO_PASSWORD, DemoAccounts } from '../components/DemoAccounts'
-import { Page } from '../components/Layout'
+import { AuthShell, authTitle } from '../components/AuthShell'
 import { PasswordField } from '../components/PasswordField'
-import { Button } from '../components/ui/Button'
 import { TextField } from '../components/ui/Field'
-import { Notice, SlowServerHint } from '../components/ui/Feedback'
+import { Notice, SlowServerHint, Spinner } from '../components/ui/Feedback'
 import { toApiError } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { homeFor, safeNext, usePageTitle, withNext } from '../lib/navigation'
@@ -48,45 +47,9 @@ export default function Login() {
   }
 
   return (
-    <Page>
-      <div className="grid gap-8 lg:grid-cols-2 lg:items-start">
-        <section className="rounded-3xl border border-line bg-surface p-5 shadow-card sm:p-8">
-          <h1 className="text-2xl font-bold tracking-tight">Log in</h1>
-          <p className="mt-1 text-sm text-muted">
-            {next ? 'Log in to continue where you left off.' : 'Welcome back.'}
-          </p>
-
-          <form onSubmit={submit} noValidate className="mt-6 space-y-5">
-            {serverError && <Notice tone="error">{serverError}</Notice>}
-            <TextField
-              label="Email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              error={errors.email}
-            />
-            <PasswordField
-              label="Password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              error={errors.password}
-            />
-            <Button type="submit" size="lg" className="w-full" loading={pending === 'form'} disabled={pending !== null}>
-              Log in
-            </Button>
-            {pending !== null && <SlowServerHint />}
-          </form>
-
-          <p className="mt-6 text-center text-sm text-muted">
-            New here?{' '}
-            <Link to={withNext('/signup', next)} className="font-semibold text-accent hover:underline">
-              Create an account
-            </Link>
-          </p>
-        </section>
-
+    <AuthShell
+      asideTitle="Try it with a demo account"
+      aside={
         <DemoAccounts
           pendingEmail={pending !== null && pending !== 'form' ? pending : null}
           onUse={(address) => {
@@ -96,7 +59,49 @@ export default function Login() {
             void attempt(address, DEMO_PASSWORD, address)
           }}
         />
-      </div>
-    </Page>
+      }
+    >
+      <h1 className={authTitle}>Welcome back</h1>
+      <p className="mt-1 text-sm text-[#6b7280]">
+        {next ? 'Sign in to continue where you left off.' : 'Sign in to your account.'}
+      </p>
+
+      <form onSubmit={submit} noValidate className="mt-7 space-y-5">
+        {serverError && <Notice tone="error">{serverError}</Notice>}
+        <TextField
+          label="Email"
+          type="email"
+          autoComplete="email"
+          placeholder="you@company.com"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          error={errors.email}
+        />
+        <PasswordField
+          label="Password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          error={errors.password}
+        />
+        <button
+          type="submit"
+          disabled={pending !== null}
+          aria-busy={pending === 'form' || undefined}
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#2563eb] text-sm font-semibold text-white shadow-[0_4px_12px_rgba(37,99,235,0.24)] transition-colors hover:bg-[#1d4ed8] disabled:opacity-60"
+        >
+          {pending === 'form' && <Spinner />}
+          Sign in
+        </button>
+        {pending !== null && <SlowServerHint />}
+      </form>
+
+      <p className="mt-6 text-center text-sm text-[#6b7280]">
+        Don't have an account?{' '}
+        <Link to={withNext('/signup', next)} className="font-semibold text-[#2563eb] hover:underline">
+          Sign up
+        </Link>
+      </p>
+    </AuthShell>
   )
 }

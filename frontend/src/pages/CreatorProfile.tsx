@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import { Avatar } from '../components/Avatar'
-import { HowItWorks } from '../components/HowItWorks'
+import { HowItWorksList } from '../components/HowItWorks'
 import { Page } from '../components/Layout'
 import { ReliabilityExplainer, ReliabilityLine } from '../components/Reliability'
 import { Button, ButtonLink } from '../components/ui/Button'
@@ -98,11 +98,11 @@ export default function CreatorProfile() {
     <Page>
       {back}
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
-        <article className="space-y-6 rounded-3xl border border-line bg-surface p-5 shadow-card sm:p-8">
+        <article className="space-y-6 rounded-[28px] border border-[#e4e5e7] bg-white/95 backdrop-blur p-5 shadow-float sm:p-8">
           <header className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <Avatar name={creator.name} seed={creator.id} size="lg" />
             <div className="min-w-0">
-              <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{creator.name}</h1>
+              <h1 className="display text-[2rem] sm:text-[2.6rem]">{creator.name}</h1>
               <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted">
                 <span className="rounded-md bg-accent-soft px-2 py-0.5 font-semibold text-accent-strong">
                   {creator.niche}
@@ -122,10 +122,10 @@ export default function CreatorProfile() {
             <p className="leading-7">{creator.audience || 'Audience not described yet.'}</p>
           </section>
 
-          <HowItWorks compact />
+          <HowItWorksList />
         </article>
 
-        <aside className="space-y-5 rounded-3xl border border-line bg-surface p-5 shadow-card sm:p-6 lg:sticky lg:top-24">
+        <aside className="space-y-5 rounded-[28px] border border-[#e4e5e7] bg-white/95 backdrop-blur p-5 shadow-float sm:p-6 lg:sticky lg:top-24">
           <div>
             <p className="text-sm text-muted">Price per post</p>
             <p className="text-4xl font-bold tracking-tight text-ink">{formatMoney(creator.priceCents)}</p>

@@ -1,7 +1,7 @@
 import { type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes, useId } from 'react'
 
 export const inputClass =
-  'block w-full rounded-lg border border-line-strong bg-surface px-3 py-2.5 text-[15px] text-ink placeholder:text-muted/70 focus:border-accent focus:ring-2 focus:ring-accent/20 focus:outline-none aria-[invalid=true]:border-danger'
+  'block w-full rounded-xl border border-line-strong bg-white px-4 py-3 text-[15px] text-ink transition-shadow placeholder:text-[#9ca3af] focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none aria-[invalid=true]:border-danger'
 
 type FieldShellProps = {
   id: string
@@ -16,7 +16,7 @@ export function FieldShell({ id, label, hint, error, children, aside }: FieldShe
   return (
     <div className="space-y-1.5">
       <div className="flex items-baseline justify-between gap-3">
-        <label htmlFor={id} className="text-sm font-semibold text-ink">
+        <label htmlFor={id} className="text-xs font-semibold tracking-wide text-[#5c5b57] uppercase">
           {label}
         </label>
         {aside}

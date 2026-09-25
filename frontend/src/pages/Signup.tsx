@@ -1,10 +1,9 @@
 import { type FormEvent, useState } from 'react'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
-import { Page } from '../components/Layout'
+import { AuthShell, authTitle } from '../components/AuthShell'
 import { PasswordField } from '../components/PasswordField'
-import { Button } from '../components/ui/Button'
 import { TextField } from '../components/ui/Field'
-import { Notice, SlowServerHint } from '../components/ui/Feedback'
+import { Notice, SlowServerHint, Spinner } from '../components/ui/Feedback'
 import { toApiError } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { homeFor, safeNext, usePageTitle, withNext } from '../lib/navigation'
@@ -23,6 +22,27 @@ const roles: { value: Role; title: string; body: string }[] = [
     body: 'I want brands to book me and get paid once my post is verified.',
   },
 ]
+
+function SignupAside() {
+  return (
+    <div className="space-y-5 text-[#dbeafe]">
+      <p>Brands book LinkedIn creators at a fixed price. Creators get paid for posts that go live.</p>
+      <ul className="space-y-3">
+        <li className="rounded-2xl border border-white/20 bg-white/10 p-4">
+          <span className="block font-semibold text-white">Brands</span>
+          Your money is held in escrow when you book and released only once the post is verified live. If it never
+          happens, you get it back automatically.
+        </li>
+        <li className="rounded-2xl border border-white/20 bg-white/10 p-4">
+          <span className="block font-semibold text-white">Creators</span>
+          The money exists before you start writing. Accept the briefs you like, post in your own voice, and get paid
+          once the post is verified.
+        </li>
+      </ul>
+      <p className="text-sm text-[#bfdbfe]">This is a demo: balances are demo money and no card is ever charged.</p>
+    </div>
+  )
+}
 
 type Errors = { role?: string; name?: string; email?: string; password?: string }
 
@@ -68,9 +88,9 @@ export default function Signup() {
   }
 
   return (
-    <Page narrow>
-      <section className="rounded-3xl border border-line bg-surface p-5 shadow-card sm:p-8">
-        <h1 className="text-2xl font-bold tracking-tight">Create an account</h1>
+    <AuthShell asideTitle="One platform. Two sides." aside={<SignupAside />}>
+      <section>
+        <h1 className={authTitle}>Join naano</h1>
         <p className="mt-1 text-sm text-muted">
           Free, and it takes a minute. Your role can't be changed later, so pick the one that fits.
         </p>
@@ -145,9 +165,15 @@ export default function Signup() {
             error={errors.password}
             hint="At least 8 characters."
           />
-          <Button type="submit" size="lg" className="w-full" loading={pending}>
+          <button
+            type="submit"
+            disabled={pending}
+            aria-busy={pending || undefined}
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#2563eb] text-sm font-semibold text-white shadow-[0_4px_12px_rgba(37,99,235,0.24)] transition-colors hover:bg-[#1d4ed8] disabled:opacity-60"
+          >
+            {pending && <Spinner />}
             Create account
-          </Button>
+          </button>
           {pending && <SlowServerHint />}
         </form>
 
@@ -158,6 +184,6 @@ export default function Signup() {
           </Link>
         </p>
       </section>
-    </Page>
+    </AuthShell>
   )
 }

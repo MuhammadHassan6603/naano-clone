@@ -92,7 +92,7 @@ function Success({ booking }: { booking: Booking }) {
   const name = firstName(booking.creator.name)
   return (
     <Page narrow>
-      <section className="rounded-3xl border border-line bg-surface p-6 text-center shadow-card sm:p-10">
+      <section className="rounded-[28px] border border-[#e4e5e7] bg-white/95 backdrop-blur p-6 text-center shadow-float sm:p-10">
         <span className="mx-auto grid size-14 place-items-center rounded-full bg-good-soft text-good">
           <CheckIcon className="size-7" />
         </span>
@@ -224,11 +224,11 @@ export default function NewBooking() {
   return (
     <Page>
       {back}
-      <h1 className="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">Book {creator.name}</h1>
+      <h1 className="mt-4 display text-[2rem] sm:text-[2.6rem]">Book {creator.name}</h1>
       <p className="mt-1 text-muted">One LinkedIn post, written by {firstName(creator.name)} in their own voice.</p>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
-        <form onSubmit={submit} noValidate className="space-y-6 rounded-3xl border border-line bg-surface p-5 shadow-card sm:p-8">
+        <form onSubmit={submit} noValidate className="space-y-6 rounded-[28px] border border-[#e4e5e7] bg-white/95 backdrop-blur p-5 shadow-float sm:p-8">
           {serverError && <Notice tone="error">{serverError}</Notice>}
 
           <TextArea
@@ -319,11 +319,11 @@ export default function NewBooking() {
         </form>
 
         <aside className="order-first space-y-5 lg:sticky lg:top-24 lg:order-none">
-          <div className="rounded-3xl border border-line bg-surface p-5 shadow-card sm:p-6">
+          <div className="rounded-[28px] border border-[#e4e5e7] bg-white/95 backdrop-blur p-5 shadow-float sm:p-6">
             <Summary creator={creator} wallet={wallet} />
           </div>
           {!enough && (
-            <div className="space-y-4 rounded-3xl border border-held/30 bg-surface p-5 shadow-card sm:p-6">
+            <div className="space-y-4 rounded-[28px] border border-held/30 bg-white/95 backdrop-blur p-5 shadow-float sm:p-6">
               <Notice tone="warning" title={`You need ${formatMoney(shortfall)} more`}>
                 Your available balance is {formatMoney(wallet.availableCents)}. Add demo money to book {firstName(creator.name)}.
               </Notice>

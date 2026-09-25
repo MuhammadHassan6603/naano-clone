@@ -16,7 +16,13 @@ export function RequireAuth({ role, children }: { role?: Role; children: ReactNo
   const { status, user } = useAuth()
   const location = useLocation()
 
-  if (status === 'checking') return <LoadingState label="Checking your session…" />
+  if (status === 'checking') {
+    return (
+      <Page narrow>
+        <LoadingState label="Checking your session…" />
+      </Page>
+    )
+  }
   if (!user) return <Navigate to={withNext('/login', location.pathname + location.search)} replace />
   if (role && user.role !== role) {
     return (

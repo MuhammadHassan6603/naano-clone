@@ -6,18 +6,18 @@ type Variant = 'primary' | 'secondary' | 'ghost'
 type Size = 'sm' | 'md' | 'lg'
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-lg font-semibold whitespace-nowrap transition-colors disabled:opacity-60'
+  'inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-[background-color,border-color,color,transform] duration-200 hover:-translate-y-px active:translate-y-0 disabled:translate-y-0 disabled:opacity-55'
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-accent text-white hover:bg-accent-strong',
-  secondary: 'border border-line-strong bg-surface text-ink hover:border-ink/40',
+  primary: 'bg-ink text-white shadow-pill hover:bg-[#23262d]',
+  secondary: 'border border-line bg-white text-ink hover:border-ink/25',
   ghost: 'text-ink hover:bg-ink/5',
 }
 
 const sizes: Record<Size, string> = {
-  sm: 'h-9 px-3 text-sm',
-  md: 'h-11 px-4 text-sm',
-  lg: 'h-12 px-5 text-base',
+  sm: 'h-9 px-4 text-[0.875rem]',
+  md: 'h-11 px-5 text-[0.9375rem]',
+  lg: 'h-12 px-6 text-base',
 }
 
 export const buttonClass = (variant: Variant = 'primary', size: Size = 'md', extra = '') =>

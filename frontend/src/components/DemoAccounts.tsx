@@ -1,10 +1,10 @@
-import { Button } from './ui/Button'
+import { Spinner } from './ui/Feedback'
 
 export const DEMO_PASSWORD = 'naano-demo-2026'
 
 const accounts = [
-  { email: 'acme@demo.test', name: 'Acme CRM', role: 'Brand', note: 'Has a booking in every stage, including a post waiting for approval.' },
-  { email: 'maya@demo.test', name: 'Maya Okafor', role: 'Creator', note: 'Has a new booking request waiting to be accepted.' },
+  { email: 'acme@demo.test', name: 'Acme CRM', role: 'Brand', note: 'A booking in every stage, including a post waiting for approval.' },
+  { email: 'maya@demo.test', name: 'Maya Okafor', role: 'Creator', note: 'A new booking request waiting to be accepted.' },
   { email: 'priya@demo.test', name: 'Priya Nair', role: 'Creator', note: 'Top track record: delivered 5 of 5.' },
   { email: 'pipewise@demo.test', name: 'Pipewise', role: 'Brand', note: 'The brand behind most of the past bookings.' },
 ]
@@ -16,36 +16,32 @@ type DemoAccountsProps = {
 
 export function DemoAccounts({ onUse, pendingEmail }: DemoAccountsProps) {
   return (
-    <section aria-labelledby="demo-accounts" className="rounded-2xl border border-line bg-surface p-5 sm:p-6">
-      <h2 id="demo-accounts" className="text-base font-semibold">
-        Try it with a demo account
-      </h2>
-      <p className="mt-1 text-sm leading-6 text-muted">
-        These accounts come with real bookings and demo money. The password for all of them is{' '}
-        <code className="rounded bg-page px-1.5 py-0.5 font-mono text-[13px] text-ink">{DEMO_PASSWORD}</code>.
+    <div>
+      <p className="text-[#dbeafe]">
+        These accounts come with real bookings and demo money. One click logs you in. The password for all of them is{' '}
+        <code className="rounded bg-white/15 px-1.5 py-0.5 font-mono text-[13px] text-white">{DEMO_PASSWORD}</code>.
       </p>
-      <ul className="mt-4 divide-y divide-line">
+      <ul className="mt-6 space-y-3">
         {accounts.map((account) => (
-          <li key={account.email} className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center">
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-ink">
-                {account.name} <span className="font-normal text-muted">· {account.role}</span>
-              </p>
-              <p className="truncate text-sm text-muted">{account.email}</p>
-              <p className="text-sm text-muted">{account.note}</p>
-            </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              loading={pendingEmail === account.email}
+          <li key={account.email}>
+            <button
+              type="button"
               disabled={pendingEmail !== null}
               onClick={() => onUse(account.email)}
+              className="flex w-full items-center gap-3 rounded-2xl border border-white/20 bg-white/10 p-4 text-left transition-colors hover:bg-white/20 disabled:opacity-60"
             >
-              Log in as {account.name.split(' ')[0]}
-            </Button>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-white">
+                  Log in as {account.name} <span className="font-normal text-[#bfdbfe]">· {account.role}</span>
+                </span>
+                <span className="block truncate text-sm text-[#bfdbfe]">{account.email}</span>
+                <span className="block text-sm text-[#dbeafe]">{account.note}</span>
+              </span>
+              {pendingEmail === account.email && <Spinner className="size-5 text-white" />}
+            </button>
           </li>
         ))}
       </ul>
-    </section>
+    </div>
   )
 }

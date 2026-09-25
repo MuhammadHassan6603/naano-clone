@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import type { Role } from './types'
 
 const SITE_NAME = 'Naano Rebuild'
 
@@ -14,7 +13,7 @@ export function safeNext(value: string | null): string | null {
   return value
 }
 
-export const homeFor = (role: Role) => (role === 'brand' ? '/' : '/wallet')
+export const DASHBOARD = '/dashboard'
 
 export const withNext = (path: string, next: string | null) =>
   next ? `${path}${path.includes('?') ? '&' : '?'}next=${encodeURIComponent(next)}` : path

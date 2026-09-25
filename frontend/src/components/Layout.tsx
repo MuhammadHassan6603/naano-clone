@@ -37,7 +37,7 @@ export function Page({ children, narrow = false }: { children: ReactNode; narrow
   return (
     <div className="relative isolate">
       <CloudBackdrop />
-      <div className={`mx-auto w-full px-5 pt-24 pb-16 sm:px-8 sm:pt-28 ${narrow ? 'max-w-3xl' : 'max-w-[1200px]'}`}>
+      <div className={`mx-auto w-full px-5 pt-24 pb-12 sm:px-8 ${narrow ? 'max-w-3xl' : 'max-w-[1200px]'}`}>
         {children}
       </div>
     </div>

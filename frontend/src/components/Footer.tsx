@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { CLOUDS, FOOTER_CLOUDS, asset } from '../lib/assets'
 import { Logo } from './Logo'
 
-const transitionMask = 'linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,0) 12%, #000 30%, #000 100%)'
+const transitionMask = 'linear-gradient(rgba(0,0,0,0) 0%, #000 45%, #000 100%)'
 const cloudsMask = 'linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,0) 42%, #000 76%, #000 100%)'
 
 const transitionLayer: CSSProperties = {
@@ -36,11 +36,11 @@ const product = [
 
 export function Footer() {
   return (
-    <footer className="relative isolate overflow-hidden bg-[linear-gradient(180deg,#E9F7FC_0%,#EDF9FD_48%,#FFFFFF_100%)] px-5 pt-[200px] sm:px-8 lg:px-[72px] lg:pt-[260px]">
+    <footer className="relative isolate overflow-hidden bg-[linear-gradient(180deg,#E9F7FC_0%,#EDF9FD_48%,#FFFFFF_100%)] px-5 pt-16 sm:px-8 lg:px-[72px] lg:pt-20">
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0" style={transitionLayer} />
       <div aria-hidden className="pointer-events-none absolute inset-0 z-[1] opacity-25" style={cloudsLayer} />
 
-      <div className="relative z-[2] mx-auto grid w-full max-w-[1280px] gap-10 pt-8 pb-10 md:grid-cols-[1.2fr_0.8fr_1.4fr]">
+      <div className="relative z-[2] mx-auto grid w-full max-w-[1200px] gap-10 pb-10 md:grid-cols-[1.2fr_0.8fr_1.4fr]">
         <div>
           <Logo className="h-[28px]" />
           <p className="mt-5 max-w-[260px] text-[15px] leading-[1.55] text-[#5f737e]">
@@ -73,7 +73,7 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="relative z-[2] mx-auto flex w-full max-w-[1280px] flex-wrap items-center justify-between gap-4 border-t border-[rgba(93,139,160,0.2)] pt-5 pb-7">
+      <div className="relative z-[2] mx-auto flex w-full max-w-[1200px] flex-wrap items-center justify-between gap-4 border-t border-[rgba(93,139,160,0.2)] pt-5 pb-7">
         <span className="text-[13.5px] text-[#8a8c92]">© 2026 naano rebuild. Demo project.</span>
         <span className="text-[13.5px] text-[#8a8c92]">Escrow-backed creator bookings</span>
       </div>

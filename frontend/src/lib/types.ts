@@ -69,3 +69,17 @@ export type Booking = {
   brand: { id: string; name: string }
   creator: { id: string; name: string }
 }
+
+export type TimelineEvent = {
+  at: string
+  event: 'booked' | 'accepted' | 'submitted' | 'verified' | 'paid' | 'declined' | 'expired' | 'refunded'
+  via?: 'brand' | 'click' | 'timeout'
+}
+
+export type BookingDetail = Booking & { timeline: TimelineEvent[] }
+
+export type ClickStats = {
+  totalClicks: number
+  uniqueClicks: number
+  byDay: { date: string; clicks: number }[]
+}

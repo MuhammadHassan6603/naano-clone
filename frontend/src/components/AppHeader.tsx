@@ -8,14 +8,10 @@ import { CloseIcon, MenuIcon } from './ui/Icons'
 
 type NavItem = { to: string; label: string }
 
-function navFor(user: User | null): NavItem[] {
-  const items: NavItem[] = [
-    { to: '/#how-it-works', label: 'How it works' },
-    { to: '/#creators', label: 'Creators' },
-  ]
-  if (user) items.push({ to: '/wallet', label: 'Wallet' })
-  return items
-}
+const NAV: NavItem[] = [
+  { to: '/#how-it-works', label: 'How it works' },
+  { to: '/#creators', label: 'Creators' },
+]
 
 function RoleBadge({ user }: { user: User }) {
   return (
@@ -31,7 +27,6 @@ export function AppHeader() {
   const { pathname, hash } = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const items = navFor(user)
   const close = () => setMenuOpen(false)
 
   useEffect(() => {
@@ -62,11 +57,11 @@ export function AppHeader() {
         menuOpen ? 'border-b border-line bg-page' : scrolled ? 'border-b border-line/80 bg-page/85 backdrop-blur-xl' : ''
       }`}
     >
-      <nav aria-label="Main" className="mx-auto flex h-16 max-w-[1320px] items-center gap-4 px-4 sm:px-8 lg:px-12">
+      <nav aria-label="Main" className="mx-auto flex h-16 max-w-[1200px] items-center gap-4 px-5 sm:px-8">
         <Logo onClick={close} />
 
-        <ul className="ml-auto hidden items-center gap-7 lg:flex">
-          {items.map((item) => (
+        <ul className="ml-10 hidden items-center gap-7 lg:flex">
+          {NAV.map((item) => (
             <li key={item.to}>
               <Link
                 to={item.to}
@@ -79,17 +74,20 @@ export function AppHeader() {
           ))}
         </ul>
 
-        <div className="ml-auto flex items-center gap-2 lg:ml-7">
+        <div className="ml-auto flex items-center gap-2">
           {status === 'checking' ? null : user ? (
-            <div className="hidden items-center gap-3 lg:flex">
-              <span className="flex items-center gap-2 text-[13px] font-medium text-ink">
+            <>
+              <span className="hidden items-center gap-2 text-[13px] font-medium text-ink xl:flex">
                 {user.name}
                 <RoleBadge user={user} />
               </span>
-              <Button variant="secondary" size="sm" onClick={signOut}>
+              <Button variant="secondary" size="sm" onClick={signOut} className="hidden lg:inline-flex">
                 Log out
               </Button>
-            </div>
+              <ButtonLink to="/dashboard" size="sm" className="max-sm:px-3">
+                Open dashboard
+              </ButtonLink>
+            </>
           ) : (
             <>
               <ButtonLink to="/login" variant="secondary" size="sm" className="max-sm:px-3">
@@ -116,7 +114,7 @@ export function AppHeader() {
       {menuOpen && (
         <div id="mobile-menu" className="bg-page px-5 pt-2 pb-6 sm:px-8 lg:hidden">
           <ul className="space-y-1">
-            {items.map((item) => (
+            {NAV.map((item) => (
               <li key={item.to}>
                 <Link
                   to={item.to}

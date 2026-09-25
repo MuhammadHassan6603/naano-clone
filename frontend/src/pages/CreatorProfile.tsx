@@ -34,9 +34,16 @@ function BookingAction({ creator, user }: { creator: Creator; user: User | null 
   if (user.role === 'creator') {
     return (
       <p className="rounded-xl bg-page p-3 text-sm leading-6 text-muted">
-        {user.id === creator.id
-          ? 'This is your public card. Brands book you from this page.'
-          : "You're signed in as a creator. Only brands can book creators."}
+        {user.id === creator.id ? (
+          <>
+            This is your public card. Brands book you from this page.{' '}
+            <Link to="/dashboard/profile" className="font-semibold text-accent hover:underline">
+              Edit it in your dashboard
+            </Link>
+          </>
+        ) : (
+          "You're signed in as a creator. Only brands can book creators."
+        )}
       </p>
     )
   }

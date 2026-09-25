@@ -5,7 +5,7 @@ const SLOW_AFTER_MS = 4000
 
 type State<T> = { data: T | undefined; error: ApiError | undefined; loading: boolean }
 
-export function useApi<T>(path: string | null) {
+export function useApi<T>(path: string | null, { refreshOnFocus = false }: { refreshOnFocus?: boolean } = {}) {
   const [state, setState] = useState<State<T>>({ data: undefined, error: undefined, loading: path !== null })
   const [slow, setSlow] = useState(false)
   const [version, setVersion] = useState(0)
@@ -35,6 +35,14 @@ export function useApi<T>(path: string | null) {
   }, [path, version])
 
   const reload = useCallback(() => setVersion((value) => value + 1), [])
+  const replace = useCallback((data: T) => setState({ data, error: undefined, loading: false }), [])
 
-  return { ...state, slow: slow && state.loading, reload }
+  useEffect(() => {
+    if (!refreshOnFocus || path === null) return
+    const onVisible = () => document.visibilityState === 'visible' && reload()
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [refreshOnFocus, path, reload])
+
+  return { ...state, slow: slow && state.loading, reload, replace }
 }

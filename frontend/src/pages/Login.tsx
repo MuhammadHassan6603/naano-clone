@@ -7,8 +7,7 @@ import { TextField } from '../components/ui/Field'
 import { Notice, SlowServerHint, Spinner } from '../components/ui/Feedback'
 import { toApiError } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import { homeFor, safeNext, usePageTitle, withNext } from '../lib/navigation'
-import type { User } from '../lib/types'
+import { DASHBOARD, safeNext, usePageTitle, withNext } from '../lib/navigation'
 import { emailProblem } from '../lib/validation'
 
 export default function Login() {
@@ -24,14 +23,14 @@ export default function Login() {
   const [serverError, setServerError] = useState<string | null>(null)
   const [pending, setPending] = useState<'form' | string | null>(null)
 
-  if (user && pending === null) return <Navigate to={next ?? homeFor(user.role)} replace />
+  if (user && pending === null) return <Navigate to={next ?? DASHBOARD} replace />
 
   async function attempt(address: string, secret: string, source: 'form' | string) {
     setPending(source)
     setServerError(null)
     try {
-      const signedIn: User = await login(address.trim(), secret)
-      navigate(next ?? homeFor(signedIn.role), { replace: true })
+      await login(address.trim(), secret)
+      navigate(next ?? DASHBOARD, { replace: true })
     } catch (error) {
       setServerError(toApiError(error).message)
       setPending(null)

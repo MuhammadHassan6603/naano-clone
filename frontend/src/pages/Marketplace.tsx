@@ -40,9 +40,9 @@ function SectionPill({ children }: { children: string }) {
 
 function Hero({ user }: { user: User | null }) {
   return (
-    <section className="relative isolate flex min-h-[640px] flex-col justify-center overflow-hidden pt-16 lg:min-h-svh">
+    <section className="relative isolate overflow-hidden pt-16">
       <CloudBackdrop tall />
-      <div className="mx-auto flex max-w-[1100px] flex-col items-center px-5 py-16 text-center sm:px-8">
+      <div className="mx-auto flex max-w-[1100px] flex-col items-center px-5 pt-12 pb-14 text-center sm:px-8 sm:pt-16 sm:pb-16">
         <div className="flex items-center gap-2 rounded-full bg-white/90 px-3.5 py-1.5 shadow-[0_2px_14px_rgb(17_19_24/0.06)] backdrop-blur-sm">
           <span className="flex size-[18px] items-center justify-center rounded-[4px] bg-[#0a66c2] text-white">
             <LinkedInIcon className="size-[11px]" />
@@ -68,10 +68,9 @@ function Hero({ user }: { user: User | null }) {
             <ArrowRightIcon className="transition-transform duration-300 group-hover:translate-x-1" />
           </a>
           {user ? (
-            <a href="#how-it-works" className="group inline-flex items-center gap-2 font-semibold text-ink underline-offset-4 hover:underline">
-              See how escrow works
-              <ArrowRightIcon className="transition-transform duration-300 group-hover:translate-x-1" />
-            </a>
+            <ButtonLink to="/dashboard" variant="secondary" size="lg" className="w-full sm:w-auto">
+              Open your dashboard
+            </ButtonLink>
           ) : (
             <ButtonLink to="/login" variant="secondary" size="lg" className="w-full sm:w-auto">
               Try a demo account
@@ -94,7 +93,7 @@ function Hero({ user }: { user: User | null }) {
 
 function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="px-5 py-16 sm:px-8 lg:py-24">
+    <section id="how-it-works" className="px-5 pt-4 pb-12 sm:px-8 lg:pb-16">
       <div className="mx-auto max-w-[1200px]">
         <header className="mx-auto max-w-[760px] text-center">
           <SectionPill>How it works</SectionPill>
@@ -104,7 +103,7 @@ function HowItWorksSection() {
             post is proven live.
           </p>
         </header>
-        <div className="mt-10">
+        <div className="mt-8">
           <HowItWorksCards />
         </div>
       </div>
@@ -144,7 +143,7 @@ export default function Marketplace() {
       <section
         id="creators"
         aria-labelledby="creators-heading"
-        className="relative overflow-hidden px-4 pt-12 pb-20 sm:px-8 lg:pt-16"
+        className="relative overflow-hidden px-4 pt-4 pb-14 sm:px-8"
         style={{
           backgroundImage:
             'radial-gradient(circle at 50% 60%, rgba(208,237,251,0.35), rgba(0,0,0,0) 44%), linear-gradient(#FCFCFB 0%, #F8FCFE 62%, #FFFFFF 100%)',
@@ -161,7 +160,7 @@ export default function Marketplace() {
             </p>
           </header>
 
-          <div className="relative isolate mt-10 overflow-hidden rounded-[28px] border border-[rgba(139,189,215,0.32)] bg-[linear-gradient(#DFF3FC_0%,#EDF9FE_72%,#FFFFFF_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_42px_90px_-48px_rgba(69,119,145,0.38)] sm:p-8 lg:rounded-[40px] lg:p-12">
+          <div className="relative isolate mt-8 overflow-hidden rounded-[28px] border border-[rgba(139,189,215,0.32)] bg-[linear-gradient(#DFF3FC_0%,#EDF9FE_72%,#FFFFFF_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_42px_90px_-48px_rgba(69,119,145,0.38)] sm:p-8 lg:rounded-[40px] lg:p-12">
             <div
               aria-hidden
               className="pointer-events-none absolute inset-x-0 bottom-0 -z-20 h-[55%] bg-cover bg-bottom bg-no-repeat opacity-60 [filter:saturate(0.8)_brightness(1.08)]"

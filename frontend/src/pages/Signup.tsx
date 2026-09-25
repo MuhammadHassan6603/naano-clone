@@ -6,7 +6,7 @@ import { TextField } from '../components/ui/Field'
 import { Notice, SlowServerHint, Spinner } from '../components/ui/Feedback'
 import { toApiError } from '../lib/api'
 import { useAuth } from '../lib/auth'
-import { homeFor, safeNext, usePageTitle, withNext } from '../lib/navigation'
+import { DASHBOARD, safeNext, usePageTitle, withNext } from '../lib/navigation'
 import type { Role } from '../lib/types'
 import { emailProblem, lengthProblem, passwordProblem } from '../lib/validation'
 
@@ -62,7 +62,7 @@ export default function Signup() {
   const [serverError, setServerError] = useState<{ message: string; emailTaken: boolean } | null>(null)
   const [pending, setPending] = useState(false)
 
-  if (user && !pending) return <Navigate to={next ?? homeFor(user.role)} replace />
+  if (user && !pending) return <Navigate to={next ?? DASHBOARD} replace />
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -78,8 +78,8 @@ export default function Signup() {
     setPending(true)
     setServerError(null)
     try {
-      const created = await signup({ role, name: name.trim(), email: email.trim(), password })
-      navigate(next ?? homeFor(created.role), { replace: true })
+      await signup({ role, name: name.trim(), email: email.trim(), password })
+      navigate(next ?? DASHBOARD, { replace: true })
     } catch (error) {
       const apiError = toApiError(error)
       setServerError({ message: apiError.message, emailTaken: apiError.status === 409 })

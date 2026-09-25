@@ -13,13 +13,25 @@ function Stat({ label, value, divider = false }: { label: string; value: string;
   )
 }
 
-export function CreatorCard({ creator }: { creator: Creator }) {
+const cardClass =
+  'group relative flex h-full flex-col overflow-hidden rounded-[28px] border border-[#e4e5e7] bg-white shadow-float transition-[border-color,box-shadow,transform] duration-300'
+const interactiveClass =
+  'hover:-translate-y-1 hover:border-[#9fb9f7] hover:shadow-[0_30px_72px_rgba(37,62,117,0.18),0_8px_22px_rgba(49,91,194,0.09)]'
+
+export function CreatorCard({ creator, preview = false }: { creator: Creator; preview?: boolean }) {
+  const body = <CardBody creator={creator} preview={preview} />
+  if (preview) return <div className={cardClass}>{body}</div>
+  return (
+    <Link to={`/creators/${creator.id}`} className={`${cardClass} ${interactiveClass}`}>
+      {body}
+    </Link>
+  )
+}
+
+function CardBody({ creator, preview }: { creator: Creator; preview: boolean }) {
   const { delivered, total } = creator.reliability
   return (
-    <Link
-      to={`/creators/${creator.id}`}
-      className="group relative flex h-full flex-col overflow-hidden rounded-[28px] border border-[#e4e5e7] bg-white shadow-float transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-[#9fb9f7] hover:shadow-[0_30px_72px_rgba(37,62,117,0.18),0_8px_22px_rgba(49,91,194,0.09)]"
-    >
+    <>
       <div className="relative h-[72px] bg-[radial-gradient(circle_at_12%_8%,rgba(255,255,255,0.25),transparent_28%),radial-gradient(circle_at_88%_86%,rgba(137,174,255,0.42),transparent_36%),linear-gradient(135deg,#0C3EBE_0%,#1959EF_57%,#6691FF_100%)]">
         <span className="absolute -top-16 -right-12 size-32 rounded-full border border-white/15" />
         <span className="absolute top-3 left-4 inline-flex size-8 items-center justify-center rounded-[10px] border border-white/75 bg-white/90 text-[#0a66c2]">
@@ -57,10 +69,10 @@ export function CreatorCard({ creator }: { creator: Creator }) {
       </dl>
 
       <span className="flex items-center justify-center gap-1.5 border-t border-[#e7e8eb] py-3 text-sm font-semibold text-accent transition-[gap] group-hover:gap-2.5">
-        View profile and book
-        <ArrowRightIcon className="size-4" />
+        {preview ? 'This is how brands see you' : 'View profile and book'}
+        {!preview && <ArrowRightIcon className="size-4" />}
       </span>
-    </Link>
+    </>
   )
 }
 

@@ -107,7 +107,7 @@ function Success({ booking }: { booking: Booking }) {
           <li>3. You approve it, or it is verified by the first real click or after 72 hours. Then {name} is paid.</li>
         </ol>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <ButtonLink to="/wallet">See your wallet</ButtonLink>
+          <ButtonLink to={`/dashboard/bookings/${booking.id}`}>Track this booking</ButtonLink>
           <ButtonLink to="/" variant="secondary">
             Browse more creators
           </ButtonLink>
@@ -132,6 +132,7 @@ export default function NewBooking() {
   const [serverError, setServerError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
   const [booked, setBooked] = useState<Booking | null>(null)
+  const [toppedUp, setToppedUp] = useState<Wallet | null>(null)
 
   const back = (
     <Link
@@ -145,7 +146,7 @@ export default function NewBooking() {
   if (booked) return <Success booking={booked} />
 
   const loadError = creatorQuery.error ?? walletQuery.error
-  if (loadError && !(creator && walletQuery.data)) {
+  if (loadError && !(creator && (toppedUp ?? walletQuery.data))) {
     const missing = creatorQuery.error?.status === 404
     return (
       <Page>
@@ -173,7 +174,8 @@ export default function NewBooking() {
       </Page>
     )
   }
-  if (!creator || !walletQuery.data) {
+  const wallet = toppedUp ?? walletQuery.data
+  if (!creator || !wallet) {
     return (
       <Page>
         {back}
@@ -182,7 +184,6 @@ export default function NewBooking() {
     )
   }
 
-  const wallet = walletQuery.data
   const shortfall = creator.priceCents - wallet.availableCents
   const enough = shortfall <= 0
 
@@ -214,7 +215,10 @@ export default function NewBooking() {
     } catch (error) {
       const apiError = toApiError(error)
       setServerError(apiError.message)
-      if (apiError.status === 409) walletQuery.reload()
+      if (apiError.status === 409) {
+        setToppedUp(null)
+        walletQuery.reload()
+      }
       if (apiError.status === 404) creatorQuery.reload()
     } finally {
       setPending(false)
@@ -322,12 +326,13 @@ export default function NewBooking() {
           <div className="rounded-[28px] border border-[#e4e5e7] bg-white/95 backdrop-blur p-5 shadow-float sm:p-6">
             <Summary creator={creator} wallet={wallet} />
           </div>
+          {toppedUp && enough && <Notice tone="success">Money added. Your balance now covers this booking.</Notice>}
           {!enough && (
             <div className="space-y-4 rounded-[28px] border border-held/30 bg-white/95 backdrop-blur p-5 shadow-float sm:p-6">
               <Notice tone="warning" title={`You need ${formatMoney(shortfall)} more`}>
                 Your available balance is {formatMoney(wallet.availableCents)}. Add demo money to book {firstName(creator.name)}.
               </Notice>
-              <TopUpForm suggestedCents={Math.ceil(shortfall / 10_000) * 10_000} onDone={walletQuery.reload} />
+              <TopUpForm suggestedCents={Math.ceil(shortfall / 10_000) * 10_000} onDone={setToppedUp} />
             </div>
           )}
         </aside>

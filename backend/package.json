@@ -9,7 +9,8 @@
     "typecheck": "tsc",
     "build": "prisma generate && tsc -p tsconfig.build.json",
     "start": "prisma migrate deploy && node dist/index.js",
-    "test": "node --env-file-if-exists=.env --import tsx --test --test-concurrency=1 'test/**/*.test.ts'",
+    "test": "node --env-file-if-exists=.env --import tsx --test --test-concurrency=4 'test/**/*.test.ts'",
+    "check": "tsx scripts/escrow-check.ts",
     "db:studio": "prisma studio"
   },
   "engines": {

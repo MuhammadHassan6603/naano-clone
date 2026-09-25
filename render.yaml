@@ -19,3 +19,5 @@ services:
         generateValue: true
       - key: ALLOWED_ORIGINS
         value: http://localhost:5173,https://muhammadhassan6603.github.io
+      - key: PUBLIC_API_URL
+        value: https://naano-clone-9pyv.onrender.com

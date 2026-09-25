@@ -61,8 +61,8 @@ DATABASE_URL=        # Neon pooled
 DIRECT_URL=          # Neon direct, used by prisma migrate
 JWT_SECRET=          # long random string
 ALLOWED_ORIGINS=http://localhost:5173,https://muhammadhassan6603.github.io
-PUBLIC_API_URL=http://localhost:4000   # used to build tracking links
-IP_SALT=             # random string, used to hash IPs
+PUBLIC_API_URL=http://localhost:4000   # optional; tracking-link base, defaults to the request's host
+TEST_DATABASE=1      # only on the Neon test branch; npm test refuses to run without it
 AUTO_APPROVE_HOURS=72
 PORT=4000
 ```
@@ -179,7 +179,7 @@ Indexes: `(status, deadline)` and `(status, submitted_at)` for the sweep job; `(
 | id | uuid PK | |
 | booking_id | uuid FK | |
 | clicked_at | timestamptz | |
-| ip_hash | text | sha256(ip + IP_SALT); the raw IP is never stored |
+| ip_hash | text | HMAC-SHA256 of the IP keyed with the server secret; the raw IP is never stored |
 | user_agent | text | cut to 300 characters |
 
 Bot requests are not stored at all (decision 7).
@@ -305,7 +305,8 @@ Query: `?status=` (optional)
 **12. `GET /bookings/:id`** (auth, only the brand or creator on this booking)
 - Runs `sweep(id)` first.
 - Adds `timeline`: an ordered list of `{ at, event }` built from the timestamps and ledger rows, e.g. `booked, money held`, `accepted`, `post submitted`, `verified via first click`, `paid to creator`.
-- `trackingUrl` = `${PUBLIC_API_URL}/r/${tracking_code}`. It is shown once the booking is accepted.
+- `trackingUrl` = `${PUBLIC_API_URL}/r/${tracking_code}` (or the request's own host when `PUBLIC_API_URL` is unset). It is shown once the booking is accepted.
+- `timeline` events are codes the frontend turns into labels: `booked`, `accepted`, `submitted`, `verified` (with `via`), `paid`, `declined`, `expired`, `refunded`.
 - 200 → `{ booking: Booking & { timeline } }` · 403 · 404
 
 **13. `POST /bookings/:id/accept`** (auth, the creator on this booking)

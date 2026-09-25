@@ -72,7 +72,118 @@ GET {{base}}/creators?niche=RevOps&maxPriceCents=50000&sort=price
 ### One creator: 200 { creator }
 GET {{base}}/creators/{{creatorLogin.response.body.user.id}}
 
+########## Wallet ##########
+
+### Brand tops up $1,000 (demo money): 200 { availableCents, heldCents, reconciled }
+POST {{base}}/wallet/topup
+Authorization: Bearer {{brandToken}}
+Content-Type: application/json
+
+{ "amountCents": 100000 }
+
+### Wallet: reconciled=true means the balance matches the ledger
+GET {{base}}/wallet
+Authorization: Bearer {{brandToken}}
+
+### Ledger, newest first
+GET {{base}}/wallet/transactions
+Authorization: Bearer {{brandToken}}
+
+########## Bookings (the escrow flow) ##########
+
+### Brand books the creator: 201. The price moves from available to held
+# @name book
+POST {{base}}/bookings
+Authorization: Bearer {{brandToken}}
+Content-Type: application/json
+
+{
+  "creatorId": "{{creatorLogin.response.body.user.id}}",
+  "brief": "Post about our new pipeline analytics dashboard. Mention the free trial.",
+  "destinationUrl": "https://acme.example/launch",
+  "deadline": "2026-10-10T17:00:00Z"
+}
+
+@bookingId = {{book.response.body.booking.id}}
+
+### Approve before anything is submitted: 409 (the refused step for the demo)
+POST {{base}}/bookings/{{bookingId}}/approve
+Authorization: Bearer {{brandToken}}
+
+### Creator accepts: 200, and the booking now has a trackingUrl
+POST {{base}}/bookings/{{bookingId}}/accept
+Authorization: Bearer {{creatorToken}}
+
+### Creator submits the LinkedIn post: 200
+POST {{base}}/bookings/{{bookingId}}/submit
+Authorization: Bearer {{creatorToken}}
+Content-Type: application/json
+
+{ "postUrl": "https://www.linkedin.com/posts/dana_pipeline-activity-123" }
+
+### Brand approves: 200. Held money is released and the creator is paid
+POST {{base}}/bookings/{{bookingId}}/approve
+Authorization: Bearer {{brandToken}}
+
+### The booking with its timeline (either party)
+GET {{base}}/bookings/{{bookingId}}
+Authorization: Bearer {{creatorToken}}
+
+### My bookings, optionally ?status=requested|accepted|submitted|paid|refunded
+GET {{base}}/bookings
+Authorization: Bearer {{brandToken}}
+
+### Creator's wallet after payout
+GET {{base}}/wallet
+Authorization: Bearer {{creatorToken}}
+
+### Book again, then decline: the brand is refunded in full
+# @name bookToDecline
+POST {{base}}/bookings
+Authorization: Bearer {{brandToken}}
+Content-Type: application/json
+
+{
+  "creatorId": "{{creatorLogin.response.body.user.id}}",
+  "brief": "A second campaign brief that the creator will turn down.",
+  "destinationUrl": "https://acme.example/second",
+  "deadline": "2026-10-10T17:00:00Z"
+}
+
+### Creator declines: 200, refundReason=declined
+POST {{base}}/bookings/{{bookToDecline.response.body.booking.id}}/decline
+Authorization: Bearer {{creatorToken}}
+
 ########## Failure cases ##########
+
+### Approving twice: 409 "already paid"
+POST {{base}}/bookings/{{bookingId}}/approve
+Authorization: Bearer {{brandToken}}
+
+### Creator tries to approve: 403
+POST {{base}}/bookings/{{bookingId}}/approve
+Authorization: Bearer {{creatorToken}}
+
+### Post link that isn't LinkedIn: 400
+POST {{base}}/bookings/{{bookingId}}/submit
+Authorization: Bearer {{creatorToken}}
+Content-Type: application/json
+
+{ "postUrl": "https://linkedin.com.evil.example/post" }
+
+### Deadline in the past: 400
+POST {{base}}/bookings
+Authorization: Bearer {{brandToken}}
+Content-Type: application/json
+
+{ "creatorId": "{{creatorLogin.response.body.user.id}}", "brief": "A brief that is long enough.", "destinationUrl": "https://acme.example", "deadline": "2020-01-01T00:00:00Z" }
+
+### Creator tries to top up: 403
+POST {{base}}/wallet/topup
+Authorization: Bearer {{creatorToken}}
+Content-Type: application/json
+
+{ "amountCents": 1000 }
 
 ### Brand tries to save a creator profile: 403
 PUT {{base}}/creators/me/profile

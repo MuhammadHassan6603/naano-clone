@@ -56,7 +56,40 @@ export function queryInt(query: Body, key: string, range: Range): number | undef
   return int({ [key]: Number(value) }, key, range)
 }
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+function parseUrl(body: Body, key: string): URL {
+  const value = text(body, key, { max: 2000 })
+  try {
+    return new URL(value)
+  } catch {
+    throw badRequest(`${key} must be a valid URL`)
+  }
+}
+
+export function webUrl(body: Body, key: string): string {
+  const url = parseUrl(body, key)
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') throw badRequest(`${key} must be an http(s) URL`)
+  return url.toString()
+}
+
+export function linkedInUrl(body: Body, key: string): string {
+  const url = parseUrl(body, key)
+  const onLinkedIn = url.hostname === 'linkedin.com' || url.hostname.endsWith('.linkedin.com')
+  if (url.protocol !== 'https:' || !onLinkedIn) throw badRequest(`${key} must be an https link to a LinkedIn post`)
+  return url.toString()
+}
+
+export function isoDate(body: Body, key: string): Date {
+  const value = text(body, key, { max: 40 })
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) throw badRequest(`${key} must be an ISO 8601 date`)
+  return date
+}
+
+export function uuid(body: Body, key: string, what: string): string {
+  return idParam(text(body, key, { max: 36 }), what)
+}
+
+const UUID =/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 // A malformed id can't match any row; checking here keeps it a 404 instead of a database error.
 export function idParam(value: string | undefined, what: string): string {

@@ -33,7 +33,7 @@ const creatorSelect = {
 type CreatorRow = Prisma.UserGetPayload<{ select: typeof creatorSelect }>
 
 // A creator is listed once they've set a price, which the profile endpoint only allows together with a niche.
-const listed = {
+export const listed = {
   role: 'creator',
   profile: { is: { priceCents: { not: null }, niche: { not: null } } },
 } satisfies Prisma.UserWhereInput

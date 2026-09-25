@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { after, before, describe, test } from 'node:test'
 import { randomUUID } from 'node:crypto'
-import { type Session, insertBooking, startServer } from './helpers.js'
+import { type Session, defaultProfile as validProfile, insertBooking, startServer } from './helpers.js'
 
 let api: Awaited<ReturnType<typeof startServer>>
 
@@ -12,25 +12,12 @@ after(async () => {
   await api.stop()
 })
 
-const validProfile = {
-  niche: 'RevOps',
-  bio: 'I write about pipeline hygiene.',
-  audience: 'SaaS founders, seed to Series B',
-  priceCents: 45_000,
-  followers: 12_000,
-}
-
 const PUBLIC_KEYS = ['audience', 'bio', 'followers', 'id', 'name', 'niche', 'priceCents', 'reliability']
 
 const saveProfile = (session: Session, profile: Record<string, unknown> = validProfile) =>
   api.call('PUT', '/creators/me/profile', { token: session.token, body: profile })
 
-async function listedCreator(profile: Partial<typeof validProfile> = {}, name?: string) {
-  const session = await api.signup('creator', name)
-  const res = await saveProfile(session, { ...validProfile, ...profile })
-  assert.equal(res.status, 200)
-  return session
-}
+const listedCreator = (...args: Parameters<typeof api.listedCreator>) => api.listedCreator(...args)
 
 const ids = (res: { body: { creators: { id: string }[] } }) => res.body.creators.map((c) => c.id)
 

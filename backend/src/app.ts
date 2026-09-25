@@ -5,6 +5,8 @@ import { env } from './env.js'
 import { errorHandler, unknownRoute } from './errors.js'
 import { authRouter } from './routes/auth.js'
 import { creatorsRouter } from './routes/creators.js'
+import { walletRouter } from './routes/wallet.js'
+import { bookingsRouter } from './routes/bookings.js'
 
 export function createApp() {
   const app = express()
@@ -24,6 +26,8 @@ export function createApp() {
 
   app.use('/auth', authRouter)
   app.use('/creators', creatorsRouter)
+  app.use('/wallet', walletRouter)
+  app.use('/bookings', bookingsRouter)
 
   app.use(unknownRoute)
   app.use(errorHandler)

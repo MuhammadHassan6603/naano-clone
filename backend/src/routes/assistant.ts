@@ -3,7 +3,7 @@ import { db } from '../db.js'
 import { env } from '../env.js'
 import { getAuth, requireAuth } from '../auth.js'
 import { HttpError, badRequest, unauthorized } from '../errors.js'
-import { type ChatMessage, type Model, ask } from '../assistant.js'
+import { type ChatMessage, type Model, ask, validTimeZone } from '../assistant.js'
 import { type Body, objectBody } from '../validate.js'
 
 const MAX_MESSAGES = 12
@@ -55,8 +55,7 @@ export function assistantRouter(model: Model | null) {
 
   router.post('/', async (req, res) => {
     const body = objectBody(req.body)
-    const input = { messages: messages(body), page: page(body) }
-    if (!model) throw new HttpError(503, "The assistant isn't switched on for this server yet.")
+    const input = { messages: messages(body), page: page(body), timeZone: validTimeZone(body.timeZone) }
 
     const auth = getAuth(req)
     const user = await db.user.findUnique({ where: { id: auth.userId }, select: { name: true } })
@@ -64,7 +63,7 @@ export function assistantRouter(model: Model | null) {
     rateLimit(auth.userId)
 
     const trackingBase = env.publicApiUrl ?? `${req.protocol}://${req.get('host')}`
-    res.json(await ask({ ...auth, name: user.name, trackingBase }, input.messages, input.page, model))
+    res.json(await ask({ ...auth, name: user.name, trackingBase }, input.messages, { page: input.page, timeZone: input.timeZone, model }))
   })
 
   return router

@@ -93,6 +93,18 @@ export function AssistantBar({ user }: { user: User }) {
   )
 
   useEffect(() => {
+    if (!panelOpen && !focused) return
+    const closeOnOutsideTap = (event: PointerEvent) => {
+      const target = event.target as Element | null
+      if (target?.closest('.ai-thread, .ai-bar, .ai-handle')) return
+      setThreadOpen(false)
+      inputRef.current?.blur()
+    }
+    document.addEventListener('pointerdown', closeOnOutsideTap)
+    return () => document.removeEventListener('pointerdown', closeOnOutsideTap)
+  }, [panelOpen, focused])
+
+  useEffect(() => {
     if (!guide?.highlight || location.pathname + location.search !== guide.path) return
     return highlight(guide.highlight, () => setGuide(undefined))
   }, [guide, location.pathname, location.search])
@@ -129,10 +141,11 @@ export function AssistantBar({ user }: { user: User }) {
     setPending(true)
     setSlow(false)
     const slowTimer = window.setTimeout(() => setSlow(true), SLOW_AFTER_MS)
+    setMessages(history)
     try {
       const { reply, action } = await askAssistant(history, location.pathname + location.search, controller.signal)
       setMessages([...history, { role: 'assistant', text: reply, action }])
-      if (action) go(action)
+      if (action?.auto) go(action)
     } catch (error) {
       if (isAbort(error)) return
       setMessages([...history, { role: 'assistant', text: toApiError(error).message, failed: true }])
@@ -240,7 +253,7 @@ export function AssistantBar({ user }: { user: User }) {
                       <p>{message.text}</p>
                       {message.action && (
                         <button type="button" className="ai-chip ai-chip--go" onMouseDown={keepFocus} onClick={() => go(message.action!)}>
-                          {message.action.highlight ? 'Show me' : 'Open'}: {message.action.label}
+                          {message.action.auto ? 'Show me again' : 'Show me'}: {message.action.label}
                         </button>
                       )}
                       {message.failed && index === messages.length - 1 && (

@@ -1,14 +1,18 @@
 import { api } from './api'
 import type { Role } from './types'
 
-export type GuideAction = { path: string; label: string; highlight?: string }
+export type GuideAction = { path: string; label: string; highlight?: string; auto: boolean }
 export type ChatMessage = { role: 'user' | 'assistant'; text: string; action?: GuideAction; failed?: boolean }
 
 export const askAssistant = (history: ChatMessage[], page: string, signal: AbortSignal) =>
   api<{ reply: string; action?: GuideAction }>('/assistant', {
     method: 'POST',
     signal,
-    body: { messages: history.filter((m) => !m.failed).map(({ role, text }) => ({ role, text })), page },
+    body: {
+      messages: history.filter((m) => !m.failed).map(({ role, text }) => ({ role, text })),
+      page,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    },
   })
 
 export const SUGGESTIONS: Record<Role, string[]> = {

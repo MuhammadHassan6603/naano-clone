@@ -16,6 +16,7 @@ React 19 · Vite 8 · TypeScript · Tailwind CSS v4 · motion · react-router
 ## Running it
 
 ```bash
+cd frontend
 npm install
 npm run dev
 ```
@@ -32,17 +33,29 @@ npx wrangler dev                                  # :8787
 Vite proxies `/api/chat` to the worker, so the browser stays same-origin and
 the key never reaches it.
 
+The app backend (signup, login, booking, agency forms) is a separate Node
+service:
+
+```bash
+cd backend
+npm install
+cp .env.example .env   # point DATABASE_URL at a local Postgres
+npm run dev             # :4000
+```
+
 ## Layout
 
 ```
-src/
-  main.tsx          root
-  App.tsx           routes, and the chrome shared across them
-  index.css         theme, animations, the page-specific stylesheets
-  sections/         home, /creators and /agencies sections
-  pages/            one file per route
-  components/       shared pieces
-  lib/              assets, motion presets, blog content, chat transport
+frontend/           React app (Vite, TypeScript, Tailwind)
+  src/
+    main.tsx          root
+    App.tsx           routes, and the chrome shared across them
+    index.css         theme, animations, the page-specific stylesheets
+    sections/         home, /creators and /agencies sections
+    pages/            one file per route
+    components/       shared pieces
+    lib/              assets, motion presets, blog content, chat transport
+backend/            Node + Express + TypeScript API backed by Postgres
 worker/             Cloudflare Worker holding the Gemini key
 .agent-logs/        transcripts of the sessions that produced this
 ```
@@ -52,6 +65,7 @@ worker/             Cloudflare Worker holding the Gemini key
 Live at **https://muhammadhassan6603.github.io/naano-clone/**
 
 ```bash
+cd frontend
 npm run deploy      # builds with the Pages base path, force-pushes dist/ to gh-pages
 ```
 

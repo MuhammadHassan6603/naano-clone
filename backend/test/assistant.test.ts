@@ -4,7 +4,7 @@ import { after, before, describe, test } from 'node:test'
 import { randomUUID } from 'node:crypto'
 import { createApp } from '../src/app.js'
 import { db } from '../src/db.js'
-import { SCREENS, type Content, type Model } from '../src/assistant.js'
+import { GEMINI_MODELS, SCREENS, type Content, type Model, geminiModel } from '../src/assistant.js'
 import { MAX_QUESTIONS_PER_WINDOW } from '../src/routes/assistant.js'
 import { DAY_MS, type Session, insertBooking, startServer } from './helpers.js'
 
@@ -382,4 +382,60 @@ test('limits each user to a burst of questions', async () => {
   assert.match(limited.body.error, /try again in a few minutes/)
   assert.equal((await ask(other, question('hi'))).status, 200)
   assert.equal((await ask(brand, { messages: [] })).status, 400)
+})
+
+describe('the Gemini adapter', () => {
+  const request = { system: 's', contents: [{ role: 'user' as const, parts: [{ text: 'hi' }] }], tools: [] }
+  const reply = (status: number, body: unknown = {}) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
+  const ok = reply(200, { candidates: [{ content: { role: 'model', parts: [{ text: 'hello' }] } }] })
+
+  async function withFetch(responses: Response[], run: (urls: string[]) => Promise<void>) {
+    const original = globalThis.fetch
+    const originalError = console.error
+    const urls: string[] = []
+    globalThis.fetch = (async (url: string, init?: RequestInit) => {
+      if (!String(url).includes('googleapis.com')) return original(url, init)
+      urls.push(url)
+      return responses.shift()!
+    }) as typeof fetch
+    console.error = () => {}
+    try {
+      await run(urls)
+    } finally {
+      globalThis.fetch = original
+      console.error = originalError
+    }
+  }
+
+  test('falls back to the lighter model when the first is rate limited', async () => {
+    await withFetch([reply(429), ok], async (urls) => {
+      const content = await geminiModel('key')(request)
+      assert.equal(content.parts[0].text, 'hello')
+      assert.ok(urls[0].includes(`/${GEMINI_MODELS[0]}:`))
+      assert.ok(urls[1].includes(`/${GEMINI_MODELS[1]}:`))
+    })
+  })
+
+  test('says the assistant is busy when every model is rate limited', async () => {
+    await withFetch([reply(429), reply(429)], async () => {
+      await assert.rejects(geminiModel('key')(request), { status: 503, message: /try again in a minute/ })
+    })
+  })
+
+  test('does not retry a request Gemini rejects as bad', async () => {
+    await withFetch([reply(400), ok], async (urls) => {
+      await assert.rejects(geminiModel('key')(request), /failed with 400/)
+      assert.equal(urls.length, 1)
+    })
+  })
+
+  test('the route passes the busy message through', async () => {
+    const brand = await api.signup('brand')
+    await withFetch([reply(429), reply(429)], async () => {
+      current = geminiModel('key')
+      const res = await ask(brand, question('hi'))
+      assert.equal(res.status, 503)
+      assert.match(res.body.error, /getting a lot of questions/)
+    })
+  })
 })

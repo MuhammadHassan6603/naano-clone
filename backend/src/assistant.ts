@@ -377,25 +377,41 @@ export async function ask(
   return { reply: action ? `Opened ${action.label}.` : 'That took too many steps. Please ask in a simpler way.', action }
 }
 
-const GEMINI_MODEL = 'gemini-2.5-flash'
+export const GEMINI_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite']
+const RETRY_ON_NEXT_MODEL = new Set([429, 500, 503])
+
+export class AssistantBusy extends HttpError {
+  constructor() {
+    super(503, 'The assistant is getting a lot of questions right now. Please try again in a minute.')
+  }
+}
 
 export function geminiModel(apiKey: string): Model {
   return async ({ system, contents, tools }) => {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: system }] },
-        contents,
-        tools: [{ functionDeclarations: tools }],
-        generationConfig: { temperature: 0.2, maxOutputTokens: 1024, thinkingConfig: { thinkingBudget: 0 } },
-      }),
-      signal: AbortSignal.timeout(25_000),
-    })
-    if (!response.ok) throw new Error(`Gemini answered ${response.status}: ${(await response.text()).slice(0, 500)}`)
-    const data = (await response.json()) as { candidates?: { content?: Content; finishReason?: string }[] }
-    const candidate = data.candidates?.[0]
-    if (!candidate?.content?.parts?.length) throw new Error(`Gemini returned no content (${candidate?.finishReason ?? 'no candidate'})`)
-    return { role: 'model', parts: candidate.content.parts }
+    let lastStatus = 0
+    for (const name of GEMINI_MODELS) {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${name}:generateContent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: system }] },
+          contents,
+          tools: [{ functionDeclarations: tools }],
+          generationConfig: { temperature: 0.2, maxOutputTokens: 1024, thinkingConfig: { thinkingBudget: 0 } },
+        }),
+        signal: AbortSignal.timeout(25_000),
+      })
+      if (response.ok) {
+        const data = (await response.json()) as { candidates?: { content?: Content; finishReason?: string }[] }
+        const candidate = data.candidates?.[0]
+        if (!candidate?.content?.parts?.length) throw new Error(`Gemini ${name} returned no content (${candidate?.finishReason ?? 'no candidate'})`)
+        return { role: 'model', parts: candidate.content.parts }
+      }
+      lastStatus = response.status
+      console.error(`Gemini ${name} answered ${response.status}: ${(await response.text()).slice(0, 300)}`)
+      if (!RETRY_ON_NEXT_MODEL.has(response.status)) break
+    }
+    if (lastStatus === 429) throw new AssistantBusy()
+    throw new Error(`Gemini failed with ${lastStatus}`)
   }
 }

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { after, before, describe, test } from 'node:test'
 import jwt from 'jsonwebtoken'
 import { db } from '../src/db.js'
-import { startServer, testEmail } from './helpers.js'
+import { PASSWORD, startServer, testEmail } from './helpers.js'
 
 let api: Awaited<ReturnType<typeof startServer>>
 
@@ -13,8 +13,7 @@ after(async () => {
   await api.stop()
 })
 
-const PASSWORD = 'correct horse battery'
-
+// Raw signup that returns the whole reply, since these tests assert on failures too.
 const signup = (overrides: Record<string, unknown> = {}) =>
   api.call('POST', '/auth/signup', {
     body: { email: testEmail('user'), password: PASSWORD, name: 'Test User', role: 'brand', ...overrides },

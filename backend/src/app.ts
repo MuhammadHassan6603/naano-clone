@@ -4,6 +4,7 @@ import { db } from './db.js'
 import { env } from './env.js'
 import { errorHandler, unknownRoute } from './errors.js'
 import { authRouter } from './routes/auth.js'
+import { creatorsRouter } from './routes/creators.js'
 
 export function createApp() {
   const app = express()
@@ -22,6 +23,7 @@ export function createApp() {
   })
 
   app.use('/auth', authRouter)
+  app.use('/creators', creatorsRouter)
 
   app.use(unknownRoute)
   app.use(errorHandler)

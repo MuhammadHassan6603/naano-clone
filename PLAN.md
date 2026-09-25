@@ -261,7 +261,7 @@ Query: `?niche=RevOps&maxPriceCents=50000&sort=reliability|price|followers` (def
 - Returns only creators with a price set.
 - Reliability: `delivered` = paid bookings, `total` = paid + expired. Declined bookings don't count: turning down a brief isn't a delivery failure. Computed with one `GROUP BY` query joined onto the list.
 - Sorted by reliability: delivered/total descending, with new creators (total = 0) last. Ties are broken by followers.
-- 200 → `{ creators: Creator[] }`
+- 200 → `{ creators: Creator[], niches: string[] }`. `niches` is the fixed list, so the frontend's filter never drifts from what the API accepts.
 
 **5. `GET /creators/:id`** (anyone)
 - 200 → `{ creator: Creator }` · 404 if the user isn't a creator or has no price set

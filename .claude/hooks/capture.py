@@ -18,6 +18,18 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 LOGDIR = os.path.join(ROOT, ".agent-logs")
 
 
+SECRETS = [
+    (re.compile(r"(\b[a-z][a-z0-9+.-]*://[^\s:/@]+:)[^\s@]+@", re.I), r"\1*****@"),
+    (re.compile(r"\bnpg_[A-Za-z0-9]+"), "*****"),
+]
+
+
+def redact(text):
+    for pattern, replacement in SECRETS:
+        text = pattern.sub(replacement, text)
+    return text
+
+
 def text_of(content):
     if isinstance(content, str):
         return content.strip()
@@ -130,7 +142,8 @@ def main():
     ])
     entries = "\n\n".join(render(t, i, short) for i, t in enumerate(turns, start=1))
     with open(path, "w", encoding="utf-8") as fh:
-        fh.write(frontmatter + entries.rstrip("\n") + "\n")
+        # Logs are committed to a public repo; never let a pasted credential through.
+        fh.write(redact(frontmatter + entries.rstrip("\n") + "\n"))
 
 
 if __name__ == "__main__":

@@ -48,7 +48,54 @@ Authorization: Bearer {{brandToken}}
 GET {{base}}/auth/me
 Authorization: Bearer {{creatorToken}}
 
+########## Creators ##########
+
+### Creator saves their profile: 200 { creator } (the card brands see)
+PUT {{base}}/creators/me/profile
+Authorization: Bearer {{creatorToken}}
+Content-Type: application/json
+
+{
+  "niche": "RevOps",
+  "bio": "Ex-VP Sales. I write about pipeline hygiene and forecasting that holds up.",
+  "audience": "SaaS founders and sales leaders, seed to Series B",
+  "priceCents": 45000,
+  "followers": 18400
+}
+
+### Marketplace: 200 { creators, niches }. No login needed
+GET {{base}}/creators
+
+### Filter and sort: niche, max price in cents (inclusive), sort=reliability|price|followers
+GET {{base}}/creators?niche=RevOps&maxPriceCents=50000&sort=price
+
+### One creator: 200 { creator }
+GET {{base}}/creators/{{creatorLogin.response.body.user.id}}
+
 ########## Failure cases ##########
+
+### Brand tries to save a creator profile: 403
+PUT {{base}}/creators/me/profile
+Authorization: Bearer {{brandToken}}
+Content-Type: application/json
+
+{ "niche": "RevOps", "bio": "", "audience": "", "priceCents": 45000, "followers": 0 }
+
+### Price sent as text: 400
+PUT {{base}}/creators/me/profile
+Authorization: Bearer {{creatorToken}}
+Content-Type: application/json
+
+{ "niche": "RevOps", "bio": "", "audience": "", "priceCents": "450", "followers": 0 }
+
+### Unknown niche filter: 400
+GET {{base}}/creators?niche=Crypto
+
+### Unknown creator id: 404
+GET {{base}}/creators/00000000-0000-0000-0000-000000000000
+
+### Malformed creator id: 404
+GET {{base}}/creators/not-an-id
 
 ### Duplicate email, different case: 409
 POST {{base}}/auth/signup

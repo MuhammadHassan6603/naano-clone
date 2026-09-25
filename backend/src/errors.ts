@@ -19,7 +19,6 @@ export const unknownRoute: RequestHandler = (req) => {
   throw notFound(`No route for ${req.method} ${req.path}`)
 }
 
-// body-parser marks its own client errors (bad JSON, body too large) with a 4xx status and expose=true.
 type ClientError = { status: number; expose: true; type?: string }
 const isClientError = (err: unknown): err is ClientError =>
   typeof err === 'object' &&

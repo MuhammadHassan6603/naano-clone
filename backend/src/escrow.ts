@@ -1,16 +1,3 @@
-/**
- * The only module that moves money or changes a booking's status.
- *
- * Every operation is one database transaction built around a conditional update:
- * the WHERE clause states the precondition (status, deadline, balance), and if it
- * matches no row we refuse with 409. Postgres locks the row and re-checks the
- * condition, so two racing requests can never both succeed. Rows are always locked
- * in the same order (booking, brand wallet, creator wallet), which rules out deadlocks.
- *
- * Every function takes optional `{ at, tx }`: `at` lets the seed write history in the
- * past, and `tx` lets it chain several steps into one transaction so nothing else ever
- * sees a half-played booking.
- */
 import { randomBytes } from 'node:crypto'
 import { db } from './db.js'
 import { env } from './env.js'
@@ -22,21 +9,16 @@ import type { BookingStatus, RefundReason, VerifiedVia } from './generated/prism
 export type Tx = Prisma.TransactionClient
 export type EscrowOptions = { at?: Date; tx?: Tx }
 
-// Generous limits: each transaction is a handful of round trips to Neon.
 export const TX_LIMITS = { maxWait: 10_000, timeout: 20_000 }
 
-/** Runs inside the caller's transaction when one is given, otherwise in a new one. */
 const inTx = <T>(tx: Tx | undefined, fn: (tx: Tx) => Promise<T>) => (tx ? fn(tx) : db.$transaction(fn, TX_LIMITS))
 
 export const MIN_TOPUP_CENTS = 100
 export const MAX_TOPUP_CENTS = 1_000_000
 
-// 48 random bits: collisions are negligible at this scale, and the unique index would catch one.
 const newTrackingCode = () => randomBytes(6).toString('base64url')
 
 const autoApproveCutoff = (at: Date) => new Date(at.getTime() - env.autoApproveMs)
-
-// ─── Wallet ──────────────────────────────────────────────────────────────────
 
 export async function topUp(brandId: string, amountCents: number, { at = new Date(), tx }: EscrowOptions = {}) {
   await inTx(tx, async (tx) => {
@@ -48,8 +30,6 @@ export async function topUp(brandId: string, amountCents: number, { at = new Dat
   })
 }
 
-// ─── Booking ─────────────────────────────────────────────────────────────────
-
 export type NewBooking = {
   brandId: string
   creatorId: string
@@ -58,14 +38,12 @@ export type NewBooking = {
   deadline: Date
 }
 
-/** Holds the creator's current price from the brand's wallet and opens the booking. */
 export function createBooking(input: NewBooking, { at = new Date(), tx }: EscrowOptions = {}): Promise<string> {
   return inTx(tx, async (tx) => {
     const creator = await tx.user.findFirst({
       where: { id: input.creatorId, ...listed },
       select: { profile: { select: { priceCents: true } } },
     })
-    // The price is read here, never taken from the client, and copied onto the booking.
     const priceCents = creator?.profile?.priceCents
     if (!priceCents) throw notFound('Creator not found')
 
@@ -114,7 +92,6 @@ export const approve = (bookingId: string, options?: EscrowOptions) => pay(booki
 
 const PAY_VERB: Record<VerifiedVia, string> = { brand: 'approve', click: 'verify', timeout: 'auto-approve' }
 
-/** Verified delivery: releases the brand's held money and pays the creator. */
 export async function pay(bookingId: string, via: VerifiedVia, { at = new Date(), tx }: EscrowOptions = {}) {
   await inTx(tx, async (tx) => {
     const booking = await transition(tx, bookingId, PAY_VERB[via], at, {
@@ -141,7 +118,6 @@ export async function pay(bookingId: string, via: VerifiedVia, { at = new Date()
   })
 }
 
-/** Returns the held money to the brand: the creator declined, or the deadline passed. */
 export async function refund(bookingId: string, reason: RefundReason, { at = new Date(), tx }: EscrowOptions = {}) {
   await inTx(tx, async (tx) => {
     const booking = await transition(tx, bookingId, reason === 'declined' ? 'decline' : 'expire', at, {
@@ -161,13 +137,6 @@ export async function refund(bookingId: string, reason: RefundReason, { at = new
   })
 }
 
-// ─── Sweep ───────────────────────────────────────────────────────────────────
-
-/**
- * Expires overdue bookings (refund) and auto-approves posts the brand ignored (pay).
- * Runs on a timer and before booking reads, because a sleeping free-tier server may
- * have missed the timer. Losing a race to a user action is expected and ignored.
- */
 export async function sweep({ at = new Date(), bookingId }: { at?: Date; bookingId?: string } = {}) {
   const scope = bookingId ? { id: bookingId } : {}
   const [overdue, ignored] = await Promise.all([
@@ -187,8 +156,6 @@ export async function sweep({ at = new Date(), bookingId }: { at?: Date; booking
 export function ignoreConflict(err: unknown) {
   if (!(err instanceof HttpError && err.status === 409)) throw err
 }
-
-// ─── Internals ───────────────────────────────────────────────────────────────
 
 async function transition(
   tx: Tx,

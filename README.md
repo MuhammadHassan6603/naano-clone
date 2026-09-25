@@ -1,87 +1,98 @@
-# naano.com rebuild
+# Naano Rebuild
 
-A from-scratch rebuild of [naano.com](https://naano.com), done as a 24-hour
-take-home for **8x**.
+A rebuild of [naano.com](https://naano.com), the B2B LinkedIn creator
+marketplace, made as a take-home assignment for **8x**. It is not affiliated
+with naano.
 
-This is a clone built to demonstrate front-end work. It is not affiliated with
-naano, and nothing on it transacts — sign-up, login, booking and the agency
-forms reproduce the real flows but do not create accounts, take payment, or
-book anything. Images and video are hotlinked from naano.com rather than
-re-hosted.
+**The change we made:** naano admits that booked posts don't always get
+published. Here the brand's money is held in escrow when it books, released to
+the creator only when the post is verified live, and refunded automatically if
+the creator declines or misses the deadline.
+
+Accounts, bookings, balances and clicks are real records in a real Postgres
+database. The money is demo money: no card is charged and nothing is paid out.
+
+- Frontend: https://muhammadhassan6603.github.io/naano-clone/
+- API: https://naano-clone-9pyv.onrender.com (`/health`)
+- Plan and API reference: [PLAN.md](PLAN.md)
+
+## Demo accounts
+
+Every account uses the password `naano-demo-2026`.
+
+| Email | Role | What to look at |
+| --- | --- | --- |
+| `acme@demo.test` | Brand | One booking in every stage, and a post waiting for approval |
+| `maya@demo.test` | Creator | A new booking request waiting to be accepted |
+| `priya@demo.test` | Creator | Delivered 5 of 5 |
+| `pipewise@demo.test` | Brand | The brand behind most past bookings |
+
+The login page has one-click buttons for these. The API runs on a free plan
+that sleeps when idle, so the first request can take up to a minute.
 
 ## Stack
 
-React 19 · Vite 8 · TypeScript · Tailwind CSS v4 · motion · react-router
+| Part | Choice |
+| --- | --- |
+| Frontend | React 19, Vite 8, TypeScript, Tailwind CSS v4, react-router |
+| Backend | Node.js, Express 5, TypeScript |
+| Database | PostgreSQL on Neon, through Prisma 7 |
+| Hosting | GitHub Pages (frontend), Render (API) |
 
-## Running it
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-The assistant needs the worker as well — see [`worker/README.md`](worker/README.md).
-
-```bash
-cd worker
-npm install
-echo 'GEMINI_API_KEY = "your-key"' > .dev.vars   # gitignored
-npx wrangler dev                                  # :8787
-```
-
-Vite proxies `/api/chat` to the worker, so the browser stays same-origin and
-the key never reaches it.
-
-The backend is a separate Node service (Express, TypeScript, Prisma, Postgres
-on Neon):
+## Running it locally
 
 ```bash
 cd backend
 npm install                   # also generates the Prisma client
 cp .env.example .env          # fill in the Neon URLs and a JWT_SECRET
 npx prisma migrate deploy     # create the tables (first run only)
-npm run dev                   # :4000
-npm test                      # API tests against the database in .env
+npm run seed                  # demo accounts and bookings
+npm run dev                   # http://localhost:4000
+```
+
+```bash
+cd frontend
+npm install
+npm run dev                   # http://localhost:5173, talks to localhost:4000
+```
+
+Backend checks:
+
+```bash
+npm test                      # 147 API tests; needs TEST_DATABASE=1 in .env
+npm run check                 # end-to-end escrow check against a running server
 npm run db:studio             # browse the tables
 ```
 
 `backend/requests.http` has every endpoint, including the failure cases, for
-the VS Code REST Client. The backend deploys to Render from `render.yaml`.
+the VS Code REST Client.
 
 ## Layout
 
 ```
-frontend/           React app (Vite, TypeScript, Tailwind)
-  src/
-    main.tsx          root
-    App.tsx           routes, and the chrome shared across them
-    index.css         theme, animations, the page-specific stylesheets
-    sections/         home, /creators and /agencies sections
-    pages/            one file per route
-    components/       shared pieces
-    lib/              assets, motion presets, blog content, chat transport
-backend/            Node + Express + TypeScript API backed by Postgres
-worker/             Cloudflare Worker holding the Gemini key
-.agent-logs/        transcripts of the sessions that produced this
+frontend/src/
+  pages/          one file per route
+  components/     shared UI; components/ui/ holds buttons, fields, notices, icons
+  lib/            API client, session, data hook, formatting, validation
+backend/
+  src/escrow.ts   the only code that moves money or changes a booking's status
+  src/routes/     HTTP layer: validate input, check who is calling, respond
+  prisma/         schema, migrations, seed
+  test/           API tests
+worker/           Cloudflare Worker for the earlier AI assistant (not used by the app)
+.agent-logs/      transcripts of the sessions that produced this
 ```
 
 ## Deployment
 
-Live at **https://muhammadhassan6603.github.io/naano-clone/**
+The API deploys to Render from `render.yaml` on every push to `main`.
+
+The frontend is published to GitHub Pages:
 
 ```bash
 cd frontend
 npm run deploy      # builds with the Pages base path, force-pushes dist/ to gh-pages
 ```
 
-Pages serves the `gh-pages` branch. `VITE_BASE` in the `build:pages` script sets
-the subpath for both the bundle and the router, so renaming the repo means
-editing that one string. `index.html` is copied to `404.html` because Pages has
-no rewrite rules — that is what makes deep links work.
-
-The assistant's endpoint is baked in from `.env.production`. That URL is public
-on purpose: the Gemini key is a Cloudflare secret, and `ALLOWED_ORIGINS` in
-`worker/wrangler.toml` limits the worker to this site's origin so it cannot be
-reused as an open Gemini proxy. The key is not in this repository, not in the
-bundle, and never sent to the browser.
+`index.html` is copied to `404.html` because Pages has no rewrite rules; that
+is what makes deep links such as `/creators/:id` work.

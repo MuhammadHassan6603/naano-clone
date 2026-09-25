@@ -6,7 +6,6 @@ export const BOOKING_STATUSES = ['requested', 'accepted', 'submitted', 'paid', '
 
 const party = { select: { id: true, name: true } } as const
 
-// submitIpHash and the raw trackingCode never leave the server.
 const bookingSelect = {
   id: true,
   status: true,
@@ -34,7 +33,6 @@ export type TimelineEvent = {
   via?: VerifiedVia
 }
 
-/** The status history, rebuilt from the booking's own timestamps. */
 function timeline(row: BookingRow): TimelineEvent[] {
   const events: TimelineEvent[] = [{ at: row.createdAt, event: 'booked' }]
   if (row.acceptedAt) events.push({ at: row.acceptedAt, event: 'accepted' })
@@ -56,7 +54,6 @@ function timeline(row: BookingRow): TimelineEvent[] {
 function toPublic({ trackingCode, ...row }: BookingRow, trackingBase: string) {
   return {
     ...row,
-    // The link goes into the LinkedIn post, so it only exists once the creator has taken the job.
     trackingUrl: row.acceptedAt ? `${trackingBase}/r/${trackingCode}` : null,
   }
 }

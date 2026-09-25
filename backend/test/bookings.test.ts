@@ -23,7 +23,6 @@ const inDays = (days: number) => new Date(Date.now() + days * DAY_MS).toISOStrin
 
 type Action = 'accept' | 'decline' | 'submit' | 'approve'
 
-/** A funded brand, a listed creator, and shortcuts for acting on bookings between them. */
 async function scenario({ balance = 100_000, price = PRICE } = {}) {
   const [brand, creator] = await Promise.all([api.fundedBrand(balance), api.listedCreator({ priceCents: price })])
 
@@ -324,7 +323,6 @@ describe('booking lifecycle', () => {
     test(`submit rejects ${label} with 400 and stays accepted`, async () => {
       const s = await scenario()
       const id = await s.bookingIn('accepted')
-      // Called directly: passing undefined to run.submit would fall back to its default URL.
       const res = await s.act(s.creator, id, 'submit', { postUrl })
       assert.equal(res.status, 400)
       assert.equal((await s.get(id)).body.booking.status, 'accepted')

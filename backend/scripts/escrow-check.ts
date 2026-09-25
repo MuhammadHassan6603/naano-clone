@@ -1,12 +1,3 @@
-/**
- * End-to-end check of the escrow flow over HTTP against a running server.
- *
- *   npm run check                                        # http://localhost:4000
- *   npm run check -- https://naano-clone-9pyv.onrender.com
- *
- * It creates two throwaway @check.naano.dev accounts. The creator gets a price, so it
- * will appear in that server's marketplace.
- */
 import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
 

@@ -21,7 +21,6 @@ declare global {
 const BCRYPT_COST = 10
 const TOKEN_TTL = '7d'
 
-// bcrypt only reads the first 72 bytes, so longer passwords would silently match on a prefix.
 export function password(body: Body): string {
   const value = body.password
   if (typeof value !== 'string') throw badRequest('password is required')
@@ -33,8 +32,6 @@ export function password(body: Body): string {
 
 export const hashPassword = (plain: string) => bcrypt.hash(plain, BCRYPT_COST)
 
-// Comparing against a real hash even when the email is unknown keeps login timing
-// the same either way, so response time doesn't reveal which emails have accounts.
 const DUMMY_HASH = bcrypt.hashSync('timing-equaliser-not-a-real-password', BCRYPT_COST)
 
 export const verifyPassword = (plain: string, hash: string | undefined) =>

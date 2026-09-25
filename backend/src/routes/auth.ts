@@ -43,7 +43,6 @@ authRouter.post('/signup', async (req, res) => {
   }
   const passwordHash = await hashPassword(password(body))
 
-  // One nested create runs as one transaction: there is never a user without a wallet.
   const user = await db.user
     .create({
       data: {
@@ -55,7 +54,6 @@ authRouter.post('/signup', async (req, res) => {
       select: publicUser,
     })
     .catch((err: unknown) => {
-      // Checked by the unique index rather than a lookup first, so two signups racing still get one 409.
       if (isUniqueViolation(err)) throw conflict('An account with this email already exists')
       throw err
     })

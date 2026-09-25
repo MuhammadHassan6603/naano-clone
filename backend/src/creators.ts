@@ -23,7 +23,6 @@ export type PublicCreator = {
   reliability: Reliability
 }
 
-// Email is deliberately absent: this shape is served to anyone, logged in or not.
 const creatorSelect = {
   id: true,
   name: true,
@@ -32,16 +31,11 @@ const creatorSelect = {
 
 type CreatorRow = Prisma.UserGetPayload<{ select: typeof creatorSelect }>
 
-// A creator is listed once they've set a price, which the profile endpoint only allows together with a niche.
 export const listed = {
   role: 'creator',
   profile: { is: { priceCents: { not: null }, niche: { not: null } } },
 } satisfies Prisma.UserWhereInput
 
-/**
- * Delivered = paid bookings. Total = paid + expired. Declined bookings don't count:
- * turning down a brief is not a failure to deliver.
- */
 async function reliabilityOf(creatorIds: string[]): Promise<Map<string, Reliability>> {
   const result = new Map(creatorIds.map((id) => [id, { delivered: 0, total: 0 }]))
   if (creatorIds.length === 0) return result
@@ -78,11 +72,6 @@ function toPublic(row: CreatorRow, reliability: Reliability): PublicCreator | nu
   }
 }
 
-/**
- * Ranks by how confident we can be in the delivery rate, not the raw rate: the lower bound
- * of the 95% Wilson score interval. So "5 of 5" outranks "1 of 1", and "4 of 5" outranks
- * "1 of 1" too. New creators (no finished bookings yet) sort after anyone with a track record.
- */
 export function reliabilityScore({ delivered, total }: Reliability): number {
   if (total === 0) return -1
   const z = 1.96
@@ -103,7 +92,6 @@ export async function listCreators(filters: {
   maxPriceCents?: number
   sort: CreatorSort
 }): Promise<PublicCreator[]> {
-  // ponytail: loads every matching creator and sorts in memory; add SQL ordering + pagination past a few thousand creators.
   const rows = await db.user.findMany({
     where: {
       ...listed,

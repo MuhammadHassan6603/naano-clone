@@ -58,7 +58,6 @@ model User {
   @@map("users")
 }
 
-/// A creator is listed in the marketplace only once price_cents is set.
 model CreatorProfile {
   userId     String   @id @map("user_id") @db.Uuid
   niche      String?
@@ -83,7 +82,6 @@ model Wallet {
   @@map("wallets")
 }
 
-/// Append-only ledger. A database trigger rejects UPDATE and DELETE.
 model Transaction {
   id          String          @id @default(uuid()) @db.Uuid
   userId      String          @map("user_id") @db.Uuid

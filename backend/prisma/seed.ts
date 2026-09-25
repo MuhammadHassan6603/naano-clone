@@ -1,16 +1,3 @@
-/**
- * Demo data: 2 brands, 8 creators, and bookings in every state.
- *
- *   npm run seed        → the database in .env (the Neon test branch)
- *   npm run seed:prod   → production (.env.prod.local)
- *
- * Everything goes through escrow.ts with past timestamps, so balances, ledger rows and
- * reliability scores are exactly what real use would have produced. It refuses to run twice.
- *
- * Each booking's whole history is played inside one transaction. A live server's
- * background sweep would otherwise see a booking dated weeks ago halfway through,
- * treat it as overdue, and refund it before the seed finished it.
- */
 import { db } from '../src/db.js'
 import type { Tx } from '../src/escrow.js'
 import { hashPassword } from '../src/auth.js'
@@ -104,7 +91,6 @@ const briefs: Record<BrandKey, string> = {
 let postCounter = 0
 let visitorCounter = 0
 
-/** Adds human clicks from distinct visitors, spread over the given times. */
 async function addClicks(tx: Tx, bookingId: string, times: Date[]) {
   await tx.click.createMany({
     data: times.map((clickedAt) => ({
@@ -116,10 +102,6 @@ async function addClicks(tx: Tx, bookingId: string, times: Date[]) {
   })
 }
 
-/**
- * Plays one booking forward through escrow.ts. `start` is when it was booked; every later
- * step happens at a fixed offset from it, so the timeline reads naturally.
- */
 function play(ids: Record<BrandKey | CreatorKey, string>, brand: BrandKey, creator: CreatorKey, outcome: Outcome, start: Date) {
   return db.$transaction((tx) => playSteps(tx, ids, brand, creator, outcome, start), { ...escrow.TX_LIMITS, timeout: 60_000 })
 }
@@ -150,7 +132,6 @@ async function playSteps(
   await escrow.accept(id, { at: plus(start, 6 * HOUR), tx })
   if (outcome === 'accepted') return id
 
-  // The creator posts, a few readers click, and then the creator submits the link.
   const postedAt = plus(start, 30 * HOUR)
   await addClicks(tx, id, [plus(postedAt, 20 * 60_000), plus(postedAt, 2 * HOUR), plus(postedAt, 5 * HOUR)])
   const submittedAt = plus(postedAt, 6 * HOUR)
@@ -181,7 +162,6 @@ async function main() {
   const ids = await createUsers()
   console.log('created 2 brands and 8 creators')
 
-  // Track records, booked by Pipewise over the past month. Declines don't count against anyone.
   const history: [CreatorKey, Outcome][] = [
     ['maya', 'paid-brand'], ['maya', 'paid-click'], ['maya', 'paid-brand'], ['maya', 'paid-timeout'], ['maya', 'expired'],
     ['daniel', 'paid-brand'], ['daniel', 'paid-click'], ['daniel', 'paid-brand'],
@@ -195,7 +175,6 @@ async function main() {
   }
   console.log(`played ${history.length} past bookings for reliability history`)
 
-  // Acme is the account a reviewer logs into: one booking in every state.
   const acme: [CreatorKey, Outcome, Date][] = [
     ['tom', 'paid-timeout', ago(12)],
     ['james', 'paid-click', ago(10)],

@@ -30,7 +30,6 @@ creatorsRouter.get('/:id', async (req, res) => {
   res.json({ creator })
 })
 
-// PUT replaces the whole profile, so every field is required; bio and audience may be empty strings.
 creatorsRouter.put('/me/profile', requireAuth, requireRole('creator'), async (req, res) => {
   const body = objectBody(req.body)
   const profile = {
@@ -42,7 +41,6 @@ creatorsRouter.put('/me/profile', requireAuth, requireRole('creator'), async (re
   }
   const { userId } = getAuth(req)
 
-  // Every creator gets a profile row at signup, in the same transaction as the user.
   await db.creatorProfile.update({ where: { userId }, data: profile })
 
   const creator = await getCreator(userId)

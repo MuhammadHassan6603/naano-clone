@@ -176,7 +176,6 @@ export default {
                     const parts = parsed?.candidates?.[0]?.content?.parts ?? []
                     for (const part of parts) emit(part?.text ?? '')
                   } catch {
-                    // a partial SSE frame; the next chunk completes it
                   }
                 }
               }

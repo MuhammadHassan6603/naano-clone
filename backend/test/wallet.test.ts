@@ -26,7 +26,6 @@ describe('GET /wallet', () => {
 
   test('reports reconciled: false if the stored balance drifts from the ledger', async () => {
     const brand = await api.fundedBrand(10_000)
-    // Simulate a bug that changed the balance without writing a ledger row.
     await db.wallet.update({ where: { userId: brand.user.id }, data: { availableCents: { increment: 1 } } })
     assert.deepEqual(await api.wallet(brand), { availableCents: 10_001, heldCents: 0, reconciled: false })
   })

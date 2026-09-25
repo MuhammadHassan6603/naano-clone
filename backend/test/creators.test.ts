@@ -170,7 +170,6 @@ describe('reliability score', () => {
 
   test('default sort puts the better track record first and new creators last', async () => {
     const brand = await api.signup('brand')
-    // A distinct niche keeps other creators in the shared test database out of the comparison.
     const niche = 'Founders'
     const perfect = await listedCreator({ niche, followers: 10 })
     const mixed = await listedCreator({ niche, followers: 999_999 })

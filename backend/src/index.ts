@@ -9,7 +9,6 @@ const server = createApp().listen(env.port, () => {
 })
 const stopSweeps = startSweepLoop()
 
-// Render sends SIGTERM on every deploy; finish in-flight requests, then release DB connections.
 for (const signal of ['SIGTERM', 'SIGINT'] as const) {
   process.once(signal, () => {
     stopSweeps()

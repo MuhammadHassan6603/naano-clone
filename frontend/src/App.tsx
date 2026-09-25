@@ -1,57 +1,41 @@
-import { Suspense, lazy } from 'react'
-import { Route, Routes, useLocation } from 'react-router-dom'
-import { AiBar } from './components/AiBar'
-import { ScrollManager } from './components/ScrollManager'
-import { Header } from './sections/Header'
-import { Footer } from './sections/Footer'
-import Home from './pages/Home'
-
-const Creators = lazy(() => import('./pages/Creators'))
-const Agencies = lazy(() => import('./pages/Agencies'))
-const Blog = lazy(() => import('./pages/Blog'))
-const BlogPost = lazy(() => import('./pages/BlogPost'))
-const Login = lazy(() => import('./pages/Login'))
-const Register = lazy(() => import('./pages/Register'))
-const FreeTools = lazy(() => import('./pages/FreeTools'))
-const CaseStudy = lazy(() => import('./pages/CaseStudy'))
-const Book = lazy(() => import('./pages/Book'))
-const AgencySignup = lazy(() => import('./pages/AgencySignup'))
+import { Navigate, Route, Routes } from 'react-router-dom'
+import { Layout } from './components/Layout'
+import { RequireAuth } from './components/RequireAuth'
+import CreatorProfile from './pages/CreatorProfile'
+import Login from './pages/Login'
+import Marketplace from './pages/Marketplace'
+import NewBooking from './pages/NewBooking'
+import NotFound from './pages/NotFound'
+import Signup from './pages/Signup'
+import Wallet from './pages/Wallet'
 
 export default function App() {
-  const { pathname } = useLocation()
-  const bare =
-    pathname === '/login' ||
-    pathname === '/register' ||
-    pathname === '/free-tools' ||
-    pathname === '/book' ||
-    pathname === '/agency' ||
-    pathname === '/talent-agency' ||
-    pathname.startsWith('/case-studies')
-  const hasOwnFooter = bare || pathname.startsWith('/blog')
-
   return (
-    <>
-      <ScrollManager />
-      {!bare && <Header />}
-      <Suspense fallback={<div className="min-h-svh" />}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/creators" element={<Creators />} />
-          <Route path="/agencies" element={<Agencies />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:slug" element={<BlogPost />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/free-tools" element={<FreeTools />} />
-          <Route path="/case-studies/blogseo" element={<CaseStudy />} />
-          <Route path="/book" element={<Book />} />
-          <Route path="/agency" element={<AgencySignup variant="brand" />} />
-          <Route path="/talent-agency" element={<AgencySignup variant="talent" />} />
-          <Route path="*" element={<Home />} />
-        </Routes>
-      </Suspense>
-      {!hasOwnFooter && <Footer />}
-      <AiBar />
-    </>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<Marketplace />} />
+        <Route path="creators/:id" element={<CreatorProfile />} />
+        <Route path="login" element={<Login />} />
+        <Route path="signup" element={<Signup />} />
+        <Route path="register" element={<Navigate to="/signup" replace />} />
+        <Route
+          path="book/:creatorId"
+          element={
+            <RequireAuth role="brand">
+              <NewBooking />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="wallet"
+          element={
+            <RequireAuth>
+              <Wallet />
+            </RequireAuth>
+          }
+        />
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
   )
 }

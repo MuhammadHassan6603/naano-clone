@@ -11,7 +11,6 @@ walletRouter.get('/', async (req, res) => {
   res.json(await getWallet(getAuth(req).userId))
 })
 
-// Demo money: there is no card payment behind this, by design (see PLAN.md, "What we are cutting").
 walletRouter.post('/topup', requireRole('brand'), async (req, res) => {
   const amountCents = int(objectBody(req.body), 'amountCents', { min: MIN_TOPUP_CENTS, max: MAX_TOPUP_CENTS })
   const { userId } = getAuth(req)

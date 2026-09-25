@@ -33,11 +33,6 @@ async function sendBooking(req: Request, res: Response, id: string, status = 200
   res.status(status).json({ booking })
 }
 
-/**
- * Resolves :id to a booking the caller is a party to, optionally as a specific side.
- * Sweeps that booking first, so an overdue or long-ignored booking is settled before
- * anyone reads it or acts on it.
- */
 async function bookingForCaller(req: Request, side?: Role): Promise<string> {
   const raw = req.params.id
   const id = idParam(typeof raw === 'string' ? raw : undefined, 'Booking')

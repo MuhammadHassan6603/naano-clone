@@ -1,21 +1,17 @@
 import { db } from './db.js'
 import { unauthorized } from './errors.js'
+import { TX_LIMITS } from './escrow.js'
 import type { TransactionType } from './generated/prisma/enums.js'
 
 export type WalletView = { availableCents: number; heldCents: number; reconciled: boolean }
 
-/**
- * The stored balance plus a check that it equals what the append-only ledger says.
- * Both reads share one REPEATABLE READ snapshot, so a concurrent booking can't make
- * them disagree for a moment.
- */
 export async function getWallet(userId: string): Promise<WalletView> {
   const [wallet, sums] = await db.$transaction(
     async (tx) => [
       await tx.wallet.findUnique({ where: { userId } }),
       await tx.transaction.groupBy({ by: ['type'], where: { userId }, _sum: { amountCents: true } }),
     ] as const,
-    { isolationLevel: 'RepeatableRead' },
+    { ...TX_LIMITS, isolationLevel: 'RepeatableRead' },
   )
   if (!wallet) throw unauthorized('Account no longer exists')
 

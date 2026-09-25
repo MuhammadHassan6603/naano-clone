@@ -13,7 +13,6 @@ after(async () => {
   await api.stop()
 })
 
-// Raw signup that returns the whole reply, since these tests assert on failures too.
 const signup = (overrides: Record<string, unknown> = {}) =>
   api.call('POST', '/auth/signup', {
     body: { email: testEmail('user'), password: PASSWORD, name: 'Test User', role: 'brand', ...overrides },

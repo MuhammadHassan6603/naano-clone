@@ -6,12 +6,10 @@ import { createApp } from '../src/app.js'
 import { db } from '../src/db.js'
 import type { BookingStatus, RefundReason, Role } from '../src/generated/prisma/enums.js'
 
-// Cleanup below deletes ledger rows, which production must never allow.
 if (process.env.TEST_DATABASE !== '1') {
   throw new Error('Refusing to run: tests need TEST_DATABASE=1 in .env, set only for the Neon test branch.')
 }
 
-// Each test process gets its own subdomain, so parallel test files only ever clean up their own data.
 export const TEST_DOMAIN = `run-${randomUUID().slice(0, 8)}.test.naano.dev`
 export const PASSWORD = 'correct horse battery'
 export const DAY_MS = 86_400_000
@@ -83,10 +81,6 @@ export async function startServer() {
 
   const wallet = async (session: Session) => (await call('GET', '/wallet', { token: session.token })).body
 
-  /**
-   * Deletes everything owned by test users. The ledger is append-only, so the trigger is
-   * switched off and back on inside one transaction: other connections never see it disabled.
-   */
   async function stop() {
     await new Promise<void>((resolve, reject) => server.close((err) => (err ? reject(err) : resolve())))
     const testBookings = { OR: [{ brand: testUsers }, { creator: testUsers }] }
@@ -109,7 +103,6 @@ type Outcome =
   | { status: 'paid' }
   | { status: 'refunded'; reason: RefundReason }
 
-/** Inserts a booking in any state directly, without moving money. Only for read-side tests. */
 export function insertBooking(brandId: string, creatorId: string, outcome: Outcome) {
   const hasPost = outcome.status === 'submitted' || outcome.status === 'paid'
   return db.booking.create({

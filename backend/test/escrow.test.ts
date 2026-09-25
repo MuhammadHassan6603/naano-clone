@@ -36,7 +36,6 @@ async function scenario() {
   const submit = (id: string) => call(creator, 'POST', `/bookings/${id}/submit`, { postUrl: POST_URL })
   const get = async (id: string) => (await call(brand, 'GET', `/bookings/${id}`)).body.booking
 
-  // Time travel for tests: move a booking's clock fields instead of waiting for real time to pass.
   const setTimes = (id: string, data: { deadline?: Date; submittedAt?: Date }) =>
     db.booking.update({ where: { id }, data })
 

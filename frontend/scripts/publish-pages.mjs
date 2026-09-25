@@ -1,6 +1,3 @@
-// Publishes dist/ to the gh-pages branch. A worktree keeps the working
-// directory untouched, and the branch is rewritten each time so Pages only
-// ever holds the current build.
 import { execFileSync } from 'node:child_process'
 import { cpSync, mkdtempSync, rmSync, readdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -29,10 +26,8 @@ try {
 } finally {
   run('worktree', 'remove', '--force', work)
   rmSync(work, { recursive: true, force: true })
-  // the orphan only existed to build the commit; it must not linger
   try {
     execFileSync('git', ['branch', '-D', branch], { stdio: 'ignore' })
   } catch {
-    // never created, nothing to clean
   }
 }

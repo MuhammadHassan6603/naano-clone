@@ -57,7 +57,6 @@ async function scenario() {
   return { brand, creator, booking, click, clicks, status, stats }
 }
 
-/** Click recording runs after the redirect is sent, so wait for it to land. */
 async function eventually(check: () => Promise<boolean>, what: string, timeoutMs = 15_000) {
   const deadline = Date.now() + timeoutMs
   while (Date.now() < deadline) {
@@ -67,7 +66,6 @@ async function eventually(check: () => Promise<boolean>, what: string, timeoutMs
   assert.fail(`timed out waiting for: ${what}`)
 }
 
-/** For "nothing happens" checks: give background work time to finish before asserting. */
 const settle = () => sleep(3_000)
 
 describe('GET /r/:code', () => {

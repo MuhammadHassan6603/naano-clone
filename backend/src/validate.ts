@@ -37,7 +37,6 @@ export function int(body: Body, key: string, { min, max }: Range): number {
   return value
 }
 
-// Query strings arrive as text, and a repeated key (?a=1&a=2) arrives as an array.
 export function queryText(query: Body, key: string): string | undefined {
   const value = query[key]
   if (value === undefined) return undefined
@@ -89,9 +88,8 @@ export function uuid(body: Body, key: string, what: string): string {
   return idParam(text(body, key, { max: 36 }), what)
 }
 
-const UUID =/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-// A malformed id can't match any row; checking here keeps it a 404 instead of a database error.
 export function idParam(value: string | undefined, what: string): string {
   if (!value || !UUID.test(value)) throw notFound(`${what} not found`)
   return value

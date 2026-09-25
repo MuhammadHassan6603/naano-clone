@@ -1,16 +1,17 @@
 import 'dotenv/config'
-import cors from 'cors'
-import express from 'express'
+import { createApp } from './app.js'
 import { db } from './db.js'
+import { env } from './env.js'
 
-const app = express()
-app.use(cors({ origin: process.env.ALLOWED_ORIGIN }))
-app.use(express.json())
-
-app.get('/health', async (_req, res) => {
-  await db.query('SELECT 1')
-  res.json({ ok: true })
+const server = createApp().listen(env.port, () => {
+  console.log(`backend listening on :${env.port}`)
 })
 
-const port = Number(process.env.PORT ?? 4000)
-app.listen(port, () => console.log(`backend listening on :${port}`))
+// Render sends SIGTERM on every deploy; finish in-flight requests, then release DB connections.
+for (const signal of ['SIGTERM', 'SIGINT'] as const) {
+  process.once(signal, () => {
+    server.close(() => {
+      db.$disconnect().finally(() => process.exit(0))
+    })
+  })
+}

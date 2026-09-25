@@ -1,0 +1,94 @@
+# VS Code REST Client: click "Send Request" above each block.
+# Run `npm run dev` first. Switch @base to the Render URL to test the live API.
+
+@base = http://localhost:4000
+@brandEmail = brand-demo@example.com
+@creatorEmail = creator-demo@example.com
+@password = correct horse battery
+
+### Health: 200 { ok: true }
+GET {{base}}/health
+
+### Sign up a brand: 201 (409 if you run it twice)
+# @name brandSignup
+POST {{base}}/auth/signup
+Content-Type: application/json
+
+{ "email": "{{brandEmail}}", "password": "{{password}}", "name": "Acme CRM", "role": "brand" }
+
+### Sign up a creator: 201
+# @name creatorSignup
+POST {{base}}/auth/signup
+Content-Type: application/json
+
+{ "email": "{{creatorEmail}}", "password": "{{password}}", "name": "Dana Creator", "role": "creator" }
+
+### Log in as the brand: 200 with a token
+# @name brandLogin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "{{brandEmail}}", "password": "{{password}}" }
+
+### Log in as the creator: 200 with a token
+# @name creatorLogin
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "{{creatorEmail}}", "password": "{{password}}" }
+
+@brandToken = {{brandLogin.response.body.token}}
+@creatorToken = {{creatorLogin.response.body.token}}
+
+### Who am I (brand): 200 { user }
+GET {{base}}/auth/me
+Authorization: Bearer {{brandToken}}
+
+### Who am I (creator): 200 { user, profile }
+GET {{base}}/auth/me
+Authorization: Bearer {{creatorToken}}
+
+########## Failure cases ##########
+
+### Duplicate email, different case: 409
+POST {{base}}/auth/signup
+Content-Type: application/json
+
+{ "email": "BRAND-DEMO@example.com", "password": "{{password}}", "name": "Again", "role": "brand" }
+
+### Invalid role: 400
+POST {{base}}/auth/signup
+Content-Type: application/json
+
+{ "email": "x@example.com", "password": "{{password}}", "name": "X", "role": "admin" }
+
+### Short password: 400
+POST {{base}}/auth/signup
+Content-Type: application/json
+
+{ "email": "y@example.com", "password": "short", "name": "Y", "role": "brand" }
+
+### Malformed JSON: 400
+POST {{base}}/auth/signup
+Content-Type: application/json
+
+{ "email":
+
+### Wrong password: 401 "Wrong email or password"
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "{{brandEmail}}", "password": "wrong password" }
+
+### Unknown email: 401, identical message
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{ "email": "nobody@example.com", "password": "{{password}}" }
+
+### No token: 401
+GET {{base}}/auth/me
+
+### Garbage token: 401
+GET {{base}}/auth/me
+Authorization: Bearer not.a.token

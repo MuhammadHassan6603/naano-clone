@@ -33,15 +33,21 @@ npx wrangler dev                                  # :8787
 Vite proxies `/api/chat` to the worker, so the browser stays same-origin and
 the key never reaches it.
 
-The app backend (signup, login, booking, agency forms) is a separate Node
-service:
+The backend is a separate Node service (Express, TypeScript, Prisma, Postgres
+on Neon):
 
 ```bash
 cd backend
-npm install
-cp .env.example .env   # point DATABASE_URL at a local Postgres
-npm run dev             # :4000
+npm install                   # also generates the Prisma client
+cp .env.example .env          # fill in the Neon URLs and a JWT_SECRET
+npx prisma migrate deploy     # create the tables (first run only)
+npm run dev                   # :4000
+npm test                      # API tests against the database in .env
+npm run db:studio             # browse the tables
 ```
+
+`backend/requests.http` has every endpoint, including the failure cases, for
+the VS Code REST Client. The backend deploys to Render from `render.yaml`.
 
 ## Layout
 

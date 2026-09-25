@@ -1,0 +1,145 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  brand
+  creator
+}
+
+enum BookingStatus {
+  requested
+  accepted
+  submitted
+  paid
+  refunded
+}
+
+enum VerifiedVia {
+  brand
+  click
+  timeout
+}
+
+enum RefundReason {
+  declined
+  expired
+}
+
+enum TransactionType {
+  topup
+  hold
+  release
+  payout
+  refund
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  name         String
+  role         Role
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  profile         CreatorProfile?
+  wallet          Wallet?
+  transactions    Transaction[]
+  brandBookings   Booking[]       @relation("BrandBookings")
+  creatorBookings Booking[]       @relation("CreatorBookings")
+
+  @@map("users")
+}
+
+/// A creator is listed in the marketplace only once price_cents is set.
+model CreatorProfile {
+  userId     String   @id @map("user_id") @db.Uuid
+  niche      String?
+  bio        String   @default("")
+  audience   String   @default("")
+  priceCents Int?     @map("price_cents")
+  followers  Int      @default(0)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("creator_profiles")
+}
+
+model Wallet {
+  userId         String @id @map("user_id") @db.Uuid
+  availableCents Int    @default(0) @map("available_cents")
+  heldCents      Int    @default(0) @map("held_cents")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("wallets")
+}
+
+/// Append-only ledger. A database trigger rejects UPDATE and DELETE.
+model Transaction {
+  id          String          @id @default(uuid()) @db.Uuid
+  userId      String          @map("user_id") @db.Uuid
+  bookingId   String?         @map("booking_id") @db.Uuid
+  type        TransactionType
+  amountCents Int             @map("amount_cents")
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user    User     @relation(fields: [userId], references: [id])
+  booking Booking? @relation(fields: [bookingId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([bookingId])
+  @@map("transactions")
+}
+
+model Booking {
+  id             String        @id @default(uuid()) @db.Uuid
+  brandId        String        @map("brand_id") @db.Uuid
+  creatorId      String        @map("creator_id") @db.Uuid
+  brief          String
+  destinationUrl String        @map("destination_url")
+  priceCents     Int           @map("price_cents")
+  status         BookingStatus @default(requested)
+  deadline       DateTime      @db.Timestamptz(3)
+  postUrl        String?       @map("post_url")
+  trackingCode   String        @unique @map("tracking_code")
+  verifiedVia    VerifiedVia?  @map("verified_via")
+  refundReason   RefundReason? @map("refund_reason")
+  submitIpHash   String?       @map("submit_ip_hash")
+  createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  acceptedAt     DateTime?     @map("accepted_at") @db.Timestamptz(3)
+  submittedAt    DateTime?     @map("submitted_at") @db.Timestamptz(3)
+  closedAt       DateTime?     @map("closed_at") @db.Timestamptz(3)
+
+  brand        User          @relation("BrandBookings", fields: [brandId], references: [id])
+  creator      User          @relation("CreatorBookings", fields: [creatorId], references: [id])
+  transactions Transaction[]
+  clicks       Click[]
+
+  @@index([status, deadline])
+  @@index([status, submittedAt])
+  @@index([brandId])
+  @@index([creatorId])
+  @@map("bookings")
+}
+
+model Click {
+  id        String   @id @default(uuid()) @db.Uuid
+  bookingId String   @map("booking_id") @db.Uuid
+  clickedAt DateTime @default(now()) @map("clicked_at") @db.Timestamptz(3)
+  ipHash    String   @map("ip_hash")
+  userAgent String   @map("user_agent")
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId, clickedAt])
+  @@map("clicks")
+}

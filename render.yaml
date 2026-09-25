@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: naano-backend
+    runtime: node
+    plan: free
+    region: ohio # same region as the Neon database (us-east-2)
+    rootDir: backend
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: http://localhost:5173,https://muhammadhassan6603.github.io

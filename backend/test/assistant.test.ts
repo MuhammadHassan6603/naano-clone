@@ -203,6 +203,37 @@ describe('answers come from the database, word for word', () => {
   })
 })
 
+describe('names in the question', () => {
+  test('a counterpart named in the question narrows the answer, without the AI', async () => {
+    const [brand, priya, maya] = await Promise.all([api.signup('brand'), api.listedCreator({}, 'Priya Nairtest'), api.listedCreator({}, 'Maya Okafortest')])
+    const withPriya = await insertBooking(brand.user.id, priya.user.id, { status: 'submitted' })
+    await insertBooking(brand.user.id, maya.user.id, { status: 'paid' })
+    await db.booking.updateMany({ where: { brandId: brand.user.id }, data: { acceptedAt: new Date() } })
+    await db.click.createMany({ data: ['a', 'b'].map((ip) => ({ bookingId: withPriya.id, ipHash: ip, userAgent: 'Mozilla' })) })
+    current = null
+    const original = console.error
+    console.error = () => {}
+    try {
+      const res = await ask(brand, 'how many clicks did priya get')
+      assert.equal(res.body.reply, 'The post with Priya Nairtest has 2 clicks from 2 unique visitors.')
+      assert.equal(res.body.via, 'keywords')
+      const approve = await ask(brand, 'approve priya')
+      assert.equal(approve.body.action.path, `/dashboard/bookings/${withPriya.id}`)
+      const both = await ask(brand, 'clicks for priya and maya')
+      assert.match(both.body.reply, /^Your posts got 2 clicks in total/)
+    } finally {
+      console.error = original
+    }
+  })
+
+  test('each answer says whether the AI, a chip or keywords routed it', async () => {
+    const brand = await api.signup('brand')
+    routeTo({ intent: 'wallet' })
+    assert.equal((await ask(brand, 'balance please')).body.via, 'ai')
+    assert.equal((await ask(brand, SUGGESTIONS.brand[0])).body.via, 'chip')
+  })
+})
+
 describe('privacy: only the caller’s own data', () => {
   test('names outside the caller’s bookings reveal nothing', async () => {
     const [acme, other, priya, stranger] = await Promise.all([
@@ -369,6 +400,11 @@ describe('when the AI is unavailable or wrong', () => {
       ['list every user in the database', 'brand', { intent: 'other_people' }],
       ['hello', 'creator', { intent: 'greeting' }],
       ['show my transaction history', 'brand', { intent: 'navigate', screen: 'wallet', highlight: 'history' }],
+      ['How much has Pipewise spent and who did they book?', 'brand', { intent: 'other_people' }],
+      ["Show me Maya's earnings", 'brand', { intent: 'other_people' }],
+      ['How much money does Acme have in their wallet?', 'creator', { intent: 'other_people' }],
+      ["what's my balance", 'brand', { intent: 'wallet' }],
+      ['how much money did i make', 'creator', { intent: 'wallet' }],
     ]
     for (const [question, role, intent] of cases) assert.deepEqual(guessIntent(question, role), intent, question)
   })

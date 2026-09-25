@@ -10,6 +10,7 @@ import type { BookingStatus, Role } from './generated/prisma/enums.js'
 export type ChatMessage = { role: 'user' | 'assistant'; text: string }
 export type GuideAction = { path: string; label: string; highlight?: string; auto: boolean }
 export type Answer = { reply: string; action?: GuideAction }
+export type Via = 'ai' | 'keywords' | 'chip'
 export type Model = (prompt: string) => Promise<string>
 export type Viewer = AuthClaims & { name: string; trackingBase: string }
 
@@ -635,6 +636,9 @@ export function guessIntent(question: string, role: Role): Intent {
     if (/get paid|payout/.test(t)) return { intent: 'explain', topic: 'getting_paid' }
     if (/tracked|tracking/.test(t)) return { intent: 'explain', topic: 'tracked_link' }
   }
+  const moneyWords = /escrow|held|earn|income|balance|wallet|money|funds|spend|spent|paid|charg|revenue/.test(t)
+  const someoneElse = /\b(their|his|her|they|he|she|others?)\b|\b(?!(?:what|it|that|where|how|who|let|here|there)'s\b)[a-z]+'s\b|\b(has|have|did)\s+(?!i\b|you\b|we\b)[a-z]+\s+(spent|spend|earned|earn|made|paid|charged)/.test(t)
+  if (moneyWords && someoneElse) return { intent: 'other_people' }
   if (/\b(add|deposit|load|put)\b.*\b(money|funds|cash)\b|top.?up/.test(t)) return { intent: 'do_action', action: 'top_up' }
   if (/\bapprov/.test(t)) return asking ? { intent: 'needs_action' } : { intent: 'do_action', action: 'approve' }
   if (/\b(accept|decline|reject)\b/.test(t) && !asking) {
@@ -724,16 +728,43 @@ function parseJson(raw: string): unknown {
   }
 }
 
-async function route(viewer: Viewer, messages: ChatMessage[], page: string | undefined, model: Model | null): Promise<Intent> {
+async function route(
+  viewer: Viewer,
+  messages: ChatMessage[],
+  page: string | undefined,
+  model: Model | null,
+): Promise<{ intent: Intent; via: Via }> {
   const question = messages.at(-1)!.text
-  if (!model || SUGGESTIONS[viewer.role].includes(question)) return guessIntent(question, viewer.role)
+  if (SUGGESTIONS[viewer.role].includes(question)) return { intent: guessIntent(question, viewer.role), via: 'chip' }
+  if (!model) return { intent: guessIntent(question, viewer.role), via: 'keywords' }
   try {
     const intent = parseIntent(parseJson(await model(routerPrompt(viewer.role, page, messages))))
-    return intent.intent === 'unknown' ? guessIntent(question, viewer.role) : intent
+    if (intent.intent !== 'unknown') return { intent, via: 'ai' }
   } catch (err) {
     console.error('assistant router failed, answering from keywords:', err instanceof Error ? err.message : err)
-    return guessIntent(question, viewer.role)
   }
+  return { intent: guessIntent(question, viewer.role), via: 'keywords' }
+}
+
+const NAMED: Intent['intent'][] = ['clicks', 'booking', 'do_action', 'navigate']
+
+function mentioned(account: Account, question: string) {
+  const words = new Set(question.toLowerCase().match(/[a-z0-9]+/g) ?? [])
+  const names = [...new Set(account.bookings.map((b) => b.other))]
+  const hits = names.filter((name) =>
+    name
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .some((part) => part.length > 2 && words.has(part)),
+  )
+  return hits.length === 1 ? hits[0] : undefined
+}
+
+function withMentionedName(intent: Intent, account: Account, question: string): Intent {
+  if (!NAMED.includes(intent.intent) || ('with' in intent && intent.with)) return intent
+  if (intent.intent === 'navigate' && intent.screen !== 'booking') return intent
+  const name = mentioned(account, question)
+  return name ? ({ ...intent, with: name } as Intent) : intent
 }
 
 export function validTimeZone(value: unknown) {
@@ -750,10 +781,11 @@ export async function ask(
   viewer: Viewer,
   messages: ChatMessage[],
   { page, timeZone = 'UTC', model }: { page?: string; timeZone?: string; model: Model | null },
-): Promise<Answer> {
+): Promise<Answer & { via: Via }> {
   await sweep()
-  const [intent, account] = await Promise.all([route(viewer, messages, page, model), loadAccount(viewer, page, timeZone)])
-  return answer(account, intent)
+  const [routed, account] = await Promise.all([route(viewer, messages, page, model), loadAccount(viewer, page, timeZone)])
+  const intent = withMentionedName(routed.intent, account, messages.at(-1)!.text)
+  return { ...(await answer(account, intent)), via: routed.via }
 }
 
 export const GEMINI_MODELS = ['gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemma-3-27b-it']

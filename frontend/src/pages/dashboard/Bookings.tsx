@@ -37,8 +37,10 @@ export default function Bookings() {
 
   const role = user.role
   const requested = params.get('tab')
-  const tab: BookingTab = TABS.some((t) => t.value === requested) ? (requested as BookingTab) : 'action'
   const all = data?.bookings ?? []
+  const counts = Object.fromEntries(TABS.map((t) => [t.value, all.filter((b) => inTab(b, t.value, role)).length])) as Record<BookingTab, number>
+  const chosen = TABS.find((t) => t.value === requested)?.value
+  const tab: BookingTab = chosen ?? (data ? (TABS.find((t) => counts[t.value] > 0)?.value ?? 'all') : 'action')
   const shown = all.filter((b) => inTab(b, tab, role))
 
   return (
@@ -51,17 +53,20 @@ export default function Bookings() {
       <div data-guide="booking-tabs" className="-mx-4 mb-4 overflow-x-auto px-4 sm:mx-0 sm:px-0" role="tablist" aria-label="Booking filters">
         <div className="flex w-max gap-2">
           {TABS.map((option) => {
-            const count = all.filter((b) => inTab(b, option.value, role)).length
+            const count = counts[option.value]
             const active = option.value === tab
+            const empty = Boolean(data) && count === 0 && option.value !== 'all' && !active
             return (
               <button
                 key={option.value}
                 type="button"
                 role="tab"
                 aria-selected={active}
-                onClick={() => setParams(option.value === 'action' ? {} : { tab: option.value }, { replace: true })}
-                className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
-                  active ? 'bg-ink text-white' : 'bg-white text-[#4b5563] ring-1 ring-line hover:text-ink'
+                disabled={empty}
+                title={empty ? 'Nothing here right now' : undefined}
+                onClick={() => setParams({ tab: option.value }, { replace: true })}
+                className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${
+                  active ? 'bg-ink text-white' : 'bg-white text-[#4b5563] ring-1 ring-line enabled:hover:text-ink'
                 }`}
               >
                 {option.label}

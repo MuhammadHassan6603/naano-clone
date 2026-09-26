@@ -62,13 +62,16 @@ model User {
 }
 
 model CreatorProfile {
-  userId     String   @id @map("user_id") @db.Uuid
-  niche      String?
-  bio        String   @default("")
-  audience   String   @default("")
-  priceCents Int?     @map("price_cents")
-  followers  Int      @default(0)
-  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  userId              String    @id @map("user_id") @db.Uuid
+  niche               String?
+  bio                 String    @default("")
+  audience            String    @default("")
+  priceCents          Int?      @map("price_cents")
+  followers           Int       @default(0)
+  linkedinUrl         String?   @unique @map("linkedin_url")
+  linkedinName        String?   @map("linkedin_name")
+  followersVerifiedAt DateTime? @map("followers_verified_at") @db.Timestamptz(3)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

@@ -27,6 +27,9 @@ const ownProfile = {
   audience: true,
   priceCents: true,
   followers: true,
+  linkedinUrl: true,
+  linkedinName: true,
+  followersVerifiedAt: true,
 } satisfies Prisma.CreatorProfileSelect
 
 const isUniqueViolation = (err: unknown) =>

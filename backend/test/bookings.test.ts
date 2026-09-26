@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { after, before, describe, test } from 'node:test'
 import { randomUUID } from 'node:crypto'
-import { DAY_MS, type Session, startServer } from './helpers.js'
+import { DAY_MS, type Session, linkedinFor, startServer } from './helpers.js'
 
 let api: Awaited<ReturnType<typeof startServer>>
 
@@ -140,7 +140,7 @@ describe('POST /bookings', () => {
     const id = await s.bookingIn('requested')
     await api.call('PUT', '/creators/me/profile', {
       token: s.creator.token,
-      body: { niche: 'RevOps', bio: '', audience: '', priceCents: 99_000, followers: 1 },
+      body: { niche: 'RevOps', bio: '', audience: '', priceCents: 99_000, followers: 1, linkedinUrl: linkedinFor() },
     })
     assert.equal((await s.get(id)).body.booking.priceCents, PRICE)
   })

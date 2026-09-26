@@ -21,6 +21,8 @@ export type PublicCreator = {
   audience: string
   priceCents: number
   followers: number
+  followersVerified: boolean
+  linkedinUrl: string | null
   reliability: Reliability
   fit?: Fit
 }
@@ -28,7 +30,9 @@ export type PublicCreator = {
 const creatorSelect = {
   id: true,
   name: true,
-  profile: { select: { niche: true, bio: true, audience: true, priceCents: true, followers: true } },
+  profile: {
+    select: { niche: true, bio: true, audience: true, priceCents: true, followers: true, linkedinUrl: true, followersVerifiedAt: true },
+  },
 } satisfies Prisma.UserSelect
 
 type CreatorRow = Prisma.UserGetPayload<{ select: typeof creatorSelect }>
@@ -70,6 +74,8 @@ function toPublic(row: CreatorRow, reliability: Reliability): PublicCreator | nu
     audience: profile.audience,
     priceCents: profile.priceCents,
     followers: profile.followers,
+    followersVerified: Boolean(profile.followersVerifiedAt),
+    linkedinUrl: profile.linkedinUrl,
     reliability,
   }
 }

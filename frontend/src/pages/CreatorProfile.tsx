@@ -6,7 +6,7 @@ import { Page } from '../components/Layout'
 import { ReliabilityExplainer, ReliabilityLine } from '../components/Reliability'
 import { Button, ButtonLink } from '../components/ui/Button'
 import { ErrorState, LoadingState } from '../components/ui/Feedback'
-import { ArrowLeftIcon } from '../components/ui/Icons'
+import { ArrowLeftIcon, CheckIcon, ExternalIcon, LinkedInIcon } from '../components/ui/Icons'
 import { useAuth } from '../lib/auth'
 import { firstName, formatCount, formatMoney } from '../lib/format'
 import { usePageTitle, withNext } from '../lib/navigation'
@@ -115,8 +115,27 @@ export default function CreatorProfile() {
                 <span className="rounded-md bg-accent-soft px-2 py-0.5 font-semibold text-accent-strong">
                   {creator.niche}
                 </span>
-                <span>{formatCount(creator.followers)} followers on LinkedIn</span>
+                <span className="inline-flex items-center gap-1">
+                  {formatCount(creator.followers)} followers on LinkedIn
+                  {creator.followersVerified ? (
+                    <span className="inline-flex items-center gap-1 font-semibold text-[#0a66c2]">
+                      <CheckIcon className="size-3.5" /> verified
+                    </span>
+                  ) : (
+                    <span>(self-reported)</span>
+                  )}
+                </span>
               </p>
+              {creator.linkedinUrl && (
+                <a
+                  href={creator.linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 inline-flex items-center gap-2 rounded-full border border-line bg-white px-3.5 py-1.5 text-sm font-semibold text-[#0a66c2] hover:border-[#0a66c2]/40"
+                >
+                  <LinkedInIcon className="size-4" /> View LinkedIn profile <ExternalIcon className="size-3.5" />
+                </a>
+              )}
             </div>
           </header>
 

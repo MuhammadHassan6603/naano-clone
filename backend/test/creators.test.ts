@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { after, before, describe, test } from 'node:test'
 import { randomUUID } from 'node:crypto'
 import { reliabilityScore } from '../src/creators.js'
-import { type Session, defaultProfile as validProfile, insertBooking, startServer } from './helpers.js'
+import { type Session, defaultProfile as validProfile, insertBooking, linkedinFor, startServer } from './helpers.js'
 
 let api: Awaited<ReturnType<typeof startServer>>
 
@@ -13,10 +13,10 @@ after(async () => {
   await api.stop()
 })
 
-const PUBLIC_KEYS = ['audience', 'bio', 'followers', 'id', 'name', 'niche', 'priceCents', 'reliability']
+const PUBLIC_KEYS = ['audience', 'bio', 'followers', 'followersVerified', 'id', 'linkedinUrl', 'name', 'niche', 'priceCents', 'reliability']
 
 const saveProfile = (session: Session, profile: Record<string, unknown> = validProfile) =>
-  api.call('PUT', '/creators/me/profile', { token: session.token, body: profile })
+  api.call('PUT', '/creators/me/profile', { token: session.token, body: { linkedinUrl: linkedinFor(), ...profile } })
 
 const listedCreator = (...args: Parameters<typeof api.listedCreator>) => api.listedCreator(...args)
 
@@ -25,13 +25,16 @@ const ids = (res: { body: { creators: { id: string }[] } }) => res.body.creators
 describe('PUT /creators/me/profile', () => {
   test('a creator saves a profile and gets back their public card', async () => {
     const session = await api.signup('creator', 'Dana')
-    const res = await saveProfile(session, { ...validProfile, bio: '  trimmed  ' })
+    const linkedinUrl = linkedinFor('dana')
+    const res = await saveProfile(session, { ...validProfile, bio: '  trimmed  ', linkedinUrl })
     assert.equal(res.status, 200)
     assert.deepEqual(res.body.creator, {
       id: session.user.id,
       name: 'Dana',
       ...validProfile,
       bio: 'trimmed',
+      followersVerified: false,
+      linkedinUrl,
       reliability: { delivered: 0, total: 0 },
     })
   })

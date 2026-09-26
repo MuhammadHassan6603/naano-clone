@@ -16,6 +16,7 @@ import Marketplace from './pages/Marketplace'
 import NewBooking from './pages/NewBooking'
 import NotFound from './pages/NotFound'
 import Signup from './pages/Signup'
+import Welcome from './pages/Welcome'
 import { useAuth } from './lib/auth'
 
 function Assistant() {
@@ -31,6 +32,14 @@ export default function App() {
       <Routes>
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<Signup />} />
+        <Route
+          path="welcome"
+          element={
+            <RequireAuth>
+              <Welcome />
+            </RequireAuth>
+          }
+        />
         <Route path="register" element={<Navigate to="/signup" replace />} />
         <Route path="wallet" element={<Navigate to="/dashboard/wallet" replace />} />
         <Route

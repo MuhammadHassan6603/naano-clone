@@ -44,6 +44,7 @@ const creator = await signup('creator')
 
 await expect('creator sets a price', 200, call('PUT', '/creators/me/profile', creator.token, {
   niche: 'Sales', bio: 'Escrow check account.', audience: 'Test audience', priceCents: PRICE, followers: 1,
+  linkedinUrl: `https://www.linkedin.com/in/escrow-check-${Date.now()}`,
 }))
 await expect('brand tops up $1,000', 200, call('POST', '/wallet/topup', brand.token, { amountCents: 100_000 }))
 

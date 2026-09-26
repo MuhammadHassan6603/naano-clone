@@ -3,13 +3,23 @@ import { formatCount, formatMoney } from '../lib/format'
 import type { Creator } from '../lib/types'
 import { Avatar } from './Avatar'
 import { FitChips } from './FitReasons'
-import { ArrowRightIcon, LinkedInIcon } from './ui/Icons'
+import { ArrowRightIcon, CheckIcon, LinkedInIcon } from './ui/Icons'
 
-function Stat({ label, value, divider = false }: { label: string; value: string; divider?: boolean }) {
+function Stat({ label, value, divider = false, verified = false, note }: { label: string; value: string; divider?: boolean; verified?: boolean; note?: string }) {
   return (
     <div className={`flex min-w-0 flex-col items-center justify-center px-2 py-4 text-center ${divider ? 'border-x border-[#e7e8eb]' : ''}`}>
-      <dd className="w-full truncate text-[19px] font-bold tracking-[-0.025em] text-ink">{value}</dd>
-      <dt className="mt-0.5 text-[11px] leading-4 text-[#8a909b]">{label}</dt>
+      <dd className="flex w-full items-center justify-center gap-1 truncate text-[19px] font-bold tracking-[-0.025em] text-ink">
+        {value}
+        {verified && (
+          <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-[#0a66c2] text-white" title="Verified from LinkedIn">
+            <CheckIcon className="size-2.5" strokeWidth={3} />
+          </span>
+        )}
+      </dd>
+      <dt className="mt-0.5 text-[11px] leading-4 text-[#8a909b]">
+        {label}
+        {note && <span className="block text-[10px] text-[#a5aab3]">{note}</span>}
+      </dt>
     </div>
   )
 }
@@ -19,13 +29,44 @@ const cardClass =
 const interactiveClass =
   'hover:-translate-y-1 hover:border-[#9fb9f7] hover:shadow-[0_30px_72px_rgba(37,62,117,0.18),0_8px_22px_rgba(49,91,194,0.09)]'
 
-export function CreatorCard({ creator, preview = false }: { creator: Creator; preview?: boolean }) {
-  const body = <CardBody creator={creator} preview={preview} />
-  if (preview) return <div className={cardClass}>{body}</div>
+const badgeClass = 'absolute top-3 left-4 z-10 inline-flex h-8 items-center gap-1.5 rounded-[10px] border border-white/75 bg-white/90 px-2 text-[#0a66c2]'
+
+function LinkedInBadge({ creator, preview }: { creator: Creator; preview: boolean }) {
+  if (!creator.linkedinUrl) {
+    return (
+      <span className={badgeClass} title="LinkedIn profile not linked">
+        <LinkedInIcon className="size-4" />
+      </span>
+    )
+  }
+  const label = <span className="text-[11px] font-semibold">View profile</span>
+  if (preview) {
+    return (
+      <span className={badgeClass}>
+        <LinkedInIcon className="size-4" />
+        {label}
+      </span>
+    )
+  }
   return (
-    <Link to={`/creators/${creator.id}`} className={`${cardClass} ${interactiveClass}`}>
-      {body}
-    </Link>
+    <a
+      href={creator.linkedinUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${badgeClass} transition-colors hover:bg-white`}
+      aria-label={`${creator.name} on LinkedIn (opens in a new tab)`}
+    >
+      <LinkedInIcon className="size-4" />
+      {label}
+    </a>
+  )
+}
+
+export function CreatorCard({ creator, preview = false }: { creator: Creator; preview?: boolean }) {
+  return (
+    <div className={`${cardClass} ${preview ? '' : interactiveClass}`}>
+      <CardBody creator={creator} preview={preview} />
+    </div>
   )
 }
 
@@ -35,9 +76,7 @@ function CardBody({ creator, preview }: { creator: Creator; preview: boolean }) 
     <>
       <div className="relative h-[72px] bg-[radial-gradient(circle_at_12%_8%,rgba(255,255,255,0.25),transparent_28%),radial-gradient(circle_at_88%_86%,rgba(137,174,255,0.42),transparent_36%),linear-gradient(135deg,#0C3EBE_0%,#1959EF_57%,#6691FF_100%)]">
         <span className="absolute -top-16 -right-12 size-32 rounded-full border border-white/15" />
-        <span className="absolute top-3 left-4 inline-flex size-8 items-center justify-center rounded-[10px] border border-white/75 bg-white/90 text-[#0a66c2]">
-          <LinkedInIcon className="size-4" />
-        </span>
+        <LinkedInBadge creator={creator} preview={preview} />
         <span className="absolute top-3.5 right-4 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-accent-strong">
           {creator.niche}
         </span>
@@ -65,15 +104,27 @@ function CardBody({ creator, preview }: { creator: Creator; preview: boolean }) 
       </div>
 
       <dl className="grid grid-cols-3 border-t border-[#e7e8eb] bg-[#fcfcfd]">
-        <Stat label="Followers" value={formatCount(creator.followers)} />
+        <Stat
+          label={creator.followersVerified ? 'Verified followers' : 'Followers'}
+          note={creator.followersVerified ? undefined : 'self-reported'}
+          value={formatCount(creator.followers)}
+          verified={creator.followersVerified}
+        />
         <Stat label="Price / post" value={formatMoney(creator.priceCents)} divider />
         <Stat label={total ? 'Delivered' : 'Track record'} value={total ? `${delivered}/${total}` : 'New'} />
       </dl>
 
-      <span className="flex items-center justify-center gap-1.5 border-t border-[#e7e8eb] py-3 text-sm font-semibold text-accent transition-[gap] group-hover:gap-2.5">
-        {preview ? 'This is how brands see you' : 'View profile and book'}
-        {!preview && <ArrowRightIcon className="size-4" />}
-      </span>
+      {preview ? (
+        <span className="flex items-center justify-center border-t border-[#e7e8eb] py-3 text-sm font-semibold text-accent">This is how brands see you</span>
+      ) : (
+        <Link
+          to={`/creators/${creator.id}`}
+          className="flex items-center justify-center gap-1.5 border-t border-[#e7e8eb] py-3 text-sm font-semibold text-accent transition-[gap] group-hover:gap-2.5 after:absolute after:inset-0 after:rounded-[28px] after:content-['']"
+        >
+          View profile and book
+          <ArrowRightIcon className="size-4" />
+        </Link>
+      )}
     </>
   )
 }

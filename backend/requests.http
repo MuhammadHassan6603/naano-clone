@@ -60,8 +60,16 @@ Content-Type: application/json
   "bio": "Ex-VP Sales. I write about pipeline hygiene and forecasting that holds up.",
   "audience": "SaaS founders and sales leaders, seed to Series B",
   "priceCents": 45000,
-  "followers": 18400
+  "followers": 18400,
+  "linkedinUrl": "https://www.linkedin.com/in/dana-creator"
 }
+
+### Look up a LinkedIn profile: 200 { linkedin: { url, name, followers } }, 422 private, 503 LinkedIn unavailable
+POST {{base}}/creators/me/linkedin
+Authorization: Bearer {{creatorToken}}
+Content-Type: application/json
+
+{ "url": "https://www.linkedin.com/in/satyanadella" }
 
 ### Marketplace: 200 { creators, niches }. No login needed
 GET {{base}}/creators
@@ -199,14 +207,14 @@ PUT {{base}}/creators/me/profile
 Authorization: Bearer {{brandToken}}
 Content-Type: application/json
 
-{ "niche": "RevOps", "bio": "", "audience": "", "priceCents": 45000, "followers": 0 }
+{ "niche": "RevOps", "bio": "", "audience": "", "priceCents": 45000, "followers": 0, "linkedinUrl": "https://www.linkedin.com/in/some-brand" }
 
 ### Price sent as text: 400
 PUT {{base}}/creators/me/profile
 Authorization: Bearer {{creatorToken}}
 Content-Type: application/json
 
-{ "niche": "RevOps", "bio": "", "audience": "", "priceCents": "450", "followers": 0 }
+{ "niche": "RevOps", "bio": "", "audience": "", "priceCents": "450", "followers": 0, "linkedinUrl": "https://www.linkedin.com/in/dana-creator" }
 
 ### Unknown niche filter: 400
 GET {{base}}/creators?niche=Crypto

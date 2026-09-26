@@ -79,7 +79,7 @@ export default function Signup() {
     setServerError(null)
     try {
       await signup({ role, name: name.trim(), email: email.trim(), password })
-      navigate(next ?? DASHBOARD, { replace: true })
+      navigate(withNext('/welcome', next), { replace: true })
     } catch (error) {
       const apiError = toApiError(error)
       setServerError({ message: apiError.message, emailTaken: apiError.status === 409 })

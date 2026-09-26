@@ -14,6 +14,9 @@ export type OwnProfile = {
   audience: string
   priceCents: number | null
   followers: number
+  linkedinUrl: string | null
+  linkedinName: string | null
+  followersVerifiedAt: string | null
 }
 
 export type Session = { token: string; user: User }
@@ -28,6 +31,8 @@ export type Creator = {
   audience: string
   priceCents: number
   followers: number
+  followersVerified: boolean
+  linkedinUrl: string | null
   reliability: Reliability
   fit?: Fit
 }

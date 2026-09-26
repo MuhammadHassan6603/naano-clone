@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, type ReactNode, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Avatar } from '../../components/Avatar'
 import { DashboardHeader, Panel } from '../../components/dashboard/DashboardLayout'
@@ -69,7 +69,23 @@ function TopMatches({ creators, loading }: { creators: Creator[] | undefined; lo
   )
 }
 
-function AudienceForm({ target, niches, onSaved }: { target: Target; niches: string[]; onSaved: () => void }) {
+export function AudienceForm({
+  target,
+  niches,
+  onSaved,
+  submitLabel = 'Save',
+  extraActions = (
+    <ButtonLink to="/#creators" variant="ghost">
+      See creators ranked by fit
+    </ButtonLink>
+  ),
+}: {
+  target: Target
+  niches: string[]
+  onSaved: () => void
+  submitLabel?: string
+  extraActions?: ReactNode
+}) {
   const [form, setForm] = useState<Form>(() => toForm(target))
   const [errors, setErrors] = useState<Errors>({})
   const [pending, setPending] = useState(false)
@@ -167,11 +183,9 @@ function AudienceForm({ target, niches, onSaved }: { target: Target; niches: str
       />
       <div className="flex flex-wrap items-center gap-3 border-t border-line pt-5">
         <Button type="submit" loading={pending}>
-          Save
+          {submitLabel}
         </Button>
-        <ButtonLink to="/#creators" variant="ghost">
-          See creators ranked by fit
-        </ButtonLink>
+        {extraActions}
       </div>
     </form>
   )

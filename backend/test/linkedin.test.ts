@@ -82,10 +82,10 @@ describe('POST /creators/me/linkedin', () => {
     const blocked = linkedinFor('blocked')
 
     const cases: [string, number, RegExp][] = [
-      [hidden, 422, /public follower count/],
-      [gone, 422, /public follower count/],
-      [walled, 503, /enter your followers yourself/],
-      [blocked, 503, /enter your followers yourself/],
+      [hidden, 422, /couldn't find a follower count/],
+      [gone, 422, /couldn't find a follower count/],
+      [walled, 503, /doesn't show this profile's follower count/],
+      [blocked, 503, /doesn't show this profile's follower count/],
     ]
     for (const [url, status, message] of cases) {
       const res = await lookup(creator, url)

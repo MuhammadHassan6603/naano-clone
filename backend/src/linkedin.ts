@@ -9,13 +9,13 @@ const MAX_HTML = 3_000_000
 
 export class LinkedInUnavailable extends HttpError {
   constructor() {
-    super(503, "LinkedIn didn't share this profile with us right now. You can enter your followers yourself; they'll show as self-reported.")
+    super(503, "LinkedIn doesn't show this profile's follower count to outside apps, which is common. Enter your followers yourself: brands will see them as self-reported, with a link to your LinkedIn profile so they can check.")
   }
 }
 
 export class LinkedInNotFound extends HttpError {
   constructor() {
-    super(422, "We couldn't find a public follower count on this profile. Check the link, or make your profile public on LinkedIn.")
+    super(422, "We couldn't find a follower count on this LinkedIn profile. Check the link is right. Enter your followers yourself: brands will see them as self-reported, with a link to your LinkedIn profile so they can check.")
   }
 }
 

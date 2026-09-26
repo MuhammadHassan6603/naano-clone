@@ -98,8 +98,8 @@ const asides = {
         <ul className="space-y-3">
           <li className="rounded-2xl border border-white/20 bg-white/10 p-4">
             <span className="block font-semibold text-white">Verified followers</span>
-            Paste your LinkedIn link and we read your follower count straight from your public profile. Brands see it
-            marked as verified, with a link to your profile.
+            Paste your LinkedIn link. When LinkedIn shows your follower count publicly, we fill it in and mark it
+            verified. Otherwise you enter it, and brands can check it through the link on your card.
           </li>
           <li className="rounded-2xl border border-white/20 bg-white/10 p-4">
             <span className="block font-semibold text-white">Your price, paid in full</span>

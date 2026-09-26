@@ -35,7 +35,7 @@ const initialLink = (profile: OwnProfile | undefined): Link => {
   if (profile.followersVerifiedAt) {
     return { kind: 'verified', found: { url: profile.linkedinUrl, name: profile.linkedinName ?? '', followers: profile.followers } }
   }
-  return { kind: 'manual', message: 'Your followers are self-reported. Check the link again to verify them from LinkedIn.' }
+  return { kind: 'manual', message: 'Your followers are self-reported. LinkedIn did not show a public count for this profile.' }
 }
 
 function validate(form: Form, link: Link): Errors {
@@ -111,7 +111,7 @@ export function CreatorProfileForm({ user, profile, niches, reliability, submitL
       if (isAbort(error)) return
       const apiError = toApiError(error)
       if (apiError.status === 422 || apiError.status === 503 || apiError.status === 0) {
-        setLink({ kind: 'manual', message: apiError.status === 0 ? "We couldn't reach the server to check LinkedIn. Enter your followers yourself; they'll show as self-reported." : apiError.message })
+        setLink({ kind: 'manual', message: apiError.status === 0 ? "We couldn't reach the server to check LinkedIn. Enter your followers yourself: brands will see them as self-reported." : apiError.message })
         setForm((current) => ({ ...current, followers: '' }))
       } else {
         setLink({ kind: 'rejected', message: apiError.message })
@@ -194,11 +194,11 @@ export function CreatorProfileForm({ user, profile, niches, reliability, submitL
       <span>
         {link.message}{' '}
         <button type="button" className="font-semibold text-accent underline" onClick={() => void check(form.linkedinUrl, true)}>
-          Check again
+          Try LinkedIn again
         </button>
       </span>
     ) : (
-      'Filled in automatically from your LinkedIn profile.'
+      'Filled in from LinkedIn when your profile shows it publicly.'
     )
 
   const formElement = (

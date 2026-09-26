@@ -99,7 +99,7 @@ marketplace idea and changes how trust works.
 | Fit | A single match percentage | **Explained fit**: the concrete reasons a creator fits or doesn't, including the misses | A bare "92%" can't be checked or argued with |
 | Brand and creator talking | Outside the platform | **Messaging** on each booking | Questions about the brief stay with the booking |
 | Staying up to date | Refreshing the page | **Live updates and notifications**, with sound | Nobody has to wonder whether something happened |
-| Help | Help pages | An **assistant** that answers from the user's own data and takes them to the right screen | Faster than looking for it |
+| AI assistant in the dashboard | A chat widget for general questions about naano; it doesn't read your account or take you anywhere in the app | An **AI assistant** in both dashboards that reads the user's **live data** and answers in plain words ("You have $5,750 available and $1,950 held in escrow for 3 open bookings", "1 new request from Acme CRM, worth $450", "Emily's post has 3 clicks"). If the user can't find something ("where is my wallet?", "where do I change my price?", "where are the link insights?"), it **opens that screen and highlights the exact spot**. It can't move money: "approve the post" opens the booking and highlights the button | Users get answers about their own account and find their way without learning the dashboard, and every number is read from the database, so it is always right |
 | Money records | Not shown | An **append-only ledger**; every balance equals the sum of its entries, and the wallet shows that it reconciles | Money that can't be edited after the fact |
 
 ### What naano has that this rebuild doesn't (yet)

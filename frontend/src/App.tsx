@@ -18,6 +18,7 @@ import NotFound from './pages/NotFound'
 import Signup from './pages/Signup'
 import Welcome from './pages/Welcome'
 import { useAuth } from './lib/auth'
+import { NotificationsProvider } from './components/Notifications'
 
 function Assistant() {
   const { user } = useAuth()
@@ -25,8 +26,9 @@ function Assistant() {
 }
 
 export default function App() {
+  const { user } = useAuth()
   return (
-    <>
+    <NotificationsProvider userId={user?.id}>
       <ScrollManager />
       <Assistant />
       <Routes>
@@ -72,6 +74,6 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
-    </>
+    </NotificationsProvider>
   )
 }

@@ -57,6 +57,7 @@ model User {
   creatorBookings Booking[]       @relation("CreatorBookings")
   messages        Message[]
   messageReads    MessageRead[]
+  notifications   Notification[]
 
   @@map("users")
 }
@@ -184,4 +185,20 @@ model MessageRead {
 
   @@id([bookingId, userId])
   @@map("message_reads")
+}
+
+model Notification {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  kind      String
+  title     String
+  body      String
+  link      String
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  readAt    DateTime? @map("read_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("notifications")
 }

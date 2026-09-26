@@ -219,3 +219,43 @@ export const MinusIcon = (props: IconProps) => (
     <path d="M5 12h14" />
   </Icon>
 )
+
+export const BellIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+    <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+  </Icon>
+)
+
+export const VolumeIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+    <path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14" />
+  </Icon>
+)
+
+export const MuteIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+    <path d="m22 9-6 6M16 9l6 6" />
+  </Icon>
+)
+
+export const SearchIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <circle cx="11" cy="11" r="7" />
+    <path d="m20 20-3.5-3.5" />
+  </Icon>
+)
+
+export const ChevronLeftIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="m15 18-6-6 6-6" />
+  </Icon>
+)
+
+export const ChevronRightIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="m9 18 6-6-6-6" />
+  </Icon>
+)

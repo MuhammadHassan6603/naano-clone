@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CreatorCard, CreatorCardSkeleton } from '../components/CreatorCard'
 import { HowItWorksCards } from '../components/HowItWorks'
@@ -6,7 +7,7 @@ import { ReliabilityExplainer } from '../components/Reliability'
 import { Button, ButtonLink, buttonClass } from '../components/ui/Button'
 import { EmptyState, ErrorState, Notice, SlowServerHint } from '../components/ui/Feedback'
 import { inputClass } from '../components/ui/Field'
-import { ArrowRightIcon, LinkedInIcon, ShieldIcon, TargetIcon } from '../components/ui/Icons'
+import { ArrowRightIcon, ChevronLeftIcon, ChevronRightIcon, CloseIcon, LinkedInIcon, SearchIcon, ShieldIcon, TargetIcon } from '../components/ui/Icons'
 import { CLOUD_LAYER, asset } from '../lib/assets'
 import { useAuth } from '../lib/auth'
 import { formatMoney, plural } from '../lib/format'
@@ -28,7 +29,60 @@ const PRICE_CAPS = [
   { value: '100000', label: 'Up to $1,000' },
 ]
 
-type CreatorsResponse = { creators: Creator[]; niches: string[]; sort: CreatorSort; target: Target | null }
+type CreatorsResponse = {
+  creators: Creator[]
+  total: number
+  page: number
+  pages: number
+  niches: string[]
+  sort: CreatorSort
+  target: Target | null
+}
+
+const PAGE_SIZE = 9
+const SEARCH_DELAY_MS = 300
+
+function pageList(page: number, pages: number): (number | 'gap')[] {
+  const wanted = new Set([1, pages, page - 1, page, page + 1].filter((n) => n >= 1 && n <= pages))
+  const sorted = [...wanted].sort((a, b) => a - b)
+  return sorted.flatMap((n, index) => (index > 0 && n - sorted[index - 1] > 1 ? ['gap' as const, n] : [n]))
+}
+
+function Pagination({ page, pages, onChange }: { page: number; pages: number; onChange: (page: number) => void }) {
+  if (pages <= 1) return null
+  const pill = 'flex h-10 min-w-10 items-center justify-center rounded-full px-3 text-sm font-semibold transition-colors'
+  return (
+    <nav aria-label="Creator pages" className="glass flex items-center justify-between gap-2 rounded-[22px] p-2">
+      <button type="button" onClick={() => onChange(page - 1)} disabled={page === 1} className={`${pill} gap-1 text-ink enabled:hover:bg-white disabled:opacity-40`}>
+        <ChevronLeftIcon /> <span className="max-sm:sr-only">Previous</span>
+      </button>
+      <ol className="flex items-center gap-1">
+        {pageList(page, pages).map((item, index) =>
+          item === 'gap' ? (
+            <li key={`gap-${index}`} aria-hidden className="px-1 text-muted">
+              …
+            </li>
+          ) : (
+            <li key={item}>
+              <button
+                type="button"
+                onClick={() => onChange(item)}
+                aria-current={item === page ? 'page' : undefined}
+                aria-label={`Page ${item}`}
+                className={`${pill} ${item === page ? 'bg-ink text-white' : 'text-ink hover:bg-white'}`}
+              >
+                {item}
+              </button>
+            </li>
+          ),
+        )}
+      </ol>
+      <button type="button" onClick={() => onChange(page + 1)} disabled={page === pages} className={`${pill} gap-1 text-ink enabled:hover:bg-white disabled:opacity-40`}>
+        <span className="max-sm:sr-only">Next</span> <ChevronRightIcon />
+      </button>
+    </nav>
+  )
+}
 
 function SectionPill({ children }: { children: string }) {
   return (
@@ -154,11 +208,34 @@ export default function Marketplace() {
   const niche = params.get('niche') ?? ''
   const maxPrice = PRICE_CAPS.some((cap) => cap.value === params.get('max')) ? (params.get('max') ?? '') : ''
   const chosenSort = SORTS.find((option) => option.value === params.get('sort'))?.value
+  const q = (params.get('q') ?? '').slice(0, 100)
+  const page = Math.max(1, Math.floor(Number(params.get('page'))) || 1)
+  const [search, setSearch] = useState(q)
+
+  useEffect(() => {
+    setSearch((current) => (current.trim() === q ? current : q))
+  }, [q])
+
+  useEffect(() => {
+    const value = search.trim()
+    if (value === q) return
+    const timer = window.setTimeout(() => {
+      const next = new URLSearchParams(params)
+      if (value) next.set('q', value)
+      else next.delete('q')
+      next.delete('page')
+      setParams(next, { replace: true })
+    }, SEARCH_DELAY_MS)
+    return () => window.clearTimeout(timer)
+  }, [search, q, params, setParams])
 
   const query = new URLSearchParams()
   if (niche) query.set('niche', niche)
   if (maxPrice) query.set('maxPriceCents', maxPrice)
   if (chosenSort) query.set('sort', chosenSort)
+  if (q) query.set('q', q)
+  query.set('page', String(page))
+  query.set('pageSize', String(PAGE_SIZE))
   const { data, error, loading, slow, reload } = useApi<CreatorsResponse>(`/creators?${query}`)
   const sort = data?.sort ?? chosenSort ?? 'reliability'
   const sorts = SORTS.filter((option) => option.value !== 'fit' || data?.target)
@@ -167,10 +244,26 @@ export default function Marketplace() {
     const next = new URLSearchParams(params)
     if (value) next.set(key, value)
     else next.delete(key)
+    next.delete('page')
     setParams(next, { replace: true })
   }
-  const filtered = Boolean(niche || maxPrice)
-  const clearFilters = () => setParams(chosenSort ? { sort: chosenSort } : {}, { replace: true })
+  const goToPage = (target: number) => {
+    const next = new URLSearchParams(params)
+    if (target > 1) next.set('page', String(target))
+    else next.delete('page')
+    setParams(next)
+    document.getElementById('creators-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+  const filtered = Boolean(niche || maxPrice || q)
+  const clearFilters = () => {
+    setSearch('')
+    setParams(chosenSort ? { sort: chosenSort } : {}, { replace: true })
+  }
+  const countLine = !data
+    ? 'Loading creators…'
+    : q
+      ? `${plural(data.total, 'creator')} ${data.total === 1 ? 'matches' : 'match'} “${q}”`
+      : `${plural(data.total, 'creator')}${niche || maxPrice ? ' match your filters' : ' available'}`
 
   return (
     <>
@@ -208,11 +301,34 @@ export default function Marketplace() {
               className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_8%,rgba(255,255,255,0.92),rgba(0,0,0,0)_39%),linear-gradient(rgba(233,248,255,0.1),rgba(255,255,255,0.22))]"
             />
 
-            <div className="space-y-5">
+            <div id="creators-list" className="scroll-mt-24 space-y-5">
+              <form role="search" onSubmit={(event) => event.preventDefault()} className="glass flex items-center gap-2 rounded-[22px] p-2 pl-4">
+                <SearchIcon className="size-5 shrink-0 text-muted" />
+                <label htmlFor="creator-search" className="sr-only">
+                  Search creators
+                </label>
+                <input
+                  id="creator-search"
+                  type="search"
+                  value={search}
+                  maxLength={100}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search creators by name, niche or audience"
+                  autoComplete="off"
+                  className="h-11 min-w-0 flex-1 bg-transparent text-[15px] text-ink placeholder:text-[#8a909b] focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+                />
+                {search && (
+                  <button type="button" onClick={() => setSearch('')} aria-label="Clear search" className="rounded-full p-2 text-muted hover:bg-ink/5 hover:text-ink">
+                    <CloseIcon className="size-4" />
+                  </button>
+                )}
+              </form>
+
               <div className="glass flex flex-col gap-4 rounded-[22px] p-4 sm:p-5 lg:flex-row lg:items-end lg:justify-between">
                 <div className="min-w-0 space-y-3">
                   <p className="text-sm font-semibold text-ink" aria-live="polite">
-                    {data ? `${plural(data.creators.length, 'creator')}${filtered ? ' match your filters' : ' available'}` : 'Loading creators…'}
+                    {countLine}
+                    {data && data.pages > 1 && <span className="font-normal text-muted"> · page {data.page} of {data.pages}</span>}
                   </p>
                   {data && (
                     <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0" role="group" aria-label="Filter by niche">
@@ -302,19 +418,22 @@ export default function Marketplace() {
               ) : data.creators.length === 0 ? (
                 <div className="glass rounded-[22px]">
                   <EmptyState
-                    title="No creators match these filters"
-                    message="Try another niche or a higher price limit."
-                    action={<Button onClick={clearFilters}>Clear filters</Button>}
+                    title={q ? `No creators match “${q}”` : 'No creators match these filters'}
+                    message={q ? 'Check the spelling, or try a niche or an audience like “founders”.' : 'Try another niche or a higher price limit.'}
+                    action={<Button onClick={clearFilters}>{q ? 'Clear search' : 'Clear filters'}</Button>}
                   />
                 </div>
               ) : (
-                <ul className={`grid gap-5 transition-opacity sm:grid-cols-2 lg:grid-cols-3 ${loading ? 'opacity-60' : ''}`} aria-busy={loading}>
-                  {data.creators.map((creator) => (
-                    <li key={creator.id}>
-                      <CreatorCard creator={creator} />
-                    </li>
-                  ))}
-                </ul>
+                <>
+                  <ul className={`grid gap-5 transition-opacity sm:grid-cols-2 lg:grid-cols-3 ${loading ? 'opacity-60' : ''}`} aria-busy={loading}>
+                    {data.creators.map((creator) => (
+                      <li key={creator.id}>
+                        <CreatorCard creator={creator} />
+                      </li>
+                    ))}
+                  </ul>
+                  <Pagination page={data.page} pages={data.pages} onChange={goToPage} />
+                </>
               )}
             </div>
           </div>

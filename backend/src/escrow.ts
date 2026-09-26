@@ -5,6 +5,7 @@ import { HttpError, conflict, notFound } from './errors.js'
 import { listed } from './creators.js'
 import type { Prisma } from './generated/prisma/client.js'
 import type { BookingStatus, RefundReason, VerifiedVia } from './generated/prisma/enums.js'
+import { notifyBooking } from './notifications.js'
 
 export type Tx = Prisma.TransactionClient
 export type EscrowOptions = { at?: Date; tx?: Tx }
@@ -60,17 +61,19 @@ export function createBooking(input: NewBooking, { at = new Date(), tx }: Escrow
     await tx.transaction.create({
       data: { userId: input.brandId, bookingId: booking.id, type: 'hold', amountCents: priceCents, createdAt: at },
     })
+    await notifyBooking(tx, booking.id, { kind: 'booked' }, at)
     return booking.id
   })
 }
 
 export async function accept(bookingId: string, { at = new Date(), tx }: EscrowOptions = {}) {
-  await inTx(tx, (tx) =>
-    transition(tx, bookingId, 'accept', at, {
+  await inTx(tx, async (tx) => {
+    await transition(tx, bookingId, 'accept', at, {
       where: { status: 'requested', deadline: { gte: at } },
       data: { status: 'accepted', acceptedAt: at },
-    }),
-  )
+    })
+    await notifyBooking(tx, bookingId, { kind: 'accepted' }, at)
+  })
 }
 
 export async function submit(
@@ -78,12 +81,13 @@ export async function submit(
   post: { postUrl: string; submitIpHash: string },
   { at = new Date(), tx }: EscrowOptions = {},
 ) {
-  await inTx(tx, (tx) =>
-    transition(tx, bookingId, 'submit', at, {
+  await inTx(tx, async (tx) => {
+    await transition(tx, bookingId, 'submit', at, {
       where: { status: 'accepted', deadline: { gte: at } },
       data: { status: 'submitted', ...post, submittedAt: at },
-    }),
-  )
+    })
+    await notifyBooking(tx, bookingId, { kind: 'submitted' }, at)
+  })
 }
 
 export const decline = (bookingId: string, options?: EscrowOptions) => refund(bookingId, 'declined', options)
@@ -115,6 +119,7 @@ export async function pay(bookingId: string, via: VerifiedVia, { at = new Date()
         { userId: booking.creatorId, bookingId, type: 'payout', amountCents: booking.priceCents, createdAt: at },
       ],
     })
+    await notifyBooking(tx, bookingId, { kind: 'paid', via }, at)
   })
 }
 
@@ -134,6 +139,7 @@ export async function refund(bookingId: string, reason: RefundReason, { at = new
     await tx.transaction.create({
       data: { userId: booking.brandId, bookingId, type: 'refund', amountCents: booking.priceCents, createdAt: at },
     })
+    await notifyBooking(tx, bookingId, { kind: reason === 'declined' ? 'declined' : 'expired' }, at)
   })
 }
 

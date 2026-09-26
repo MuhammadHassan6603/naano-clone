@@ -632,3 +632,23 @@ body:has(main :is(input, textarea, select):focus) :is(.ai-bar, .ai-handle, .ai-t
   visibility: hidden;
   pointer-events: none;
 }
+
+.notify-toast {
+  animation: notify-in 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes notify-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+@media (min-width: 640px) {
+  @keyframes notify-in {
+    from {
+      opacity: 0;
+      transform: translateX(24px);
+    }
+  }
+}

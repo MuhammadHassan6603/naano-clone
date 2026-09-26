@@ -92,6 +92,7 @@ export async function startServer(options: Parameters<typeof createApp>[0] = {})
         await tx.$executeRaw`ALTER TABLE "transactions" DISABLE TRIGGER "transactions_no_update_or_delete"`
         await tx.transaction.deleteMany({ where: { OR: [{ user: testUsers }, { booking: testBookings }] } })
         await tx.click.deleteMany({ where: { booking: testBookings } })
+        await tx.notification.deleteMany({ where: { user: testUsers } })
         await tx.messageRead.deleteMany({ where: { OR: [{ booking: testBookings }, { user: testUsers }] } })
         await tx.message.deleteMany({ where: { OR: [{ booking: testBookings }, { sender: testUsers }] } })
         await tx.booking.deleteMany({ where: testBookings })

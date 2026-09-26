@@ -95,12 +95,29 @@ const compare: Record<CreatorSort, (a: PublicCreator, b: PublicCreator) => numbe
 }
 
 export async function listCreators(
-  filters: { niche?: Niche; maxPriceCents?: number; sort: CreatorSort },
+  filters: { niche?: Niche; maxPriceCents?: number; sort: CreatorSort; q?: string },
   target: Target | null = null,
 ): Promise<PublicCreator[]> {
+  const words = (filters.q ?? '').toLowerCase().split(/\s+/).filter(Boolean).slice(0, 8)
   const rows = await db.user.findMany({
     where: {
       ...listed,
+      AND: words.map((word) => ({
+        OR: [
+          { name: { contains: word, mode: 'insensitive' as const } },
+          {
+            profile: {
+              is: {
+                OR: [
+                  { niche: { contains: word, mode: 'insensitive' as const } },
+                  { audience: { contains: word, mode: 'insensitive' as const } },
+                  { bio: { contains: word, mode: 'insensitive' as const } },
+                ],
+              },
+            },
+          },
+        ],
+      })),
       profile: {
         is: {
           ...listed.profile.is,

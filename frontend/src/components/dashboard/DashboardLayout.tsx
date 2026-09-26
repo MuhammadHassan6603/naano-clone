@@ -4,6 +4,7 @@ import { api } from '../../lib/api'
 import { useAuth } from '../../lib/auth'
 import type { Role, User } from '../../lib/types'
 import { Logo } from '../Logo'
+import { NotificationBell } from '../Notifications'
 import { GridIcon, ListIcon, LogOutIcon, StoreIcon, TargetIcon, UserIcon, WalletIcon } from '../ui/Icons'
 
 type Item = { to: string; label: string; icon: ReactNode; end?: boolean; badge?: number }
@@ -103,9 +104,12 @@ export function DashboardLayout() {
   return (
     <div className="min-h-svh bg-[#f6f7f9] lg:flex">
       <aside className="sticky top-0 hidden h-svh w-64 shrink-0 flex-col border-r border-line bg-white px-4 py-5 lg:flex">
-        <div className="px-2">
-          <Logo className="h-6" />
-          <p className="mt-2 text-xs font-semibold tracking-wide text-muted uppercase">{user.role} dashboard</p>
+        <div className="flex items-start justify-between gap-2 px-2">
+          <div>
+            <Logo className="h-6" />
+            <p className="mt-2 text-xs font-semibold tracking-wide text-muted uppercase">{user.role} dashboard</p>
+          </div>
+          <NotificationBell align="left" />
         </div>
         <nav aria-label="Dashboard" className="mt-8 flex flex-col gap-1">
           {items.map((item) => (
@@ -129,13 +133,16 @@ export function DashboardLayout() {
         <header className="sticky top-0 z-30 border-b border-line bg-white/95 backdrop-blur lg:hidden">
           <div className="flex h-14 items-center justify-between px-4">
             <Logo className="h-[22px]" />
-            <button
+            <div className="flex items-center gap-2">
+              <NotificationBell />
+              <button
               type="button"
               onClick={signOut}
               className="flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold text-[#4b5563] ring-1 ring-line"
             >
               <LogOutIcon /> Log out
-            </button>
+              </button>
+            </div>
           </div>
           <nav aria-label="Dashboard" className="flex gap-2 overflow-x-auto px-4 pb-3">
             {items.map((item) => (

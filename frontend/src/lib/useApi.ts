@@ -3,6 +3,8 @@ import { type ApiError, api, isAbort, toApiError } from './api'
 
 const SLOW_AFTER_MS = 4000
 
+export const REFRESH_EVENT = 'naano:refresh'
+
 type State<T> = { data: T | undefined; error: ApiError | undefined; loading: boolean }
 
 export function useApi<T>(path: string | null, { refreshOnFocus = false }: { refreshOnFocus?: boolean } = {}) {
@@ -41,7 +43,11 @@ export function useApi<T>(path: string | null, { refreshOnFocus = false }: { ref
     if (!refreshOnFocus || path === null) return
     const onVisible = () => document.visibilityState === 'visible' && reload()
     document.addEventListener('visibilitychange', onVisible)
-    return () => document.removeEventListener('visibilitychange', onVisible)
+    window.addEventListener(REFRESH_EVENT, reload)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener(REFRESH_EVENT, reload)
+    }
   }, [refreshOnFocus, path, reload])
 
   return { ...state, slow: slow && state.loading, reload, replace }

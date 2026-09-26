@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import type { User } from '../lib/types'
 import { Logo } from './Logo'
+import { NotificationBell } from './Notifications'
 import { Button, ButtonLink } from './ui/Button'
 import { CloseIcon, MenuIcon } from './ui/Icons'
 
@@ -84,6 +85,7 @@ export function AppHeader() {
               <Button variant="secondary" size="sm" onClick={signOut} className="max-lg:hidden">
                 Log out
               </Button>
+              <NotificationBell />
               <ButtonLink to="/dashboard" size="sm" className="max-sm:px-3">
                 Open dashboard
               </ButtonLink>

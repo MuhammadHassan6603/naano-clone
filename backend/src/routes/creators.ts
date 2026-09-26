@@ -4,7 +4,7 @@ import { getAuth, optionalAuth, requireAuth, requireRole } from '../auth.js'
 import { hasTarget, targetOf } from '../fit.js'
 import { profileUrl } from '../linkedin.js'
 import { Prisma } from '../generated/prisma/client.js'
-import { conflict } from '../errors.js'
+import { badRequest, conflict } from '../errors.js'
 import { notFound } from '../errors.js'
 import {
   MAX_FOLLOWERS,
@@ -14,7 +14,7 @@ import {
   getCreator,
   listCreators,
 } from '../creators.js'
-import { type Body, idParam, int, objectBody, oneOf, queryInt, queryOneOf, text } from '../validate.js'
+import { type Body, idParam, int, objectBody, oneOf, queryInt, queryOneOf, queryText, text } from '../validate.js'
 
 export const creatorsRouter = Router()
 
@@ -27,15 +27,33 @@ creatorsRouter.get('/', optionalAuth, async (req, res) => {
   const query = req.query as Body
   const target = await brandTarget(req)
   const sort = queryOneOf(query, 'sort', SORTS) ?? (target ? 'fit' : 'reliability')
-  const creators = await listCreators(
+  const q = queryText(query, 'q')?.trim() ?? ''
+  if (q.length > 100) throw badRequest('q must be at most 100 characters')
+  const pageSize = queryInt(query, 'pageSize', { min: 1, max: 50 })
+  const requestedPage = queryInt(query, 'page', { min: 1, max: 10_000 }) ?? 1
+  const all = await listCreators(
     {
       niche: queryOneOf(query, 'niche', NICHES),
       maxPriceCents: queryInt(query, 'maxPriceCents', { min: 1, max: MAX_PRICE_CENTS }),
       sort,
+      q,
     },
     target,
   )
-  res.json({ creators, niches: NICHES, sort: sort === 'fit' && !target ? 'reliability' : sort, target })
+  const pages = pageSize ? Math.max(1, Math.ceil(all.length / pageSize)) : 1
+  const page = Math.min(requestedPage, pages)
+  const creators = pageSize ? all.slice((page - 1) * pageSize, page * pageSize) : all
+  res.json({
+    creators,
+    total: all.length,
+    page,
+    pages,
+    pageSize: pageSize ?? all.length,
+    q,
+    niches: NICHES,
+    sort: sort === 'fit' && !target ? 'reliability' : sort,
+    target,
+  })
 })
 
 creatorsRouter.get('/:id', optionalAuth, async (req, res) => {

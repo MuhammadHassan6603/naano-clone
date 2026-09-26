@@ -4,8 +4,9 @@ export const DEMO_PASSWORD = 'naano-demo-2026'
 
 const accounts = [
   { email: 'acme@demo.test', name: 'Acme CRM', role: 'Brand', note: 'A booking in every stage, including a post waiting for approval.' },
-  { email: 'maya@demo.test', name: 'Maya Okafor', role: 'Creator', note: 'A new booking request waiting to be accepted.' },
-  { email: 'priya@demo.test', name: 'Priya Nair', role: 'Creator', note: 'Top track record: delivered 5 of 5.' },
+  { email: 'olivia@demo.test', name: 'Olivia Bennett', role: 'Creator', note: 'A new booking request waiting to be accepted.' },
+  { email: 'emily@demo.test', name: 'Emily Carter', role: 'Creator', note: 'A post waiting for approval, and a 5 of 5 track record.' },
+  { email: 'hassan@demo.test', name: 'Muhammad Hassan', role: 'Creator', note: 'AI creator with a linked LinkedIn profile.' },
   { email: 'pipewise@demo.test', name: 'Pipewise', role: 'Brand', note: 'The brand behind most of the past bookings.' },
 ]
 

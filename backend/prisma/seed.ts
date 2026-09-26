@@ -17,34 +17,38 @@ const BROWSER = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.
 
 const brands = [
   { key: 'acme', name: 'Acme CRM', email: 'acme@demo.test', site: 'https://acme-crm.example', topUpCents: 1_000_000 },
-  { key: 'pipewise', name: 'Pipewise', email: 'pipewise@demo.test', site: 'https://pipewise.example', topUpCents: 1_000_000 },
+  { key: 'pipewise', name: 'Pipewise', email: 'pipewise@demo.test', site: 'https://pipewise.example', topUpCents: 2_000_000 },
 ] as const
 
 const creators = [
-  { key: 'maya', name: 'Maya Okafor', niche: 'RevOps', price: 45_000, followers: 18_400,
+  { key: 'olivia', name: 'Olivia Bennett', niche: 'RevOps', price: 45_000, followers: 18_400,
     bio: 'Ex-VP Sales turned RevOps operator. I write about pipeline hygiene and forecasts that hold up.',
     audience: 'SaaS founders and sales leaders, seed to Series B' },
-  { key: 'daniel', name: 'Daniel Reyes', niche: 'Sales', price: 60_000, followers: 31_200,
+  { key: 'daniel', name: 'Daniel Hughes', niche: 'Sales', price: 60_000, followers: 31_200,
     bio: 'Enterprise AE for 9 years. Daily notes on discovery calls, objection handling and closing.',
     audience: 'Account executives and sales managers at B2B SaaS companies' },
-  { key: 'priya', name: 'Priya Nair', niche: 'AI', price: 90_000, followers: 52_000,
+  { key: 'emily', name: 'Emily Carter', niche: 'AI', price: 90_000, followers: 52_000,
     bio: 'ML engineer writing plain-language breakdowns of AI tools that actually ship.',
     audience: 'Engineering leaders and technical founders evaluating AI' },
-  { key: 'tom', name: 'Tom Becker', niche: 'DevTools', price: 35_000, followers: 9_800,
+  { key: 'tom', name: 'Tom Walker', niche: 'DevTools', price: 35_000, followers: 9_800,
     bio: 'Staff engineer. I review developer tools honestly, including the ones I stop using.',
     audience: 'Backend and platform engineers' },
-  { key: 'sofia', name: 'Sofia Lindqvist', niche: 'Marketing', price: 50_000, followers: 24_300,
+  { key: 'sophie', name: 'Sophie Mitchell', niche: 'Marketing', price: 50_000, followers: 24_300,
     bio: 'B2B demand gen lead. Teardowns of campaigns that worked, and a few that did not.',
     audience: 'Heads of marketing and demand gen at Series A to C companies' },
   { key: 'james', name: 'James Whitfield', niche: 'Founders', price: 120_000, followers: 88_000,
     bio: 'Two-time founder, one exit. Writing about the unglamorous parts of building a company.',
     audience: 'Early-stage founders and operators' },
-  { key: 'aisha', name: 'Aisha Rahman', niche: 'HR', price: 25_000, followers: 7_200,
+  { key: 'hannah', name: 'Hannah Brooks', niche: 'HR', price: 25_000, followers: 7_200,
     bio: 'People ops at a 300-person scale-up. Hiring, onboarding and keeping good people.',
     audience: 'HR leaders and hiring managers' },
-  { key: 'lucas', name: 'Lucas Moreau', niche: 'SEO', price: 30_000, followers: 12_500,
+  { key: 'lucas', name: 'Lucas Grant', niche: 'SEO', price: 30_000, followers: 12_500,
     bio: 'Technical SEO consultant. Case studies with real traffic numbers.',
     audience: 'Content and growth teams at SaaS companies' },
+  { key: 'hassan', name: 'Muhammad Hassan', niche: 'AI', price: 40_000, followers: 2_400,
+    bio: 'Full-stack engineer building AI products. I write about shipping fast with small teams and the tools that make it possible.',
+    audience: 'Engineering leads and founders at early-stage SaaS companies',
+    linkedinUrl: 'https://www.linkedin.com/in/muhammad-hassan05' },
 ] as const satisfies readonly (Record<string, unknown> & { niche: Niche })[]
 
 type BrandKey = (typeof brands)[number]['key']
@@ -72,7 +76,14 @@ async function createUsers() {
         createdAt: ago(40),
         wallet: { create: {} },
         profile: {
-          create: { niche: c.niche, bio: c.bio, audience: c.audience, priceCents: c.price, followers: c.followers },
+          create: {
+            niche: c.niche,
+            bio: c.bio,
+            audience: c.audience,
+            priceCents: c.price,
+            followers: c.followers,
+            linkedinUrl: 'linkedinUrl' in c ? c.linkedinUrl : null,
+          },
         },
       },
     })
@@ -159,9 +170,9 @@ const targets: Record<BrandKey, { niches: Niche[]; audience: string; budgetCents
 type Line = { from: 'brand' | 'creator'; body: string }
 const conversations: { creator: CreatorKey; lines: Line[]; brandReads: number; creatorReads: number }[] = [
   {
-    creator: 'priya',
+    creator: 'emily',
     lines: [
-      { from: 'brand', body: 'Hi Priya, excited for this one. Could you mention the pipeline health score by name?' },
+      { from: 'brand', body: 'Hi Emily, excited for this one. Could you mention the pipeline health score by name?' },
       { from: 'creator', body: "Absolutely. I'll show it on a real forecast screenshot so it doesn't read like an ad." },
       { from: 'creator', body: 'The post is live. The link is in the booking and clicks are already coming in.' },
     ],
@@ -178,8 +189,8 @@ const conversations: { creator: CreatorKey; lines: Line[]; brandReads: number; c
     creatorReads: 2,
   },
   {
-    creator: 'maya',
-    lines: [{ from: 'brand', body: 'Hi Maya! Happy to send screenshots of the pipeline health score if that helps with the post.' }],
+    creator: 'olivia',
+    lines: [{ from: 'brand', body: 'Hi Olivia! Happy to send screenshots of the pipeline health score if that helps with the post.' }],
     brandReads: 1,
     creatorReads: 0,
   },
@@ -226,9 +237,26 @@ async function addExtras() {
   }
 }
 
+async function resetEverything(host: string) {
+  if (!process.argv.includes('--yes')) {
+    throw new Error(`--reset deletes every account, booking and ledger row on ${host}. Run again with --reset --yes to confirm.`)
+  }
+  await db.$executeRaw`TRUNCATE TABLE "notifications", "message_reads", "messages", "clicks", "transactions", "bookings", "brand_profiles", "creator_profiles", "wallets", "users" CASCADE`
+  console.log('emptied every table')
+}
+
+async function quietOldNotifications() {
+  const { count } = await db.notification.updateMany({
+    where: { readAt: null, createdAt: { lt: new Date(NOW - DAY) } },
+    data: { readAt: new Date() },
+  })
+  console.log(`marked ${count} older notifications as read`)
+}
+
 async function main() {
   const host = new URL(env.databaseUrl).hostname
   console.log(`seeding ${host}`)
+  if (process.argv.includes('--reset')) await resetEverything(host)
   if (await db.user.findUnique({ where: { email: brands[0].email } })) {
     console.log('already seeded (acme@demo.test exists); adding anything newer that is missing')
     await addExtras()
@@ -236,34 +264,37 @@ async function main() {
   }
 
   const ids = await createUsers()
-  console.log('created 2 brands and 8 creators')
+  console.log(`created ${brands.length} brands and ${creators.length} creators`)
 
   const history: [CreatorKey, Outcome][] = [
-    ['maya', 'paid-brand'], ['maya', 'paid-click'], ['maya', 'paid-brand'], ['maya', 'paid-timeout'], ['maya', 'expired'],
+    ['olivia', 'paid-brand'], ['olivia', 'paid-click'], ['olivia', 'paid-brand'], ['olivia', 'paid-timeout'], ['olivia', 'expired'],
     ['daniel', 'paid-brand'], ['daniel', 'paid-click'], ['daniel', 'paid-brand'],
-    ['priya', 'paid-click'], ['priya', 'paid-brand'], ['priya', 'paid-brand'], ['priya', 'paid-click'], ['priya', 'paid-brand'],
+    ['emily', 'paid-click'], ['emily', 'paid-brand'], ['emily', 'paid-brand'], ['emily', 'paid-click'], ['emily', 'paid-brand'],
     ['tom', 'paid-brand'],
-    ['sofia', 'paid-brand'], ['sofia', 'expired'], ['sofia', 'paid-click'],
-    ['aisha', 'declined'], ['aisha', 'paid-brand'],
+    ['sophie', 'paid-brand'], ['sophie', 'expired'], ['sophie', 'paid-click'],
+    ['hannah', 'declined'], ['hannah', 'paid-brand'],
+    ['hassan', 'paid-brand'], ['hassan', 'paid-click'], ['hassan', 'paid-brand'],
   ]
   for (const [index, [creator, outcome]] of history.entries()) {
-    await play(ids, 'pipewise', creator, outcome, ago(32 - index))
+    await play(ids, 'pipewise', creator, outcome, ago(34 - index))
   }
   console.log(`played ${history.length} past bookings for reliability history`)
 
   const acme: [CreatorKey, Outcome, Date][] = [
     ['tom', 'paid-timeout', ago(12)],
     ['james', 'paid-click', ago(10)],
-    ['sofia', 'expired', ago(9)],
+    ['sophie', 'expired', ago(9)],
     ['tom', 'paid-brand', ago(8)],
-    ['aisha', 'declined', ago(5)],
-    ['priya', 'submitted', plus(ago(0), -44 * HOUR)],
+    ['hassan', 'paid-click', ago(6)],
+    ['hannah', 'declined', ago(5)],
+    ['emily', 'submitted', plus(ago(0), -44 * HOUR)],
     ['daniel', 'accepted', ago(1)],
-    ['maya', 'requested', plus(ago(0), -2 * HOUR)],
+    ['olivia', 'requested', plus(ago(0), -2 * HOUR)],
   ]
   for (const [creator, outcome, start] of acme) await play(ids, 'acme', creator, outcome, start)
   console.log(`played ${acme.length} Acme bookings, one per state`)
   await addExtras()
+  await quietOldNotifications()
 
   console.log(`\nDemo logins (password: ${DEMO_PASSWORD})`)
   for (const b of brands) console.log(`  brand    ${b.email}`)

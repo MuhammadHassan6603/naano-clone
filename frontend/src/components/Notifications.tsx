@@ -1,11 +1,12 @@
 import { type ReactNode, createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { api } from '../lib/api'
+import { BASE_URL, api, tokenStore } from '../lib/api'
 import { type Notification, chime, soundPreference, timeAgo, unlockSound } from '../lib/notifications'
 import { REFRESH_EVENT } from '../lib/useApi'
 import { BellIcon, CheckIcon, CloseIcon, MessageIcon, MuteIcon, UndoIcon, VolumeIcon, WalletIcon } from './ui/Icons'
 
-const POLL_MS = 8000
+const POLL_MS = 15000
+const RETRY_MAX_MS = 30000
 const TOAST_MS = 7000
 const MAX_TOASTS = 3
 
@@ -86,6 +87,8 @@ export function NotificationsProvider({ userId, children }: { userId?: string; c
   pathRef.current = pathname
   const soundRef = useRef(sound)
   soundRef.current = sound
+  const pollRef = useRef<() => void>(() => undefined)
+  const liveRef = useRef(false)
 
   const markRead = useCallback(async (ids?: string[]) => {
     setItems((current) => current.map((n) => (!ids || ids.includes(n.id) ? { ...n, read: true } : n)))
@@ -144,14 +147,30 @@ export function NotificationsProvider({ userId, children }: { userId?: string; c
           setToasts((current) => [...elsewhere.slice().reverse(), ...current].slice(0, MAX_TOASTS))
           if (soundRef.current) chime()
         }
-        window.dispatchEvent(new Event(REFRESH_EVENT))
+        if (!liveRef.current) window.dispatchEvent(new Event(REFRESH_EVENT))
       } catch {
         return
       }
     }
-    void poll()
-    const timer = window.setInterval(() => void poll(), POLL_MS)
-    const onVisible = () => document.visibilityState === 'visible' && void poll()
+    let running: Promise<void> | null = null
+    let again = false
+    const schedule = () => {
+      if (running) {
+        again = true
+        return
+      }
+      running = poll().finally(() => {
+        running = null
+        if (again) {
+          again = false
+          schedule()
+        }
+      })
+    }
+    pollRef.current = schedule
+    schedule()
+    const timer = window.setInterval(schedule, POLL_MS)
+    const onVisible = () => document.visibilityState === 'visible' && schedule()
     document.addEventListener('visibilitychange', onVisible)
     return () => {
       alive = false
@@ -159,6 +178,69 @@ export function NotificationsProvider({ userId, children }: { userId?: string; c
       document.removeEventListener('visibilitychange', onVisible)
     }
   }, [markRead, userId])
+
+  useEffect(() => {
+    if (!userId) return
+    let stopped = false
+    let controller: AbortController | null = null
+    let retry = 1000
+    let timer: number | undefined
+    const connect = async () => {
+      const token = tokenStore.get()
+      if (!token || stopped) return
+      controller = new AbortController()
+      try {
+        const response = await fetch(`${BASE_URL}/events`, { headers: { Authorization: `Bearer ${token}` }, signal: controller.signal })
+        if (response.status === 401) return
+        if (!response.ok || !response.body) throw new Error(`events ${response.status}`)
+        retry = 1000
+        liveRef.current = true
+        pollRef.current()
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        for (;;) {
+          const { value, done } = await reader.read()
+          if (done) break
+          if (decoder.decode(value, { stream: true }).includes('event: update')) {
+            window.dispatchEvent(new Event(REFRESH_EVENT))
+            pollRef.current()
+          }
+        }
+      } catch {
+        if (stopped) return
+      }
+      liveRef.current = false
+      if (stopped || document.visibilityState === 'hidden' || !controller) return
+      timer = window.setTimeout(() => void connect(), retry)
+      retry = Math.min(retry * 2, RETRY_MAX_MS)
+    }
+    const close = () => {
+      window.clearTimeout(timer)
+      controller?.abort()
+      controller = null
+    }
+    const onHide = () => {
+      if (document.visibilityState === 'hidden') close()
+      else if (!controller && !stopped) {
+        retry = 1000
+        void connect()
+      }
+    }
+    const onPageHide = () => {
+      stopped = true
+      close()
+    }
+    document.addEventListener('visibilitychange', onHide)
+    window.addEventListener('pagehide', onPageHide)
+    void connect()
+    return () => {
+      stopped = true
+      liveRef.current = false
+      document.removeEventListener('visibilitychange', onHide)
+      window.removeEventListener('pagehide', onPageHide)
+      close()
+    }
+  }, [userId])
 
   useEffect(() => {
     const ids = items.filter((n) => !n.read && n.link === pathname).map((n) => n.id)

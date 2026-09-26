@@ -1,4 +1,5 @@
 import { db } from './db.js'
+import { track } from './events.js'
 import type { Tx } from './escrow.js'
 import type { VerifiedVia } from './generated/prisma/enums.js'
 
@@ -67,7 +68,9 @@ export function bookingNotes(booking: BookingParties, event: BookingEvent): Note
 }
 
 export async function notify(tx: Tx, notes: Note[], at: Date) {
-  if (notes.length) await tx.notification.createMany({ data: notes.map((note) => ({ ...note, createdAt: at })) })
+  if (!notes.length) return
+  await tx.notification.createMany({ data: notes.map((note) => ({ ...note, createdAt: at })) })
+  track(tx, notes.map((note) => note.userId))
 }
 
 export async function notifyBooking(tx: Tx, bookingId: string, event: BookingEvent, at: Date) {
@@ -76,6 +79,7 @@ export async function notifyBooking(tx: Tx, bookingId: string, event: BookingEve
     select: { id: true, priceCents: true, brand: { select: { id: true, name: true } }, creator: { select: { id: true, name: true } } },
   })
   await notify(tx, bookingNotes(booking, event), at)
+  track(tx, [booking.brand.id, booking.creator.id])
 }
 
 export function messageNote(booking: BookingParties, senderId: string, body: string): Note {

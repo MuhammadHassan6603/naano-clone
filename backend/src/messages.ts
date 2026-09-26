@@ -1,7 +1,8 @@
 import { db } from './db.js'
 import { HttpError } from './errors.js'
 import { messageNote, notify } from './notifications.js'
-import { TX_LIMITS } from './escrow.js'
+import { transaction } from './escrow.js'
+import { track } from './events.js'
 
 export const MAX_MESSAGE_CHARS = 2000
 export const MAX_MESSAGES_PER_MINUTE = 20
@@ -45,15 +46,16 @@ function rateLimit(userId: string) {
 
 export async function sendMessage(bookingId: string, senderId: string, body: string): Promise<MessageView> {
   rateLimit(senderId)
-  const row = await db.$transaction(async (tx) => {
+  const row = await transaction(async (tx) => {
     const created = await tx.message.create({ data: { bookingId, senderId, body }, select: messageSelect })
     const booking = await tx.booking.findUniqueOrThrow({
       where: { id: bookingId },
       select: { id: true, priceCents: true, brand: { select: { id: true, name: true } }, creator: { select: { id: true, name: true } } },
     })
     await notify(tx, [messageNote(booking, senderId, body)], created.createdAt)
+    track(tx, [booking.brand.id, booking.creator.id])
     return created
-  }, TX_LIMITS)
+  })
   await markRead(bookingId, senderId, row.createdAt)
   return view(senderId)(row)
 }

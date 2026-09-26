@@ -120,7 +120,7 @@ function Success({ booking }: { booking: Booking }) {
 export default function NewBooking() {
   const { creatorId = '' } = useParams()
   const creatorQuery = useApi<{ creator: Creator }>(`/creators/${encodeURIComponent(creatorId)}`)
-  const walletQuery = useApi<Wallet>('/wallet')
+  const walletQuery = useApi<Wallet>('/wallet', { refreshOnFocus: true })
   const creator = creatorQuery.data?.creator
   usePageTitle(creator ? `Book ${creator.name}` : 'Book a creator')
 

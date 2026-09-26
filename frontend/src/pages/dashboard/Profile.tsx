@@ -52,7 +52,7 @@ export default function Profile() {
   const me = useApi<{ user: User; profile?: OwnProfile }>('/auth/me')
   const market = useApi<{ creators: Creator[]; niches: string[] }>('/creators')
   const listed = Boolean(me.data?.profile?.priceCents)
-  const card = useApi<{ creator: Creator }>(listed && user ? `/creators/${user.id}` : null)
+  const card = useApi<{ creator: Creator }>(listed && user ? `/creators/${user.id}` : null, { refreshOnFocus: true })
   const ready = Boolean(me.data && market.data && (!listed || card.data || card.error))
 
   if (!user) return null

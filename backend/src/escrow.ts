@@ -6,13 +6,24 @@ import { listed } from './creators.js'
 import type { Prisma } from './generated/prisma/client.js'
 import type { BookingStatus, RefundReason, VerifiedVia } from './generated/prisma/enums.js'
 import { notifyBooking } from './notifications.js'
+import { collectFor, publish } from './events.js'
 
 export type Tx = Prisma.TransactionClient
 export type EscrowOptions = { at?: Date; tx?: Tx }
 
 export const TX_LIMITS = { maxWait: 10_000, timeout: 20_000 }
 
-const inTx = <T>(tx: Tx | undefined, fn: (tx: Tx) => Promise<T>) => (tx ? fn(tx) : db.$transaction(fn, TX_LIMITS))
+export async function transaction<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
+  let users: Set<string> | undefined
+  const result = await db.$transaction(async (tx) => {
+    users = collectFor(tx)
+    return fn(tx)
+  }, TX_LIMITS)
+  if (users) publish(users)
+  return result
+}
+
+const inTx = <T>(tx: Tx | undefined, fn: (tx: Tx) => Promise<T>) => (tx ? fn(tx) : transaction(fn))
 
 export const MIN_TOPUP_CENTS = 100
 export const MAX_TOPUP_CENTS = 1_000_000

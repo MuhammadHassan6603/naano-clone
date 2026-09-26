@@ -93,9 +93,9 @@ function BrandOverview({ user }: { user: User }) {
 }
 
 function CreatorOverview({ user }: { user: User }) {
-  const me = useApi<{ user: User; profile?: OwnProfile }>('/auth/me')
+  const me = useApi<{ user: User; profile?: OwnProfile }>('/auth/me', { refreshOnFocus: true })
   const listed = Boolean(me.data?.profile?.priceCents && me.data.profile.niche)
-  const card = useApi<{ creator: Creator }>(listed ? `/creators/${user.id}` : null)
+  const card = useApi<{ creator: Creator }>(listed ? `/creators/${user.id}` : null, { refreshOnFocus: true })
   const reliability = card.data?.creator.reliability
 
   return (

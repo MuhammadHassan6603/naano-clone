@@ -10,6 +10,7 @@ import { bookingsRouter } from './routes/bookings.js'
 import { trackingRouter } from './routes/tracking.js'
 import { brandsRouter } from './routes/brands.js'
 import { notificationsRouter } from './routes/notifications.js'
+import { eventsRouter } from './routes/events.js'
 import { assistantRouter } from './routes/assistant.js'
 import { type Model, geminiModel } from './assistant.js'
 
@@ -36,6 +37,7 @@ export function createApp({ assistantModel = defaultModel() }: { assistantModel?
   app.use('/creators', creatorsRouter)
   app.use('/brands', brandsRouter)
   app.use('/notifications', notificationsRouter)
+  app.use('/events', eventsRouter)
   app.use('/wallet', walletRouter)
   app.use('/bookings', bookingsRouter)
   app.use('/assistant', assistantRouter(assistantModel))

@@ -1,6 +1,7 @@
 import { type ReactNode, startTransition, useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { api } from '../../lib/api'
+import { REFRESH_EVENT } from '../../lib/useApi'
 import { useAuth } from '../../lib/auth'
 import type { Role, User } from '../../lib/types'
 import { Logo } from '../Logo'
@@ -36,11 +37,13 @@ function useUnreadMessages(enabled: boolean) {
     load()
     const timer = window.setInterval(load, UNREAD_POLL_MS)
     window.addEventListener(MESSAGES_READ, load)
+    window.addEventListener(REFRESH_EVENT, load)
     document.addEventListener('visibilitychange', load)
     return () => {
       alive = false
       window.clearInterval(timer)
       window.removeEventListener(MESSAGES_READ, load)
+      window.removeEventListener(REFRESH_EVENT, load)
       document.removeEventListener('visibilitychange', load)
     }
   }, [enabled, pathname])

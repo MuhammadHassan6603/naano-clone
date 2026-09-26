@@ -12,6 +12,8 @@ export function useApi<T>(path: string | null, { refreshOnFocus = false }: { ref
   const [slow, setSlow] = useState(false)
   const [version, setVersion] = useState(0)
   const lastPath = useRef(path)
+  const busy = useRef(false)
+  const stale = useRef(false)
 
   useEffect(() => {
     if (path === null) return
@@ -21,22 +23,38 @@ export function useApi<T>(path: string | null, { refreshOnFocus = false }: { ref
     setState((current) => ({ data: samePath ? current.data : undefined, error: undefined, loading: true }))
     setSlow(false)
     const slowTimer = window.setTimeout(() => setSlow(true), SLOW_AFTER_MS)
+    busy.current = true
+    const settle = () => {
+      busy.current = false
+      if (stale.current) {
+        stale.current = false
+        setVersion((value) => value + 1)
+      }
+    }
 
     api<T>(path, { signal: controller.signal })
-      .then((data) => setState({ data, error: undefined, loading: false }))
+      .then((data) => {
+        setState({ data, error: undefined, loading: false })
+        settle()
+      })
       .catch((error: unknown) => {
         if (isAbort(error)) return
         setState((current) => ({ data: current.data, error: toApiError(error), loading: false }))
+        settle()
       })
       .finally(() => window.clearTimeout(slowTimer))
 
     return () => {
+      busy.current = false
       controller.abort()
       window.clearTimeout(slowTimer)
     }
   }, [path, version])
 
-  const reload = useCallback(() => setVersion((value) => value + 1), [])
+  const reload = useCallback(() => {
+    if (busy.current) stale.current = true
+    else setVersion((value) => value + 1)
+  }, [])
   const replace = useCallback((data: T) => setState({ data, error: undefined, loading: false }), [])
 
   useEffect(() => {

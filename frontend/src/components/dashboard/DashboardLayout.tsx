@@ -1,18 +1,62 @@
-import { type ReactNode, startTransition } from 'react'
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { type ReactNode, startTransition, useEffect, useState } from 'react'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { api } from '../../lib/api'
 import { useAuth } from '../../lib/auth'
 import type { Role, User } from '../../lib/types'
 import { Logo } from '../Logo'
-import { GridIcon, ListIcon, LogOutIcon, StoreIcon, UserIcon, WalletIcon } from '../ui/Icons'
+import { GridIcon, ListIcon, LogOutIcon, StoreIcon, TargetIcon, UserIcon, WalletIcon } from '../ui/Icons'
 
-type Item = { to: string; label: string; icon: ReactNode; end?: boolean }
+type Item = { to: string; label: string; icon: ReactNode; end?: boolean; badge?: number }
 
-const itemsFor = (role: Role): Item[] => [
+const itemsFor = (role: Role, unread: number): Item[] => [
   { to: '/dashboard', label: 'Overview', icon: <GridIcon />, end: true },
-  { to: '/dashboard/bookings', label: 'Bookings', icon: <ListIcon /> },
-  ...(role === 'creator' ? [{ to: '/dashboard/profile', label: 'My profile', icon: <UserIcon /> }] : []),
+  { to: '/dashboard/bookings', label: 'Bookings', icon: <ListIcon />, badge: unread },
+  role === 'creator'
+    ? { to: '/dashboard/profile', label: 'My profile', icon: <UserIcon /> }
+    : { to: '/dashboard/audience', label: 'Who you sell to', icon: <TargetIcon /> },
   { to: '/dashboard/wallet', label: 'Wallet', icon: <WalletIcon /> },
 ]
+
+export const MESSAGES_READ = 'naano:messages-read'
+const UNREAD_POLL_MS = 30_000
+
+function useUnreadMessages(enabled: boolean) {
+  const { pathname } = useLocation()
+  const [unread, setUnread] = useState(0)
+  useEffect(() => {
+    if (!enabled) return
+    let alive = true
+    const load = () => {
+      if (document.visibilityState !== 'visible') return
+      api<{ unread: number }>('/bookings/unread')
+        .then((result) => alive && setUnread(result.unread))
+        .catch(() => undefined)
+    }
+    load()
+    const timer = window.setInterval(load, UNREAD_POLL_MS)
+    window.addEventListener(MESSAGES_READ, load)
+    document.addEventListener('visibilitychange', load)
+    return () => {
+      alive = false
+      window.clearInterval(timer)
+      window.removeEventListener(MESSAGES_READ, load)
+      document.removeEventListener('visibilitychange', load)
+    }
+  }, [enabled, pathname])
+  return unread
+}
+
+function Badge({ count, inverted = false }: { count?: number; inverted?: boolean }) {
+  if (!count) return null
+  return (
+    <span
+      className={`ml-auto min-w-5 rounded-full px-1.5 py-0.5 text-center text-[11px] leading-4 font-bold ${inverted ? 'bg-white text-ink' : 'bg-accent text-white'}`}
+      aria-label={`${count} unread ${count === 1 ? 'message' : 'messages'}`}
+    >
+      {count > 99 ? '99+' : count}
+    </span>
+  )
+}
 
 const sideLink = ({ isActive }: { isActive: boolean }) =>
   `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
@@ -48,8 +92,9 @@ function Account({ user, onLogout }: { user: User; onLogout: () => void }) {
 export function DashboardLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const unread = useUnreadMessages(Boolean(user))
   if (!user) return null
-  const items = itemsFor(user.role)
+  const items = itemsFor(user.role, unread)
   const signOut = () => {
     navigate('/')
     startTransition(logout)
@@ -67,6 +112,7 @@ export function DashboardLayout() {
             <NavLink key={item.to} to={item.to} end={item.end} className={sideLink}>
               {item.icon}
               {item.label}
+              <Badge count={item.badge} />
             </NavLink>
           ))}
           <Link to={user.role === 'brand' ? '/#creators' : '/'} className={sideLink({ isActive: false })}>
@@ -94,7 +140,12 @@ export function DashboardLayout() {
           <nav aria-label="Dashboard" className="flex gap-2 overflow-x-auto px-4 pb-3">
             {items.map((item) => (
               <NavLink key={item.to} to={item.to} end={item.end} className={tabLink}>
-                {item.label}
+                {({ isActive }) => (
+                  <>
+                    {item.label}
+                    <Badge count={item.badge} inverted={isActive} />
+                  </>
+                )}
               </NavLink>
             ))}
             <Link to={user.role === 'brand' ? '/#creators' : '/'} className={tabLink({ isActive: false })}>

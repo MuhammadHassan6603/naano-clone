@@ -5,6 +5,7 @@ import { Layout } from './components/Layout'
 import { RequireAuth } from './components/RequireAuth'
 import { ScrollManager } from './components/ScrollManager'
 import CreatorProfile from './pages/CreatorProfile'
+import Audience from './pages/dashboard/Audience'
 import BookingDetail from './pages/dashboard/BookingDetail'
 import Bookings from './pages/dashboard/Bookings'
 import Overview from './pages/dashboard/Overview'
@@ -44,6 +45,7 @@ export default function App() {
           <Route path="bookings" element={<Bookings />} />
           <Route path="bookings/:id" element={<BookingDetail />} />
           <Route path="profile" element={<Profile />} />
+          <Route path="audience" element={<Audience />} />
           <Route path="wallet" element={<Wallet />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>

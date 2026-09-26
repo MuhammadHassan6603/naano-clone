@@ -4,7 +4,7 @@ import { type Tone, counterpart, moneyLine, statusLabel } from '../../lib/bookin
 import { formatDateTime } from '../../lib/format'
 import type { Booking, Role } from '../../lib/types'
 import { Avatar } from '../Avatar'
-import { ArrowRightIcon } from '../ui/Icons'
+import { ArrowRightIcon, MessageIcon } from '../ui/Icons'
 
 const toneClass: Record<Tone, string> = {
   neutral: 'bg-[#f1f2f4] text-[#3f4652]',
@@ -55,6 +55,12 @@ export function BookingRow({ booking, role }: { booking: Booking; role: Role }) 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <p className="truncate font-semibold text-ink">{other.name}</p>
             <StatusBadge booking={booking} role={role} />
+            {Boolean(booking.unreadMessages) && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-xs font-semibold whitespace-nowrap text-white">
+                <MessageIcon className="size-3" />
+                {booking.unreadMessages} new {booking.unreadMessages === 1 ? 'message' : 'messages'}
+              </span>
+            )}
           </div>
           <p className="mt-1 truncate text-sm text-muted">
             {moneyLine(booking, role)} · {whenLine(booking)}

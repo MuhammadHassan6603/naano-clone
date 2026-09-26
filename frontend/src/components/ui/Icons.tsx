@@ -199,3 +199,23 @@ export const ClockIcon = (props: IconProps) => (
     <path d="M12 6v6l4 2" />
   </Icon>
 )
+
+export const MessageIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" />
+  </Icon>
+)
+
+export const TargetIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <circle cx="12" cy="12" r="9" />
+    <circle cx="12" cy="12" r="5" />
+    <circle cx="12" cy="12" r="1" />
+  </Icon>
+)
+
+export const MinusIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="M5 12h14" />
+  </Icon>
+)

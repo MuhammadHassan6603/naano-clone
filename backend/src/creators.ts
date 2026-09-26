@@ -1,10 +1,11 @@
 import { db } from './db.js'
 import type { Prisma } from './generated/prisma/client.js'
+import { type Fit, type Target, explainFit, hasTarget } from './fit.js'
 
 export const NICHES = ['AI', 'DevTools', 'Founders', 'HR', 'Marketing', 'RevOps', 'Sales', 'SEO'] as const
 export type Niche = (typeof NICHES)[number]
 
-export const SORTS = ['reliability', 'price', 'followers'] as const
+export const SORTS = ['fit', 'reliability', 'price', 'followers'] as const
 export type CreatorSort = (typeof SORTS)[number]
 
 export const MAX_PRICE_CENTS = 10_000_000
@@ -21,6 +22,7 @@ export type PublicCreator = {
   priceCents: number
   followers: number
   reliability: Reliability
+  fit?: Fit
 }
 
 const creatorSelect = {
@@ -81,17 +83,17 @@ export function reliabilityScore({ delivered, total }: Reliability): number {
 }
 
 const compare: Record<CreatorSort, (a: PublicCreator, b: PublicCreator) => number> = {
+  fit: (a, b) => (b.fit?.matched ?? 0) - (a.fit?.matched ?? 0) || compare.reliability(a, b),
   reliability: (a, b) =>
     reliabilityScore(b.reliability) - reliabilityScore(a.reliability) || b.followers - a.followers,
   price: (a, b) => a.priceCents - b.priceCents || b.followers - a.followers,
   followers: (a, b) => b.followers - a.followers,
 }
 
-export async function listCreators(filters: {
-  niche?: Niche
-  maxPriceCents?: number
-  sort: CreatorSort
-}): Promise<PublicCreator[]> {
+export async function listCreators(
+  filters: { niche?: Niche; maxPriceCents?: number; sort: CreatorSort },
+  target: Target | null = null,
+): Promise<PublicCreator[]> {
   const rows = await db.user.findMany({
     where: {
       ...listed,
@@ -106,14 +108,19 @@ export async function listCreators(filters: {
     select: creatorSelect,
   })
   const reliability = await reliabilityOf(rows.map((row) => row.id))
+  const sort = filters.sort === 'fit' && !hasTarget(target) ? 'reliability' : filters.sort
   return rows
-    .flatMap((row) => toPublic(row, reliability.get(row.id) ?? { delivered: 0, total: 0 }) ?? [])
-    .sort((a, b) => compare[filters.sort](a, b) || a.id.localeCompare(b.id))
+    .flatMap((row) => withFit(toPublic(row, reliability.get(row.id) ?? { delivered: 0, total: 0 }), target) ?? [])
+    .sort((a, b) => compare[sort](a, b) || a.id.localeCompare(b.id))
 }
 
-export async function getCreator(id: string): Promise<PublicCreator | null> {
+function withFit(creator: PublicCreator | null, target: Target | null): PublicCreator | null {
+  return creator && hasTarget(target) ? { ...creator, fit: explainFit(creator, target) } : creator
+}
+
+export async function getCreator(id: string, target: Target | null = null): Promise<PublicCreator | null> {
   const row = await db.user.findFirst({ where: { id, ...listed }, select: creatorSelect })
   if (!row) return null
   const reliability = await reliabilityOf([id])
-  return toPublic(row, reliability.get(id) ?? { delivered: 0, total: 0 })
+  return withFit(toPublic(row, reliability.get(id) ?? { delivered: 0, total: 0 }), target)
 }

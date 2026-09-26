@@ -6,6 +6,7 @@ import { BookingTimeline } from '../../components/dashboard/BookingTimeline'
 import { ClickInsights } from '../../components/dashboard/ClickInsights'
 import { ConfirmButton } from '../../components/dashboard/ConfirmButton'
 import { CopyField } from '../../components/dashboard/CopyField'
+import { MessageThread } from '../../components/dashboard/MessageThread'
 import { Panel } from '../../components/dashboard/DashboardLayout'
 import { Button, ButtonLink } from '../../components/ui/Button'
 import { TextField } from '../../components/ui/Field'
@@ -205,6 +206,10 @@ export default function BookingDetail() {
             <div className="mt-5 empty:hidden">
               <Actions booking={booking} role={role} actions={actions} />
             </div>
+          </Panel>
+
+          <Panel title={`Messages with ${other.name}`} guide="messages">
+            <MessageThread booking={booking} role={role} />
           </Panel>
 
           <Panel title="Timeline" guide="timeline">

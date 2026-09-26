@@ -1,4 +1,4 @@
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { CreatorCard, CreatorCardSkeleton } from '../components/CreatorCard'
 import { HowItWorksCards } from '../components/HowItWorks'
 import { CloudBackdrop } from '../components/Layout'
@@ -6,15 +6,16 @@ import { ReliabilityExplainer } from '../components/Reliability'
 import { Button, ButtonLink, buttonClass } from '../components/ui/Button'
 import { EmptyState, ErrorState, Notice, SlowServerHint } from '../components/ui/Feedback'
 import { inputClass } from '../components/ui/Field'
-import { ArrowRightIcon, LinkedInIcon, ShieldIcon } from '../components/ui/Icons'
+import { ArrowRightIcon, LinkedInIcon, ShieldIcon, TargetIcon } from '../components/ui/Icons'
 import { CLOUD_LAYER, asset } from '../lib/assets'
 import { useAuth } from '../lib/auth'
-import { plural } from '../lib/format'
+import { formatMoney, plural } from '../lib/format'
 import { usePageTitle } from '../lib/navigation'
-import type { Creator, CreatorSort, User } from '../lib/types'
+import type { Creator, CreatorSort, Target, User } from '../lib/types'
 import { useApi } from '../lib/useApi'
 
 const SORTS: { value: CreatorSort; label: string }[] = [
+  { value: 'fit', label: 'Best fit first' },
   { value: 'reliability', label: 'Most reliable first' },
   { value: 'price', label: 'Lowest price first' },
   { value: 'followers', label: 'Most followers first' },
@@ -27,7 +28,7 @@ const PRICE_CAPS = [
   { value: '100000', label: 'Up to $1,000' },
 ]
 
-type CreatorsResponse = { creators: Creator[]; niches: string[] }
+type CreatorsResponse = { creators: Creator[]; niches: string[]; sort: CreatorSort; target: Target | null }
 
 function SectionPill({ children }: { children: string }) {
   return (
@@ -111,6 +112,40 @@ function HowItWorksSection() {
   )
 }
 
+function describeTarget(target: Target) {
+  const parts = []
+  if (target.niches.length) parts.push(target.niches.join(', '))
+  if (target.audience) parts.push(`“${target.audience}”`)
+  if (target.budgetCents) parts.push(`up to ${formatMoney(target.budgetCents)} a post`)
+  return parts.join(' · ')
+}
+
+function TargetStrip({ target }: { target: Target | null }) {
+  return (
+    <div className="glass flex flex-col gap-3 rounded-[18px] p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-w-0 items-start gap-3">
+        <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
+          <TargetIcon />
+        </span>
+        {target ? (
+          <p className="min-w-0 text-sm leading-6 text-body">
+            <span className="font-semibold text-ink">Ranked for who you sell to:</span> <span className="break-words">{describeTarget(target)}</span>. Each card
+            shows why the creator fits, or doesn't.
+          </p>
+        ) : (
+          <p className="text-sm leading-6 text-body">
+            <span className="font-semibold text-ink">See why each creator fits you.</span> Tell us your niches, audience and budget, and every card
+            explains the match.
+          </p>
+        )}
+      </div>
+      <Link to="/dashboard/audience" className={buttonClass(target ? 'secondary' : 'primary', 'sm', 'shrink-0 self-start sm:self-auto')}>
+        {target ? 'Edit' : 'Set it up'}
+      </Link>
+    </div>
+  )
+}
+
 export default function Marketplace() {
   usePageTitle('Creator marketplace')
   const { user } = useAuth()
@@ -118,13 +153,15 @@ export default function Marketplace() {
 
   const niche = params.get('niche') ?? ''
   const maxPrice = PRICE_CAPS.some((cap) => cap.value === params.get('max')) ? (params.get('max') ?? '') : ''
-  const sort = SORTS.find((option) => option.value === params.get('sort'))?.value ?? 'reliability'
+  const chosenSort = SORTS.find((option) => option.value === params.get('sort'))?.value
 
   const query = new URLSearchParams()
   if (niche) query.set('niche', niche)
   if (maxPrice) query.set('maxPriceCents', maxPrice)
-  if (sort !== 'reliability') query.set('sort', sort)
+  if (chosenSort) query.set('sort', chosenSort)
   const { data, error, loading, slow, reload } = useApi<CreatorsResponse>(`/creators?${query}`)
+  const sort = data?.sort ?? chosenSort ?? 'reliability'
+  const sorts = SORTS.filter((option) => option.value !== 'fit' || data?.target)
 
   const update = (key: 'niche' | 'max' | 'sort', value: string) => {
     const next = new URLSearchParams(params)
@@ -133,7 +170,7 @@ export default function Marketplace() {
     setParams(next, { replace: true })
   }
   const filtered = Boolean(niche || maxPrice)
-  const clearFilters = () => setParams(sort === 'reliability' ? {} : { sort }, { replace: true })
+  const clearFilters = () => setParams(chosenSort ? { sort: chosenSort } : {}, { replace: true })
 
   return (
     <>
@@ -211,7 +248,7 @@ export default function Marketplace() {
                   <label className="flex flex-col gap-1 text-[11px] font-semibold tracking-wide text-[#5c5b57] uppercase">
                     Sort
                     <select className={`${inputClass} py-2.5 normal-case`} value={sort} onChange={(event) => update('sort', event.target.value)}>
-                      {SORTS.map((option) => (
+                      {sorts.map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
                         </option>
@@ -220,6 +257,8 @@ export default function Marketplace() {
                   </label>
                 </div>
               </div>
+
+              {user?.role === 'brand' && data && <TargetStrip target={data.target} />}
 
               {error && data && (
                 <Notice tone="error" title="Couldn't refresh the list">

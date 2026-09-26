@@ -151,11 +151,87 @@ async function playSteps(
   return id
 }
 
+const targets: Record<BrandKey, { niches: Niche[]; audience: string; budgetCents: number }> = {
+  acme: { niches: ['RevOps', 'Sales'], audience: 'SaaS founders, sales leaders and RevOps teams', budgetCents: 60_000 },
+  pipewise: { niches: ['Founders', 'Sales', 'AI'], audience: 'Early-stage founders and account executives', budgetCents: 100_000 },
+}
+
+type Line = { from: 'brand' | 'creator'; body: string }
+const conversations: { creator: CreatorKey; lines: Line[]; brandReads: number; creatorReads: number }[] = [
+  {
+    creator: 'priya',
+    lines: [
+      { from: 'brand', body: 'Hi Priya, excited for this one. Could you mention the pipeline health score by name?' },
+      { from: 'creator', body: "Absolutely. I'll show it on a real forecast screenshot so it doesn't read like an ad." },
+      { from: 'creator', body: 'The post is live. The link is in the booking and clicks are already coming in.' },
+    ],
+    brandReads: 2,
+    creatorReads: 3,
+  },
+  {
+    creator: 'daniel',
+    lines: [
+      { from: 'creator', body: 'Thanks for the booking! Is there a discount code you want me to include?' },
+      { from: 'brand', body: 'No code this time, just the free-trial link. Thanks for asking.' },
+    ],
+    brandReads: 2,
+    creatorReads: 2,
+  },
+  {
+    creator: 'maya',
+    lines: [{ from: 'brand', body: 'Hi Maya! Happy to send screenshots of the pipeline health score if that helps with the post.' }],
+    brandReads: 1,
+    creatorReads: 0,
+  },
+]
+
+async function addExtras() {
+  const users = await db.user.findMany({
+    where: { email: { in: [...brands.map((b) => b.email), ...creators.map((c) => `${c.key}@demo.test`)] } },
+    select: { id: true, email: true },
+  })
+  const idOf = (email: string) => users.find((u) => u.email === email)?.id
+  for (const brand of brands) {
+    const userId = idOf(brand.email)
+    if (!userId || (await db.brandProfile.findUnique({ where: { userId } }))) continue
+    await db.brandProfile.create({ data: { userId, ...targets[brand.key] } })
+    console.log(`set who ${brand.name} sells to`)
+  }
+
+  const acmeId = idOf(brands[0].email)
+  for (const talk of conversations) {
+    const creatorId = idOf(`${talk.creator}@demo.test`)
+    if (!acmeId || !creatorId) continue
+    const booking = await db.booking.findFirst({
+      where: { brandId: acmeId, creatorId, status: { in: ['requested', 'accepted', 'submitted'] } },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, createdAt: true, acceptedAt: true, submittedAt: true, _count: { select: { messages: true } } },
+    })
+    if (!booking || booking._count.messages) continue
+    const start = (booking.acceptedAt ?? booking.createdAt).getTime()
+    const end = Math.max(start + talk.lines.length * 60_000, (booking.submittedAt?.getTime() ?? NOW) + 30 * 60_000)
+    const step = Math.min((Math.min(end, NOW) - start) / (talk.lines.length + 1), 3 * HOUR)
+    const times = talk.lines.map((_, index) => new Date(start + step * (index + 1)))
+    await db.$transaction(async (tx) => {
+      for (const [index, line] of talk.lines.entries()) {
+        await tx.message.create({
+          data: { bookingId: booking.id, senderId: line.from === 'brand' ? acmeId : creatorId, body: line.body, createdAt: times[index] },
+        })
+      }
+      for (const [userId, upTo] of [[acmeId, talk.brandReads], [creatorId, talk.creatorReads]] as const) {
+        if (upTo) await tx.messageRead.create({ data: { bookingId: booking.id, userId, readAt: times[upTo - 1] } })
+      }
+    })
+    console.log(`added a conversation between Acme CRM and ${talk.creator}`)
+  }
+}
+
 async function main() {
   const host = new URL(env.databaseUrl).hostname
   console.log(`seeding ${host}`)
   if (await db.user.findUnique({ where: { email: brands[0].email } })) {
-    console.log('already seeded (acme@demo.test exists); nothing to do')
+    console.log('already seeded (acme@demo.test exists); adding anything newer that is missing')
+    await addExtras()
     return
   }
 
@@ -187,6 +263,7 @@ async function main() {
   ]
   for (const [creator, outcome, start] of acme) await play(ids, 'acme', creator, outcome, start)
   console.log(`played ${acme.length} Acme bookings, one per state`)
+  await addExtras()
 
   console.log(`\nDemo logins (password: ${DEMO_PASSWORD})`)
   for (const b of brands) console.log(`  brand    ${b.email}`)

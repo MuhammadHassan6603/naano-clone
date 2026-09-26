@@ -626,3 +626,9 @@
     opacity: 0;
   }
 }
+
+body:has(main :is(input, textarea, select):focus) :is(.ai-bar, .ai-handle, .ai-thread) {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}

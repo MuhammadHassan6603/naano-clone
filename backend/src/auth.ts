@@ -62,6 +62,17 @@ export const requireAuth: RequestHandler = (req, _res, next) => {
   next()
 }
 
+export const optionalAuth: RequestHandler = (req, _res, next) => {
+  if (req.headers.authorization) {
+    try {
+      req.auth = readToken(req.headers.authorization)
+    } catch {
+      req.auth = undefined
+    }
+  }
+  next()
+}
+
 export const requireRole =
   (role: Role): RequestHandler =>
   (req, _res, next) => {

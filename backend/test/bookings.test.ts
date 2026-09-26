@@ -354,7 +354,7 @@ describe('GET /bookings', () => {
     assert.deepEqual((await list(s.brand)).map((b) => b.id), [second, first])
     assert.deepEqual((await list(other)).map((b) => b.id), [othersBooking.body.booking.id])
     assert.equal((await list(s.creator)).length, 3)
-    assert.deepEqual(Object.keys((await list(s.brand))[0]).sort(), BOOKING_KEYS)
+    assert.deepEqual(Object.keys((await list(s.brand))[0]).sort(), [...BOOKING_KEYS, 'unreadMessages'].sort())
   })
 
   test('filters by status and rejects unknown or repeated filters', async () => {

@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import { Avatar } from '../components/Avatar'
+import { FitList, fitSummary } from '../components/FitReasons'
 import { HowItWorksList } from '../components/HowItWorks'
 import { Page } from '../components/Layout'
 import { ReliabilityExplainer, ReliabilityLine } from '../components/Reliability'
@@ -141,6 +142,29 @@ export default function CreatorProfile() {
               post is verified live.
             </p>
           </div>
+          {user?.role === 'brand' && (
+            <div className="space-y-3 border-t border-line pt-5">
+              {creator.fit ? (
+                <>
+                  <div>
+                    <p className="text-sm font-semibold text-ink">Why {firstName(creator.name)} fits you</p>
+                    <p className="text-sm text-muted">{fitSummary(creator.fit)}</p>
+                  </div>
+                  <FitList fit={creator.fit} />
+                  <Link to="/dashboard/audience" className="inline-block text-sm font-semibold text-accent hover:underline">
+                    Edit who you sell to
+                  </Link>
+                </>
+              ) : (
+                <p className="text-sm leading-6 text-muted">
+                  <Link to="/dashboard/audience" className="font-semibold text-accent hover:underline">
+                    Tell us who you sell to
+                  </Link>{' '}
+                  and we'll show why {firstName(creator.name)} fits, or doesn't.
+                </p>
+              )}
+            </div>
+          )}
           <div className="space-y-2 border-t border-line pt-5">
             <p className="text-sm font-semibold text-ink">Track record</p>
             <ReliabilityLine reliability={creator.reliability} />

@@ -39,6 +39,7 @@ export const SCREENS: Record<string, Screen> = {
       brief: 'the brief',
       money: 'the money details',
       insights: 'Link insights',
+      messages: 'the messages',
     },
   },
   wallet: {
@@ -53,12 +54,18 @@ export const SCREENS: Record<string, Screen> = {
     roles: ['creator'],
     highlights: { 'profile-form': 'your profile form', 'profile-preview': 'the preview of your card' },
   },
+  audience: {
+    label: 'Who you sell to',
+    path: '/dashboard/audience',
+    roles: ['brand'],
+    highlights: { 'audience-form': 'the form where you describe who you sell to' },
+  },
   marketplace: { label: 'Find creators', path: '/#creators', roles: ['brand'], highlights: {} },
 }
 
 const TABS = ['action', 'progress', 'done', 'all']
 const ACTIONS = ['approve', 'accept', 'decline', 'submit', 'top_up', 'edit_profile', 'book'] as const
-const TOPICS = ['escrow', 'verification', 'refunds', 'getting_paid', 'tracked_link', 'booking'] as const
+const TOPICS = ['escrow', 'verification', 'refunds', 'getting_paid', 'tracked_link', 'booking', 'fit'] as const
 
 type Action = (typeof ACTIONS)[number]
 type Topic = (typeof TOPICS)[number]
@@ -70,6 +77,7 @@ export type Intent =
   | { intent: 'clicks'; with?: string }
   | { intent: 'booking'; with?: string }
   | { intent: 'briefs' }
+  | { intent: 'messages'; with?: string }
   | { intent: 'profile' }
   | { intent: 'navigate'; screen: string; highlight?: string; with?: string; tab?: string }
   | { intent: 'do_action'; action: Action; with?: string }
@@ -128,7 +136,7 @@ const STATE: Record<Role, Record<BookingStatus, string>> = {
 
 const OPEN: BookingStatus[] = ['requested', 'accepted', 'submitted']
 
-type Row = PublicBooking & { other: string; clicks: number }
+type Row = PublicBooking & { other: string; clicks: number; unreadMessages: number }
 type Account = {
   viewer: Viewer
   when: (date: Date) => string
@@ -534,6 +542,37 @@ const EXPLAIN: Record<Topic, (role: Role) => string> = {
     role === 'brand'
       ? 'Pick a creator on the marketplace, write your brief, choose a deadline and book. Their price is held in escrow until the post is verified.'
       : 'Brands find you on the marketplace and book you with a brief and a deadline. You accept or decline, and the money is already in escrow.',
+  fit: (role) =>
+    role === 'brand'
+      ? 'Tell us who you sell to: your niches, your audience and a budget per post. Each creator card then lists the reasons they fit, or do not, compared with their niche, audience and price.'
+      : "Brands describe who they sell to, and your card shows them how your niche, audience and price compare. Keep your audience description specific so the match is clear.",
+}
+
+async function messagesAnswer(account: Account, name?: string): Promise<Answer> {
+  const named = pick(account, name)
+  if (name && !named.length) return { reply: nobodyNamed(account, name) }
+  if (named.length) {
+    const booking = named[0]
+    const latest = await db.message.findFirst({
+      where: { bookingId: booking.id, senderId: { not: account.viewer.userId } },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      select: { body: true, createdAt: true },
+    })
+    const unread = booking.unreadMessages ? ` You have ${count(booking.unreadMessages, ['unread message', 'unread messages'])} from them.` : ''
+    return {
+      reply: latest
+        ? `${booking.other}'s latest message, ${account.when(latest.createdAt)}: "${excerpt(latest.body, 200)}"${unread}`
+        : `${booking.other} hasn't sent you a message yet.`,
+      action: bookingAction(booking, 'messages'),
+    }
+  }
+  const unread = account.bookings.filter((b) => b.unreadMessages > 0).sort((x, y) => y.unreadMessages - x.unreadMessages)
+  const total = unread.reduce((n, b) => n + b.unreadMessages, 0)
+  if (!total) return { reply: 'You have no unread messages. Each booking has its own conversation with the other side.' }
+  return {
+    reply: `You have ${count(total, ['unread message', 'unread messages'])}: ${listNames(unread.map((b) => `${b.unreadMessages} from ${b.other}`))}.`,
+    action: unread.length === 1 ? bookingAction(unread[0], 'messages') : screenAction('bookings', 'booking-list'),
+  }
 }
 
 async function answer(account: Account, intent: Intent): Promise<Answer> {
@@ -551,6 +590,8 @@ async function answer(account: Account, intent: Intent): Promise<Answer> {
       return bookingAnswer(account, intent.with)
     case 'briefs':
       return briefsAnswer(account)
+    case 'messages':
+      return messagesAnswer(account, intent.with)
     case 'profile':
       return profileAnswer(account)
     case 'navigate':
@@ -601,6 +642,7 @@ export function parseIntent(raw: unknown): Intent {
     }
     case 'clicks':
     case 'booking':
+    case 'messages':
       return { intent: value.intent, with: text(value.with) }
     case 'navigate': {
       const screen = text(value.screen)
@@ -649,6 +691,12 @@ export function guessIntent(question: string, role: Role): Intent {
   }
   if (/\b(price|niche|profile|bio|followers|audience)\b/.test(t)) {
     return role === 'creator' && where ? { intent: 'navigate', screen: 'profile', highlight: 'profile-form' } : { intent: 'profile' }
+  }
+  if (/\b(messages?|chats?|inbox|replied|reply|replies|said|say|says|wrote|texted)\b/.test(t)) return { intent: 'messages' }
+  if (role === 'brand' && /\b(who (i|we) sell to|target(ing)?|ideal creator|best fit|fit)\b/.test(t)) {
+    if (/\b(how|why)\b/.test(t) && !where) return { intent: 'explain', topic: 'fit' }
+    if (/\bcreators?\b/.test(t)) return { intent: 'navigate', screen: 'marketplace' }
+    return { intent: 'navigate', screen: 'audience', highlight: 'audience-form' }
   }
   if (/\b(brief|briefs|asked|ask me|post about|write about)\b/.test(t)) return { intent: 'briefs' }
   if (/\b(history|transactions?|ledger)\b/.test(t)) return { intent: 'navigate', screen: 'wallet', highlight: 'history' }
@@ -704,10 +752,11 @@ Intents and their fields:
 - {"intent":"clicks","with":?}: numbers of clicks or visitors. with = the other person's or company's name, if one is named
 - {"intent":"booking","with":?}: details of one booking, such as its status, deadline or price
 - {"intent":"briefs"}: what the briefs say, what brands asked for
+- {"intent":"messages","with":?}: unread messages, conversations, or what someone wrote. with = the other person's or company's name, if one is named
 - {"intent":"profile"}: their own profile, price, niche or account
 - {"intent":"navigate","screen":"...","highlight":?,"with":?,"tab":?}: where something is, or to open or show a screen. Screens: ${screens}. tab (bookings only): action, progress, done, all
 - {"intent":"do_action","action":"...","with":?}: they want something done. action is one of approve, accept, decline, submit, top_up, edit_profile, book
-- {"intent":"explain","topic":"..."}: how naano works. topic is one of escrow, verification, refunds, getting_paid, tracked_link, booking
+- {"intent":"explain","topic":"..."}: how naano works. topic is one of escrow, verification, refunds, getting_paid, tracked_link, booking, fit (how creator fit is worked out)
 - {"intent":"other_people"}: asks for another user's money, bookings or data, rather than about their own dealings with that user
 - {"intent":"greeting"}, {"intent":"off_topic"}, {"intent":"unknown"}
 
@@ -746,7 +795,7 @@ async function route(
   return { intent: guessIntent(question, viewer.role), via: 'keywords' }
 }
 
-const NAMED: Intent['intent'][] = ['clicks', 'booking', 'do_action', 'navigate']
+const NAMED: Intent['intent'][] = ['clicks', 'booking', 'do_action', 'navigate', 'messages']
 
 function mentioned(account: Account, question: string) {
   const words = new Set(question.toLowerCase().match(/[a-z0-9]+/g) ?? [])

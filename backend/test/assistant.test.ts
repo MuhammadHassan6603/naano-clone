@@ -234,6 +234,34 @@ describe('names in the question', () => {
   })
 })
 
+describe('messages and fit', () => {
+  test('unread messages are counted from the database, per person', async () => {
+    const [brand, priya, maya] = await Promise.all([api.signup('brand'), api.listedCreator({}, 'Priya Msgtest'), api.listedCreator({}, 'Maya Msgtest')])
+    const a = await insertBooking(brand.user.id, priya.user.id, { status: 'accepted' })
+    const b = await insertBooking(brand.user.id, maya.user.id, { status: 'requested' })
+    assert.equal((await reply(brand, { intent: 'messages' })).reply, 'You have no unread messages. Each booking has its own conversation with the other side.')
+    for (const [session, id, body] of [[priya, a.id, 'Draft is ready'], [priya, a.id, 'Sent it over'], [maya, b.id, 'Quick question']] as const) {
+      assert.equal((await api.call('POST', `/bookings/${id}/messages`, { token: session.token, body: { body } })).status, 201)
+    }
+    const all = await reply(brand, { intent: 'messages' })
+    assert.equal(all.reply, 'You have 3 unread messages: 2 from Priya Msgtest and 1 from Maya Msgtest.')
+    const named = await reply(brand, { intent: 'messages', with: 'Priya' })
+    assert.match(named.reply, /^Priya Msgtest's latest message, .+: "Sent it over" You have 2 unread messages from them\.$/)
+    assert.deepEqual(named.action, { path: `/dashboard/bookings/${a.id}`, label: 'Booking with Priya Msgtest', highlight: 'messages', auto: false })
+    await api.call('GET', `/bookings/${a.id}/messages`, { token: brand.token })
+    assert.equal((await reply(brand, { intent: 'messages' })).reply, 'You have 1 unread message: 1 from Maya Msgtest.')
+    assert.equal((await reply(priya, { intent: 'messages', with: 'Test brand' })).reply, "Test brand hasn't sent you a message yet.")
+  })
+
+  test('the target form is a brand screen', async () => {
+    const [brand, creator] = await Promise.all([api.signup('brand'), api.listedCreator()])
+    const open = await reply(brand, { intent: 'navigate', screen: 'audience', highlight: 'audience-form' })
+    assert.deepEqual(open.action, { path: '/dashboard/audience', label: 'Who you sell to', highlight: 'audience-form', auto: true })
+    assert.equal((await reply(creator, { intent: 'navigate', screen: 'audience' })).reply, "That screen isn't part of a creator account.")
+    assert.match((await reply(brand, { intent: 'explain', topic: 'fit' })).reply, /^Tell us who you sell to/)
+  })
+})
+
 describe('privacy: only the caller’s own data', () => {
   test('names outside the caller’s bookings reveal nothing', async () => {
     const [acme, other, priya, stranger] = await Promise.all([
@@ -405,6 +433,11 @@ describe('when the AI is unavailable or wrong', () => {
       ['How much money does Acme have in their wallet?', 'creator', { intent: 'other_people' }],
       ["what's my balance", 'brand', { intent: 'wallet' }],
       ['how much money did i make', 'creator', { intent: 'wallet' }],
+      ['any new messages?', 'brand', { intent: 'messages' }],
+      ['what did they reply', 'creator', { intent: 'messages' }],
+      ['where do I set who I sell to', 'brand', { intent: 'navigate', screen: 'audience', highlight: 'audience-form' }],
+      ['how does fit work', 'brand', { intent: 'explain', topic: 'fit' }],
+      ['show creators that fit me best', 'brand', { intent: 'navigate', screen: 'marketplace' }],
     ]
     for (const [question, role, intent] of cases) assert.deepEqual(guessIntent(question, role), intent, question)
   })

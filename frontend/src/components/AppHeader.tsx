@@ -81,7 +81,7 @@ export function AppHeader() {
                 {user.name}
                 <RoleBadge user={user} />
               </span>
-              <Button variant="secondary" size="sm" onClick={signOut} className="hidden lg:inline-flex">
+              <Button variant="secondary" size="sm" onClick={signOut} className="max-lg:hidden">
                 Log out
               </Button>
               <ButtonLink to="/dashboard" size="sm" className="max-sm:px-3">

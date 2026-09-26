@@ -7,6 +7,7 @@ import { BOOKING_STATUSES, findBooking, listBookings } from '../bookings.js'
 import { accept, approve, createBooking, decline, submit, sweep } from '../escrow.js'
 import { hashIp } from '../ip.js'
 import { clickStats } from '../tracking.js'
+import { MAX_MESSAGE_CHARS, readThread, sendMessage, unreadTotal } from '../messages.js'
 import type { Role } from '../generated/prisma/enums.js'
 import {
   type Body,
@@ -73,12 +74,27 @@ bookingsRouter.get('/', async (req, res) => {
   res.json({ bookings: await listBookings(getAuth(req), status, trackingBase(req)) })
 })
 
+bookingsRouter.get('/unread', async (req, res) => {
+  res.json({ unread: await unreadTotal(getAuth(req).userId) })
+})
+
 bookingsRouter.get('/:id', async (req, res) => {
   await sendBooking(req, res, await bookingForCaller(req))
 })
 
 bookingsRouter.get('/:id/stats', async (req, res) => {
   res.json(await clickStats(await bookingForCaller(req)))
+})
+
+bookingsRouter.get('/:id/messages', async (req, res) => {
+  const id = await bookingForCaller(req)
+  res.json({ messages: await readThread(id, getAuth(req).userId) })
+})
+
+bookingsRouter.post('/:id/messages', async (req, res) => {
+  const id = await bookingForCaller(req)
+  const body = text(objectBody(req.body), 'body', { max: MAX_MESSAGE_CHARS })
+  res.status(201).json({ message: await sendMessage(id, getAuth(req).userId, body) })
 })
 
 bookingsRouter.post('/:id/accept', async (req, res) => {

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { formatCount, formatMoney } from '../lib/format'
 import type { Creator } from '../lib/types'
 import { Avatar } from './Avatar'
+import { FitChips } from './FitReasons'
 import { ArrowRightIcon, LinkedInIcon } from './ui/Icons'
 
 function Stat({ label, value, divider = false }: { label: string; value: string; divider?: boolean }) {
@@ -50,6 +51,7 @@ function CardBody({ creator, preview }: { creator: Creator; preview: boolean }) 
         <p className="mx-auto mt-2 line-clamp-2 min-h-12 max-w-[300px] text-[14px] leading-6 text-[#5f6673]">
           {creator.audience || 'Audience not described yet.'}
         </p>
+        {creator.fit && <FitChips fit={creator.fit} className="mt-3 justify-center" />}
         <div className="mx-auto mt-3 flex w-full max-w-[280px] items-center gap-3 text-left">
           <span className="shrink-0 text-xs font-medium text-[#8a909b]">Delivered</span>
           <span className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-[#e8ebf1]">

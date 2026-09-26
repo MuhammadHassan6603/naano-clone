@@ -1,4 +1,5 @@
 import { db } from './db.js'
+import { unreadByBooking } from './messages.js'
 import type { Prisma } from './generated/prisma/client.js'
 import type { BookingStatus, Role, VerifiedVia } from './generated/prisma/enums.js'
 
@@ -78,5 +79,6 @@ export async function listBookings(
     orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
     select: bookingSelect,
   })
-  return rows.map((row) => toPublic(row, trackingBase))
+  const unread = await unreadByBooking(viewer.userId, rows.map((row) => row.id))
+  return rows.map((row) => ({ ...toPublic(row, trackingBase), unreadMessages: unread.get(row.id) ?? 0 }))
 }

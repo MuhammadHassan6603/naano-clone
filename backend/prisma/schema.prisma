@@ -50,10 +50,13 @@ model User {
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
 
   profile         CreatorProfile?
+  brandProfile    BrandProfile?
   wallet          Wallet?
   transactions    Transaction[]
   brandBookings   Booking[]       @relation("BrandBookings")
   creatorBookings Booking[]       @relation("CreatorBookings")
+  messages        Message[]
+  messageReads    MessageRead[]
 
   @@map("users")
 }
@@ -70,6 +73,18 @@ model CreatorProfile {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("creator_profiles")
+}
+
+model BrandProfile {
+  userId      String   @id @map("user_id") @db.Uuid
+  niches      String[] @default([])
+  audience    String   @default("")
+  budgetCents Int?     @map("budget_cents")
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("brand_profiles")
 }
 
 model Wallet {
@@ -121,6 +136,8 @@ model Booking {
   creator      User          @relation("CreatorBookings", fields: [creatorId], references: [id])
   transactions Transaction[]
   clicks       Click[]
+  messages     Message[]
+  reads        MessageRead[]
 
   @@index([status, deadline])
   @@index([status, submittedAt])
@@ -140,4 +157,30 @@ model Click {
 
   @@index([bookingId, clickedAt])
   @@map("clicks")
+}
+
+model Message {
+  id        String   @id @default(uuid()) @db.Uuid
+  bookingId String   @map("booking_id") @db.Uuid
+  senderId  String   @map("sender_id") @db.Uuid
+  body      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  sender  User    @relation(fields: [senderId], references: [id])
+
+  @@index([bookingId, createdAt])
+  @@map("messages")
+}
+
+model MessageRead {
+  bookingId String   @map("booking_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  readAt    DateTime @map("read_at") @db.Timestamptz(3)
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@id([bookingId, userId])
+  @@map("message_reads")
 }

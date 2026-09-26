@@ -61,8 +61,11 @@ function BrandOverview({ user }: { user: User }) {
                     <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
                       Pick a creator from the marketplace. Their price is held in escrow and only paid once the post is verified live.
                     </p>
-                    <div className="mt-5 flex justify-center">
+                    <div className="mt-5 flex flex-wrap justify-center gap-3">
                       <ButtonLink to="/#creators">Browse creators</ButtonLink>
+                      <ButtonLink to="/dashboard/audience" variant="secondary">
+                        Tell us who you sell to
+                      </ButtonLink>
                     </div>
                   </div>
                 </Panel>

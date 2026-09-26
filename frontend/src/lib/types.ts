@@ -29,9 +29,16 @@ export type Creator = {
   priceCents: number
   followers: number
   reliability: Reliability
+  fit?: Fit
 }
 
-export type CreatorSort = 'reliability' | 'price' | 'followers'
+export type FitReason = { kind: 'niche' | 'audience' | 'budget'; match: boolean; label: string }
+
+export type Fit = { matched: number; reasons: FitReason[] }
+
+export type Target = { niches: string[]; audience: string; budgetCents: number | null }
+
+export type CreatorSort = 'fit' | 'reliability' | 'price' | 'followers'
 
 export type Wallet = {
   availableCents: number
@@ -68,6 +75,15 @@ export type Booking = {
   closedAt: string | null
   brand: { id: string; name: string }
   creator: { id: string; name: string }
+  unreadMessages?: number
+}
+
+export type Message = {
+  id: string
+  body: string
+  createdAt: string
+  sender: { id: string; name: string }
+  mine: boolean
 }
 
 export type TimelineEvent = {

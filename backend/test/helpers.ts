@@ -84,14 +84,19 @@ export async function startServer(options: Parameters<typeof createApp>[0] = {})
   async function stop() {
     await new Promise<void>((resolve, reject) => server.close((err) => (err ? reject(err) : resolve())))
     const testBookings = { OR: [{ brand: testUsers }, { creator: testUsers }] }
-    await db.$transaction([
-      db.$executeRaw`ALTER TABLE "transactions" DISABLE TRIGGER "transactions_no_update_or_delete"`,
-      db.transaction.deleteMany({ where: { OR: [{ user: testUsers }, { booking: testBookings }] } }),
-      db.click.deleteMany({ where: { booking: testBookings } }),
-      db.booking.deleteMany({ where: testBookings }),
-      db.user.deleteMany({ where: testUsers }),
-      db.$executeRaw`ALTER TABLE "transactions" ENABLE TRIGGER "transactions_no_update_or_delete"`,
-    ])
+    await db.$transaction(
+      async (tx) => {
+        await tx.$executeRaw`ALTER TABLE "transactions" DISABLE TRIGGER "transactions_no_update_or_delete"`
+        await tx.transaction.deleteMany({ where: { OR: [{ user: testUsers }, { booking: testBookings }] } })
+        await tx.click.deleteMany({ where: { booking: testBookings } })
+        await tx.messageRead.deleteMany({ where: { OR: [{ booking: testBookings }, { user: testUsers }] } })
+        await tx.message.deleteMany({ where: { OR: [{ booking: testBookings }, { sender: testUsers }] } })
+        await tx.booking.deleteMany({ where: testBookings })
+        await tx.user.deleteMany({ where: testUsers })
+        await tx.$executeRaw`ALTER TABLE "transactions" ENABLE TRIGGER "transactions_no_update_or_delete"`
+      },
+      { maxWait: 60_000, timeout: 120_000 },
+    )
     await db.$disconnect()
   }
 

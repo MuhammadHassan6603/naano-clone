@@ -1,6 +1,7 @@
-import { Router } from 'express'
+import { type Request, Router } from 'express'
 import { db } from '../db.js'
-import { getAuth, requireAuth, requireRole } from '../auth.js'
+import { getAuth, optionalAuth, requireAuth, requireRole } from '../auth.js'
+import { hasTarget, targetOf } from '../fit.js'
 import { notFound } from '../errors.js'
 import {
   MAX_FOLLOWERS,
@@ -14,18 +15,28 @@ import { type Body, idParam, int, objectBody, oneOf, queryInt, queryOneOf, text 
 
 export const creatorsRouter = Router()
 
-creatorsRouter.get('/', async (req, res) => {
+const brandTarget = async (req: Request) => {
+  const target = req.auth?.role === 'brand' ? await targetOf(req.auth.userId) : null
+  return hasTarget(target) ? target : null
+}
+
+creatorsRouter.get('/', optionalAuth, async (req, res) => {
   const query = req.query as Body
-  const creators = await listCreators({
-    niche: queryOneOf(query, 'niche', NICHES),
-    maxPriceCents: queryInt(query, 'maxPriceCents', { min: 1, max: MAX_PRICE_CENTS }),
-    sort: queryOneOf(query, 'sort', SORTS) ?? 'reliability',
-  })
-  res.json({ creators, niches: NICHES })
+  const target = await brandTarget(req)
+  const sort = queryOneOf(query, 'sort', SORTS) ?? (target ? 'fit' : 'reliability')
+  const creators = await listCreators(
+    {
+      niche: queryOneOf(query, 'niche', NICHES),
+      maxPriceCents: queryInt(query, 'maxPriceCents', { min: 1, max: MAX_PRICE_CENTS }),
+      sort,
+    },
+    target,
+  )
+  res.json({ creators, niches: NICHES, sort: sort === 'fit' && !target ? 'reliability' : sort, target })
 })
 
-creatorsRouter.get('/:id', async (req, res) => {
-  const creator = await getCreator(idParam(req.params.id, 'Creator'))
+creatorsRouter.get('/:id', optionalAuth, async (req, res) => {
+  const creator = await getCreator(idParam(typeof req.params.id === 'string' ? req.params.id : undefined, 'Creator'), await brandTarget(req))
   if (!creator) throw notFound('Creator not found')
   res.json({ creator })
 })

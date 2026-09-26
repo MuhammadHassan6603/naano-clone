@@ -3,23 +3,13 @@ import { formatCount, formatMoney } from '../lib/format'
 import type { Creator } from '../lib/types'
 import { Avatar } from './Avatar'
 import { FitChips } from './FitReasons'
-import { ArrowRightIcon, CheckIcon, LinkedInIcon } from './ui/Icons'
+import { ArrowRightIcon, LinkedInIcon } from './ui/Icons'
 
-function Stat({ label, value, divider = false, verified = false, note }: { label: string; value: string; divider?: boolean; verified?: boolean; note?: string }) {
+function Stat({ label, value, divider = false }: { label: string; value: string; divider?: boolean }) {
   return (
     <div className={`flex min-w-0 flex-col items-center justify-center px-2 py-4 text-center ${divider ? 'border-x border-[#e7e8eb]' : ''}`}>
-      <dd className="flex w-full items-center justify-center gap-1 truncate text-[19px] font-bold tracking-[-0.025em] text-ink">
-        {value}
-        {verified && (
-          <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-[#0a66c2] text-white" title="Verified from LinkedIn">
-            <CheckIcon className="size-2.5" strokeWidth={3} />
-          </span>
-        )}
-      </dd>
-      <dt className="mt-0.5 text-[11px] leading-4 text-[#8a909b]">
-        {label}
-        {note && <span className="block text-[10px] text-[#a5aab3]">{note}</span>}
-      </dt>
+      <dd className="w-full truncate text-[19px] font-bold tracking-[-0.025em] text-ink">{value}</dd>
+      <dt className="mt-0.5 text-[11px] leading-4 text-[#8a909b]">{label}</dt>
     </div>
   )
 }
@@ -104,12 +94,7 @@ function CardBody({ creator, preview }: { creator: Creator; preview: boolean }) 
       </div>
 
       <dl className="grid grid-cols-3 border-t border-[#e7e8eb] bg-[#fcfcfd]">
-        <Stat
-          label={creator.followersVerified ? 'Verified followers' : 'Followers'}
-          note={creator.followersVerified ? undefined : 'self-reported'}
-          value={formatCount(creator.followers)}
-          verified={creator.followersVerified}
-        />
+        <Stat label="Followers" value={formatCount(creator.followers)} />
         <Stat label="Price / post" value={formatMoney(creator.priceCents)} divider />
         <Stat label={total ? 'Delivered' : 'Track record'} value={total ? `${delivered}/${total}` : 'New'} />
       </dl>

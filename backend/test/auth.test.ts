@@ -174,7 +174,7 @@ describe('GET /auth/me', () => {
     const { body } = await signup({ role: 'creator' })
     const res = await api.call('GET', '/auth/me', { token: body.token })
     assert.equal(res.status, 200)
-    assert.deepEqual(res.body.profile, { niche: null, bio: '', audience: '', priceCents: null, followers: 0, linkedinUrl: null, linkedinName: null, followersVerifiedAt: null })
+    assert.deepEqual(res.body.profile, { niche: null, bio: '', audience: '', priceCents: null, followers: 0, linkedinUrl: null })
   })
 
   const secret = process.env.JWT_SECRET as string

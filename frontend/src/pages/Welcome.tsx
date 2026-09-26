@@ -97,9 +97,9 @@ const asides = {
         <p>Your card is what brands see on the marketplace. A complete card is what gets you booked.</p>
         <ul className="space-y-3">
           <li className="rounded-2xl border border-white/20 bg-white/10 p-4">
-            <span className="block font-semibold text-white">Verified followers</span>
-            Paste your LinkedIn link. When LinkedIn shows your follower count publicly, we fill it in and mark it
-            verified. Otherwise you enter it, and brands can check it through the link on your card.
+            <span className="block font-semibold text-white">Your LinkedIn, one click away</span>
+            Add your LinkedIn profile link and follower count. Brands can open your profile straight from your card,
+            so there's no doubt who you are.
           </li>
           <li className="rounded-2xl border border-white/20 bg-white/10 p-4">
             <span className="block font-semibold text-white">Your price, paid in full</span>

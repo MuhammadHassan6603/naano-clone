@@ -13,7 +13,7 @@ after(async () => {
   await api.stop()
 })
 
-const PUBLIC_KEYS = ['audience', 'bio', 'followers', 'followersVerified', 'id', 'linkedinUrl', 'name', 'niche', 'priceCents', 'reliability']
+const PUBLIC_KEYS = ['audience', 'bio', 'followers', 'id', 'linkedinUrl', 'name', 'niche', 'priceCents', 'reliability']
 
 const saveProfile = (session: Session, profile: Record<string, unknown> = validProfile) =>
   api.call('PUT', '/creators/me/profile', { token: session.token, body: { linkedinUrl: linkedinFor(), ...profile } })
@@ -33,7 +33,6 @@ describe('PUT /creators/me/profile', () => {
       name: 'Dana',
       ...validProfile,
       bio: 'trimmed',
-      followersVerified: false,
       linkedinUrl,
       reliability: { delivered: 0, total: 0 },
     })

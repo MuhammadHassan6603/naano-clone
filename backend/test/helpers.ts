@@ -18,29 +18,6 @@ export const testEmail = (label: string) => `${label}-${randomUUID().slice(0, 8)
 
 export const linkedinFor = (label = 'creator') => `https://www.linkedin.com/in/${label}-${randomUUID().slice(0, 8)}`
 
-export const linkedinPage = (url: string, name: string, followers: number) => `<html><head>
-<script type="application/ld+json">{"@context":"http://schema.org","@graph":[
-{"@type":"Article","author":{"@type":"Person","name":"Someone Else","url":"https://www.linkedin.com/in/someone-else"}},
-{"@type":"Person","name":"Other Person","url":"https://www.linkedin.com/in/other-person","interactionStatistic":{"@type":"InteractionCounter","interactionType":"https://schema.org/FollowAction","userInteractionCount":999999}},
-{"@type":"Person","name":${JSON.stringify(name)},"url":${JSON.stringify(url)},"interactionStatistic":{"@type":"InteractionCounter","interactionType":"https://schema.org/FollowAction","name":"Follows","userInteractionCount":${followers}}}
-]}</script></head><body>10K followers 12M followers</body></html>`
-
-export const linkedin = {
-  pages: new Map<string, { status: number; html?: string; redirect?: string }>(),
-  calls: [] as string[],
-}
-
-const realFetch = globalThis.fetch
-globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
-  const url = String(input instanceof Request ? input.url : input)
-  if (!url.startsWith('https://www.linkedin.com/')) return realFetch(input, init)
-  linkedin.calls.push(url)
-  const page = linkedin.pages.get(url) ?? { status: 999 }
-  const response = new Response(page.html ?? '', { status: page.status, headers: { 'Content-Type': 'text/html' } })
-  if (page.redirect) Object.defineProperty(response, 'url', { value: page.redirect })
-  else Object.defineProperty(response, 'url', { value: url })
-  return response
-}) as typeof fetch
 
 export type Reply = { status: number; body: any; headers: Headers }
 export type Session = { token: string; user: { id: string; email: string; name: string; role: Role } }

@@ -2,9 +2,9 @@ import { type Request, Router } from 'express'
 import { db } from '../db.js'
 import { getAuth, optionalAuth, requireAuth, requireRole } from '../auth.js'
 import { hasTarget, targetOf } from '../fit.js'
-import { LinkedInNotFound, LinkedInUnavailable, lookupLinkedIn, profileUrl } from '../linkedin.js'
+import { profileUrl } from '../linkedin.js'
 import { Prisma } from '../generated/prisma/client.js'
-import { HttpError, conflict } from '../errors.js'
+import { conflict } from '../errors.js'
 import { notFound } from '../errors.js'
 import {
   MAX_FOLLOWERS,
@@ -44,38 +44,10 @@ creatorsRouter.get('/:id', optionalAuth, async (req, res) => {
   res.json({ creator })
 })
 
-const LOOKUPS_PER_MINUTE = 10
-const lookups = new Map<string, number[]>()
-
-function limitLookups(userId: string) {
-  const now = Date.now()
-  const times = (lookups.get(userId) ?? []).filter((at) => now - at < 60_000)
-  if (times.length >= LOOKUPS_PER_MINUTE) throw new HttpError(429, 'Too many LinkedIn lookups. Please wait a minute and try again.')
-  times.push(now)
-  lookups.set(userId, times)
-}
-
 async function claimable(url: string, userId: string) {
   const owner = await db.creatorProfile.findUnique({ where: { linkedinUrl: url }, select: { userId: true } })
   if (owner && owner.userId !== userId) throw conflict('This LinkedIn profile is already linked to another creator on naano.')
 }
-
-async function verified(url: string) {
-  try {
-    return await lookupLinkedIn(url)
-  } catch (err) {
-    if (err instanceof LinkedInUnavailable || err instanceof LinkedInNotFound) return null
-    throw err
-  }
-}
-
-creatorsRouter.post('/me/linkedin', requireAuth, requireRole('creator'), async (req, res) => {
-  const { userId } = getAuth(req)
-  const url = profileUrl(text(objectBody(req.body), 'url', { max: 300 }))
-  await claimable(url, userId)
-  limitLookups(userId)
-  res.json({ linkedin: await lookupLinkedIn(url) })
-})
 
 creatorsRouter.put('/me/profile', requireAuth, requireRole('creator'), async (req, res) => {
   const body = objectBody(req.body)
@@ -89,14 +61,7 @@ creatorsRouter.put('/me/profile', requireAuth, requireRole('creator'), async (re
     followers: int(body, 'followers', { min: 0, max: MAX_FOLLOWERS }),
   }
   await claimable(linkedinUrl, userId)
-  const linkedin = await verified(linkedinUrl)
-  const data = {
-    ...profile,
-    linkedinUrl,
-    ...(linkedin
-      ? { followers: Math.min(linkedin.followers, MAX_FOLLOWERS), linkedinName: linkedin.name, followersVerifiedAt: new Date() }
-      : { linkedinName: null, followersVerifiedAt: null }),
-  }
+  const data = { ...profile, linkedinUrl }
 
   await db.creatorProfile.update({ where: { userId }, data }).catch((err: unknown) => {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {

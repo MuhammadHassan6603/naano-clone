@@ -143,7 +143,7 @@ type Account = {
   availableCents: number
   heldCents: number
   bookings: Row[]
-  profile: { niche: string | null; priceCents: number | null; followers: number; audience: string; followersVerifiedAt: Date | null } | null
+  profile: { niche: string | null; priceCents: number | null; followers: number; audience: string } | null
   pageBookingId?: string
 }
 
@@ -154,7 +154,7 @@ async function loadAccount(viewer: Viewer, page: string | undefined, timeZone: s
     viewer.role === 'creator'
       ? db.creatorProfile.findUnique({
           where: { userId: viewer.userId },
-          select: { niche: true, priceCents: true, followers: true, audience: true, followersVerifiedAt: true },
+          select: { niche: true, priceCents: true, followers: true, audience: true },
         })
       : null,
   ])
@@ -405,7 +405,7 @@ function profileAnswer(account: Account): Answer {
     }
   }
   return {
-    reply: `Your card is live: ${profile.niche}, ${money(profile.priceCents)} per post, ${profile.followers.toLocaleString('en-US')} followers (${profile.followersVerifiedAt ? 'verified from LinkedIn' : 'self-reported'})${
+    reply: `Your card is live: ${profile.niche}, ${money(profile.priceCents)} per post, ${profile.followers.toLocaleString('en-US')} followers${
       profile.audience ? `, audience "${excerpt(profile.audience, 100)}"` : ''
     }.`,
     action: screenAction('profile', 'profile-form'),

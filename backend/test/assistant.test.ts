@@ -199,7 +199,7 @@ describe('answers come from the database, word for word', () => {
     assert.equal(briefs.reply, 'Test brand asked ($450): "Please write about our new pipeline analytics dashboard."')
 
     const profile = await reply(creator, { intent: 'profile' })
-    assert.equal(profile.reply, 'Your card is live: RevOps, $450 per post, 12,000 followers (self-reported), audience "SaaS founders, seed to Series B".')
+    assert.equal(profile.reply, 'Your card is live: RevOps, $450 per post, 12,000 followers, audience "SaaS founders, seed to Series B".')
   })
 })
 

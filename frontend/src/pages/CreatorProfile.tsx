@@ -6,7 +6,7 @@ import { Page } from '../components/Layout'
 import { ReliabilityExplainer, ReliabilityLine } from '../components/Reliability'
 import { Button, ButtonLink } from '../components/ui/Button'
 import { ErrorState, LoadingState } from '../components/ui/Feedback'
-import { ArrowLeftIcon, CheckIcon, ExternalIcon, LinkedInIcon } from '../components/ui/Icons'
+import { ArrowLeftIcon, ExternalIcon, LinkedInIcon } from '../components/ui/Icons'
 import { useAuth } from '../lib/auth'
 import { firstName, formatCount, formatMoney } from '../lib/format'
 import { usePageTitle, withNext } from '../lib/navigation'
@@ -115,16 +115,7 @@ export default function CreatorProfile() {
                 <span className="rounded-md bg-accent-soft px-2 py-0.5 font-semibold text-accent-strong">
                   {creator.niche}
                 </span>
-                <span className="inline-flex items-center gap-1">
-                  {formatCount(creator.followers)} followers on LinkedIn
-                  {creator.followersVerified ? (
-                    <span className="inline-flex items-center gap-1 font-semibold text-[#0a66c2]">
-                      <CheckIcon className="size-3.5" /> verified
-                    </span>
-                  ) : (
-                    <span>(self-reported)</span>
-                  )}
-                </span>
+                <span>{formatCount(creator.followers)} followers on LinkedIn</span>
               </p>
               {creator.linkedinUrl && (
                 <a

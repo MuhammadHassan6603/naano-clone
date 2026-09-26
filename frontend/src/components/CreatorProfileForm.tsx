@@ -1,25 +1,17 @@
-import { type FormEvent, type ReactNode, useEffect, useRef, useState } from 'react'
-import { api, isAbort, toApiError } from '../lib/api'
+import { type FormEvent, type ReactNode, useState } from 'react'
+import { api, toApiError } from '../lib/api'
 import type { Creator, OwnProfile, User } from '../lib/types'
 import { Button } from './ui/Button'
 import { TextArea, TextField, inputClass } from './ui/Field'
-import { Notice, Spinner } from './ui/Feedback'
-import { CheckIcon, LinkedInIcon, LockIcon } from './ui/Icons'
+import { Notice } from './ui/Feedback'
+import { LinkedInIcon } from './ui/Icons'
 
 type Form = { linkedinUrl: string; niche: string; bio: string; audience: string; price: string; followers: string }
 type Errors = Partial<Record<keyof Form, string>>
-type Found = { url: string; name: string; followers: number }
-
-type Link =
-  | { kind: 'empty' }
-  | { kind: 'checking' }
-  | { kind: 'verified'; found: Found }
-  | { kind: 'manual'; message: string }
-  | { kind: 'rejected'; message: string }
 
 const MAX_PRICE_DOLLARS = 100_000
+const MAX_FOLLOWERS = 100_000_000
 const PROFILE_LINK = /^(https?:\/\/)?([a-z0-9-]+\.)?linkedin\.com\/in\/[^/?#\s]{3,}/i
-const count = new Intl.NumberFormat('en-US')
 
 const toForm = (profile: OwnProfile | undefined): Form => ({
   linkedinUrl: profile?.linkedinUrl ?? '',
@@ -30,15 +22,7 @@ const toForm = (profile: OwnProfile | undefined): Form => ({
   followers: profile?.linkedinUrl ? String(profile.followers) : '',
 })
 
-const initialLink = (profile: OwnProfile | undefined): Link => {
-  if (!profile?.linkedinUrl) return { kind: 'empty' }
-  if (profile.followersVerifiedAt) {
-    return { kind: 'verified', found: { url: profile.linkedinUrl, name: profile.linkedinName ?? '', followers: profile.followers } }
-  }
-  return { kind: 'manual', message: 'Your followers are self-reported. LinkedIn did not show a public count for this profile.' }
-}
-
-function validate(form: Form, link: Link): Errors {
+function validate(form: Form): Errors {
   const price = Number(form.price)
   const followers = Number(form.followers)
   return {
@@ -46,14 +30,12 @@ function validate(form: Form, link: Link): Errors {
       ? 'Add your LinkedIn profile link so brands can see who you are.'
       : !PROFILE_LINK.test(form.linkedinUrl.trim())
         ? 'Use your profile link, like https://www.linkedin.com/in/your-name'
-        : link.kind === 'rejected'
-          ? link.message
-          : undefined,
+        : undefined,
     followers:
-      link.kind === 'manual' && (form.followers.trim() === '' || !Number.isInteger(followers) || followers < 0)
-        ? 'Enter your follower count as a whole number, like 12500.'
-        : link.kind === 'empty'
-          ? 'Add your LinkedIn link first so we can read your followers.'
+      form.followers.trim() === '' || !Number.isInteger(followers) || followers < 0
+        ? 'Enter your LinkedIn follower count as a whole number, like 12500.'
+        : followers > MAX_FOLLOWERS
+          ? 'That is more followers than we can show.'
           : undefined,
     niche: form.niche ? undefined : 'Pick the niche you post about.',
     price:
@@ -80,12 +62,9 @@ type Props = {
 
 export function CreatorProfileForm({ user, profile, niches, reliability, submitLabel, extraActions, layout, onSaved }: Props) {
   const [form, setForm] = useState<Form>(() => toForm(profile))
-  const [link, setLink] = useState<Link>(() => initialLink(profile))
   const [errors, setErrors] = useState<Errors>({})
   const [pending, setPending] = useState(false)
   const [result, setResult] = useState<{ tone: 'success' | 'error'; text: string } | null>(null)
-  const lookup = useRef<AbortController | null>(null)
-  const checkedUrl = useRef(profile?.linkedinUrl ?? '')
 
   const set = (key: keyof Form) => (value: string) => {
     setForm((current) => ({ ...current, [key]: value }))
@@ -93,43 +72,6 @@ export function CreatorProfileForm({ user, profile, niches, reliability, submitL
     setResult(null)
   }
 
-  async function check(raw: string, force = false) {
-    const url = raw.trim()
-    if (!PROFILE_LINK.test(url) || (!force && url === checkedUrl.current && link.kind !== 'empty')) return
-    checkedUrl.current = url
-    lookup.current?.abort()
-    const controller = new AbortController()
-    lookup.current = controller
-    setLink({ kind: 'checking' })
-    setErrors((current) => ({ ...current, linkedinUrl: undefined, followers: undefined }))
-    try {
-      const { linkedin } = await api<{ linkedin: Found }>('/creators/me/linkedin', { method: 'POST', body: { url }, signal: controller.signal })
-      setLink({ kind: 'verified', found: linkedin })
-      setForm((current) => ({ ...current, linkedinUrl: linkedin.url, followers: String(linkedin.followers) }))
-      checkedUrl.current = linkedin.url
-    } catch (error) {
-      if (isAbort(error)) return
-      const apiError = toApiError(error)
-      if (apiError.status === 422 || apiError.status === 503 || apiError.status === 0) {
-        setLink({ kind: 'manual', message: apiError.status === 0 ? "We couldn't reach the server to check LinkedIn. Enter your followers yourself: brands will see them as self-reported." : apiError.message })
-        setForm((current) => ({ ...current, followers: '' }))
-      } else {
-        setLink({ kind: 'rejected', message: apiError.message })
-        setErrors((current) => ({ ...current, linkedinUrl: apiError.message }))
-      }
-    }
-  }
-
-  useEffect(() => {
-    const url = form.linkedinUrl.trim()
-    if (!PROFILE_LINK.test(url) || url === checkedUrl.current) return
-    const timer = window.setTimeout(() => void check(url), 700)
-    return () => window.clearTimeout(timer)
-  })
-
-  useEffect(() => () => lookup.current?.abort(), [])
-
-  const followers = link.kind === 'verified' ? link.found.followers : Math.max(0, Math.floor(Number(form.followers) || 0))
   const preview: Creator = {
     id: user.id,
     name: user.name,
@@ -137,16 +79,14 @@ export function CreatorProfileForm({ user, profile, niches, reliability, submitL
     bio: form.bio,
     audience: form.audience,
     priceCents: Math.round((Number(form.price) || 0) * 100),
-    followers,
-    followersVerified: link.kind === 'verified',
-    linkedinUrl: link.kind === 'verified' ? link.found.url : form.linkedinUrl.trim() || null,
+    followers: Math.max(0, Math.floor(Number(form.followers) || 0)),
+    linkedinUrl: PROFILE_LINK.test(form.linkedinUrl.trim()) ? form.linkedinUrl.trim() : null,
     reliability: reliability ?? { delivered: 0, total: 0 },
   }
 
   async function save(event: FormEvent) {
     event.preventDefault()
-    if (link.kind === 'checking') return
-    const found = validate(form, link)
+    const found = validate(form)
     setErrors(found)
     if (Object.values(found).some(Boolean)) return
     setPending(true)
@@ -160,46 +100,20 @@ export function CreatorProfileForm({ user, profile, niches, reliability, submitL
           bio: form.bio.trim(),
           audience: form.audience.trim(),
           priceCents: Math.round(Number(form.price) * 100),
-          followers,
+          followers: Number(form.followers),
         },
       })
-      if (creator.followersVerified && creator.linkedinUrl) {
-        setLink((current) => ({
-          kind: 'verified',
-          found: { url: creator.linkedinUrl!, name: current.kind === 'verified' ? current.found.name : '', followers: creator.followers },
-        }))
-      }
+      if (creator.linkedinUrl) setForm((current) => ({ ...current, linkedinUrl: creator.linkedinUrl! }))
       setResult({ tone: 'success', text: 'Saved. Your card is live on the marketplace.' })
       onSaved?.(creator)
     } catch (error) {
       const apiError = toApiError(error)
-      if (apiError.status === 409) setErrors((current) => ({ ...current, linkedinUrl: apiError.message }))
+      if (apiError.status === 409 || /LinkedIn/.test(apiError.message)) setErrors((current) => ({ ...current, linkedinUrl: apiError.message }))
       setResult({ tone: 'error', text: apiError.message })
     } finally {
       setPending(false)
     }
   }
-
-  const followerHint =
-    link.kind === 'verified' ? (
-      <span className="flex items-center gap-1.5 text-good">
-        <CheckIcon className="size-3.5 shrink-0" />
-        Verified from LinkedIn{link.found.name ? ` · ${link.found.name}` : ''}. This can't be edited.
-      </span>
-    ) : link.kind === 'checking' ? (
-      <span className="flex items-center gap-1.5">
-        <Spinner className="size-3.5" /> Getting your LinkedIn data…
-      </span>
-    ) : link.kind === 'manual' ? (
-      <span>
-        {link.message}{' '}
-        <button type="button" className="font-semibold text-accent underline" onClick={() => void check(form.linkedinUrl, true)}>
-          Try LinkedIn again
-        </button>
-      </span>
-    ) : (
-      'Filled in from LinkedIn when your profile shows it publicly.'
-    )
 
   const formElement = (
     <form onSubmit={save} noValidate className="space-y-5">
@@ -211,32 +125,22 @@ export function CreatorProfileForm({ user, profile, niches, reliability, submitL
         autoComplete="url"
         placeholder="https://www.linkedin.com/in/your-name"
         value={form.linkedinUrl}
-        onChange={(event) => {
-          set('linkedinUrl')(event.target.value)
-          if (link.kind !== 'checking') setLink({ kind: 'empty' })
-          checkedUrl.current = ''
-        }}
-        onBlur={() => void check(form.linkedinUrl)}
+        onChange={(event) => set('linkedinUrl')(event.target.value)}
         error={errors.linkedinUrl}
         hint="Brands can open it from your card, so there's no doubt who you are."
         trailing={<LinkedInIcon className="size-5 text-[#0a66c2]" />}
       />
       <TextField
         label="LinkedIn followers"
-        type={link.kind === 'verified' ? 'text' : 'number'}
+        type="number"
         inputMode="numeric"
         min={0}
         step="1"
-        value={link.kind === 'verified' ? count.format(link.found.followers) : link.kind === 'manual' ? form.followers : ''}
-        placeholder={link.kind === 'checking' ? 'Getting your LinkedIn data…' : link.kind === 'manual' ? '12500' : 'Add your LinkedIn link first'}
-        readOnly={link.kind === 'verified'}
-        disabled={link.kind === 'checking' || link.kind === 'empty' || link.kind === 'rejected'}
-        aria-readonly={link.kind === 'verified' || undefined}
+        placeholder="12500"
+        value={form.followers}
         onChange={(event) => set('followers')(event.target.value)}
         error={errors.followers}
-        hint={followerHint}
-        className={link.kind === 'verified' ? 'cursor-not-allowed bg-[#f6f7f9] font-semibold' : ''}
-        trailing={link.kind === 'verified' ? <LockIcon className="size-4 text-muted" /> : link.kind === 'checking' ? <Spinner className="size-4 text-accent" /> : undefined}
+        hint="As shown on your LinkedIn profile. Brands can check it through your link."
       />
       <div className="space-y-1.5">
         <label htmlFor="niche" className="text-xs font-semibold tracking-wide text-[#5c5b57] uppercase">
@@ -282,7 +186,7 @@ export function CreatorProfileForm({ user, profile, niches, reliability, submitL
         aside={<span className="text-xs text-muted">{form.bio.trim().length}/1000</span>}
       />
       <div className="flex flex-wrap items-center gap-3 border-t border-line pt-5">
-        <Button type="submit" loading={pending} disabled={link.kind === 'checking'}>
+        <Button type="submit" loading={pending}>
           {submitLabel}
         </Button>
         {extraActions}
